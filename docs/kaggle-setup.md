@@ -24,20 +24,17 @@ unit tests. This guide gets a notebook running end to end.
 
 ## 3. Pull the code
 
-First cell (note the `./` before `-DeepTrace` — the leading dash in the repo name
-confuses `%cd` and most shell commands otherwise):
+First cell — this is safe to re-run (clones once, then just pulls). The `./` before
+`-DeepTrace` matters: the leading dash in the repo name confuses `%cd` and most
+shell commands otherwise.
 
 ```python
-!git clone https://github.com/Charles-AM/-DeepTrace.git
+import os
+if not os.path.isdir("-DeepTrace"):
+    !git clone https://github.com/Charles-AM/-DeepTrace.git
 %cd ./-DeepTrace
+!git pull -q
 !pip -q install -r requirements.txt   # most deps already present on Kaggle
-```
-
-To pull later changes, restart the session and re-run, or:
-
-```python
-%cd /kaggle/working/-DeepTrace
-!git pull
 ```
 
 You only ever **pull** on Kaggle. Editing and committing happens on your Mac.
