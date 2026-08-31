@@ -16,7 +16,7 @@ whether learnable frequency masking helps — not to assume it does.
 |------|-----------|-------|
 | 1 | `DifferentiableDCT2D` — custom differentiable DCT layer | ✅ done (`src/models/dct.py`) |
 | 2 | `LearnableFrequencyMask` | ✅ done (`src/models/frequency_mask.py`) |
-| 3 | `SpatialFrequencyDetector` (hybrid model + focal loss) | ⬜ |
+| 3 | `SpatialFrequencyDetector` (hybrid model + focal loss) | ✅ done (`src/models/detector.py`, `src/losses.py`) |
 | 4 | Training / evaluation pipeline | ⬜ |
 | 5 | Ablations & baselines | ⬜ |
 | 6 | JPEG compression robustness | ⬜ |
@@ -54,11 +54,16 @@ Do **not** commit dataset files or redistribute FF++ — the EULA forbids it.
 ```
 src/
   models/
-    dct.py             # Task 1 — DifferentiableDCT2D
-    frequency_mask.py  # Task 2 — LearnableFrequencyMask
+    dct.py              # Task 1 — DifferentiableDCT2D
+    frequency_mask.py   # Task 2 — LearnableFrequencyMask
+    frequency_branch.py # Task 3 — DCT -> mask -> CNN -> embedding
+    detector.py         # Task 3 — SpatialFrequencyDetector (hybrid + gated fusion)
+  losses.py             # Task 3 — FocalLoss
+  config.py             # named configs for the Task 5 ablation matrix
 tests/
-  test_dct.py          # scipy equivalence, inverse roundtrip, gradient flow, Parseval
+  test_dct.py           # scipy equivalence, inverse roundtrip, gradient flow, Parseval
   test_frequency_mask.py
+  test_detector.py      # all 7 configs build + train; focal loss; fusion; freezing
 docs/
   kaggle-setup.md
 ```
