@@ -20,11 +20,28 @@ MODEL_CONFIGS: dict[str, dict] = {
 }
 
 
-def build_model(name: str, **overrides):
-    """Instantiate a named config. ``overrides`` (e.g. ``image_size``, ``pretrained``)
-    are merged on top."""
-    from .models import SpatialFrequencyDetector
+def build_model(name: str, image_size: int = 128, pretrained: bool = True, **overrides):
+    """Instantiate a named config.
 
-    if name not in MODEL_CONFIGS:
-        raise KeyError(f"unknown config {name!r}; choices: {sorted(MODEL_CONFIGS)}")
-    return SpatialFrequencyDetector(**{**MODEL_CONFIGS[name], **overrides})
+    ``name`` is either a hybrid-model config from ``MODEL_CONFIGS`` or an
+    established baseline from ``TIMM_BASELINES`` (``xception``, ``efficientnet_b0``,
+    ``efficientnet_b4``, ``efficientnet_b7``).
+    """
+    from .models.baselines import TIMM_BASELINES
+
+    if name in MODEL_CONFIGS:
+        from .models import SpatialFrequencyDetector
+
+        cfg = {**MODEL_CONFIGS[name], "image_size": image_size, "pretrained": pretrained, **overrides}
+        return SpatialFrequencyDetector(**cfg)
+
+    if name in TIMM_BASELINES:
+        from .models.baselines import TimmClassifier
+
+        return TimmClassifier(
+            TIMM_BASELINES[name], pretrained=pretrained, image_size=image_size, **overrides
+        )
+
+    raise KeyError(
+        f"unknown config {name!r}; choices: {sorted(MODEL_CONFIGS) + sorted(TIMM_BASELINES)}"
+    )

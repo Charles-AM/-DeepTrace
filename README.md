@@ -18,10 +18,15 @@ whether learnable frequency masking helps — not to assume it does.
 | 2 | `LearnableFrequencyMask` | ✅ done (`src/models/frequency_mask.py`) |
 | 3 | `SpatialFrequencyDetector` (hybrid model + focal loss) | ✅ done (`src/models/detector.py`, `src/losses.py`) |
 | 4 | Training / evaluation pipeline | ✅ done (`src/{data,engine,metrics,train}.py`) |
-| 5 | Ablations & baselines | ⬜ |
-| 6 | JPEG compression robustness | ⬜ |
-| 7 | Cross-dataset generalization (FF++ → Celeb-DF v2) | ⬜ |
-| 8 | Explainability & visualizations | ⬜ |
+| 5 | Ablations & baselines | ✅ code (`src/run_ablation.py`) |
+| 6 | JPEG compression robustness | ✅ code (`src/jpeg_robustness.py`) |
+| 7 | Cross-dataset generalization (FF++ → Celeb-DF v2) | ✅ code (`src/cross_dataset.py`) |
+| 8 | Explainability & visualizations | ✅ code (`src/visualize.py`) |
+| + | Established baselines: XceptionNet, EfficientNet-B0/B4/B7 (`timm`) | ✅ code (`src/models/baselines.py`) |
+| + | Face-crop extraction from FF++/Celeb-DF videos | ✅ code (`src/extract_faces.py`) |
+
+Tasks 5–8 are code-complete and unit-tested; they produce final numbers once real
+training runs exist (needs a working GPU + the target datasets).
 
 ## Compute plan
 
@@ -91,3 +96,25 @@ python -m src.train --data-root /kaggle/input/<dataset> --config full \
   TensorBoard logs, `frequency_mask.pt`; plus a row appended to `results/summary.csv`.
 - Add `--limit 200` for a fast smoke test, `--amp` on CUDA, `--group-by '(id\d+)'`
   to split by video/identity.
+- Baselines run through the same command: `--config xception` / `efficientnet_b0`.
+
+## Downstream experiments (Tasks 5–8)
+
+```bash
+# Task 5 — ablation matrix + comparison table + bar chart + paired t-tests
+python -m src.run_ablation --data-root <ds> --dataset-name rvf \
+  --configs baseline_spatial frequency_only no_mask no_fusion_concat full \
+  --seeds 0 1 2 --epochs 15
+
+# Task 6 — JPEG robustness (ROC-AUC vs quality) over trained checkpoints
+python -m src.jpeg_robustness --runs rvf_full_seed0 rvf_baseline_spatial_seed0 --seed 0
+
+# Task 7 — cross-dataset (train FF++, test Celeb-DF, no retraining)
+python -m src.cross_dataset --runs ffpp_full_seed0 --cross-root <celebdf_crops> --cross-name celebdf
+
+# Task 8 — mask heatmap, radial importance, Grad-CAM, t-SNE for one run
+python -m src.visualize --run rvf_full_seed0 --data-root <ds> --dataset-name rvf
+
+# Prep — extract face crops from FF++/Celeb-DF videos
+python -m src.extract_faces --videos <video_dir> --out <crops_dir> --size 160
+```

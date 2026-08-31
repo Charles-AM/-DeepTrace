@@ -129,6 +129,25 @@ def test_focal_gradient_flows():
     assert logits.grad is not None and torch.isfinite(logits.grad).all()
 
 
+# --- timm baselines (verification framework) ------------------------------- -
+
+@pytest.mark.parametrize("name", ["efficientnet_b0", "xception"])
+def test_timm_baseline_builds_and_matches_interface(name):
+    model = build_model(name, image_size=128, pretrained=False)
+    out = model(torch.randn(2, 3, 128, 128))
+    assert out.shape == (2, 2)
+    assert model.get_alpha() is None
+    assert model.get_frequency_mask() is None
+    out.sum().backward()
+
+
+def test_build_model_rejects_unknown_name():
+    with pytest.raises(KeyError):
+        build_model("not_a_real_config")
+
+
+# --- focal loss ------------------------------------------------------------- -
+
 def test_focal_rejects_bad_inputs():
     with pytest.raises(ValueError):
         FocalLoss(reduction="banana")
