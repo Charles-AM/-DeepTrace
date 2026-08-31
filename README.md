@@ -17,7 +17,7 @@ whether learnable frequency masking helps — not to assume it does.
 | 1 | `DifferentiableDCT2D` — custom differentiable DCT layer | ✅ done (`src/models/dct.py`) |
 | 2 | `LearnableFrequencyMask` | ✅ done (`src/models/frequency_mask.py`) |
 | 3 | `SpatialFrequencyDetector` (hybrid model + focal loss) | ✅ done (`src/models/detector.py`, `src/losses.py`) |
-| 4 | Training / evaluation pipeline | ⬜ |
+| 4 | Training / evaluation pipeline | ✅ done (`src/{data,engine,metrics,train}.py`) |
 | 5 | Ablations & baselines | ⬜ |
 | 6 | JPEG compression robustness | ⬜ |
 | 7 | Cross-dataset generalization (FF++ → Celeb-DF v2) | ⬜ |
@@ -74,3 +74,20 @@ docs/
 pip install -r requirements.txt
 pytest -q
 ```
+
+## Running a training job (Task 4)
+
+```bash
+python -m src.train --data-root /kaggle/input/<dataset> --config full \
+  --dataset-name ffpp --image-size 128 --epochs 15 --batch-size 64 --seed 0
+```
+
+- `--config` is any name from `src/config.py` (`full`, `no_mask`, `no_dct`,
+  `no_spatial`, `no_fusion_concat`, `baseline_spatial`, `frequency_only`).
+- The train/val/test split is written once to `results/manifests/…csv` and reused
+  by every later run with the same `--dataset-name`/`--seed`/`--image-size`, so all
+  configs are compared on identical images.
+- Outputs per run: `results/<run>/best.pt`, `test_metrics.json`, `history.json`,
+  TensorBoard logs, `frequency_mask.pt`; plus a row appended to `results/summary.csv`.
+- Add `--limit 200` for a fast smoke test, `--amp` on CUDA, `--group-by '(id\d+)'`
+  to split by video/identity.
