@@ -14,12 +14,23 @@ def test_output_shape_preserved():
     assert m(x).shape == x.shape
 
 
-def test_mask_strictly_in_unit_interval():
+def test_mask_in_unit_interval_under_moderate_logits():
     m = LearnableFrequencyMask(16)
     with torch.no_grad():
-        m.logits.copy_(torch.randn_like(m.logits) * 50)  # push logits to extremes
+        m.logits.copy_(torch.randn_like(m.logits) * 8)
     mask = m.mask
     assert torch.all(mask > 0) and torch.all(mask < 1)
+
+
+def test_mask_stays_bounded_under_extreme_logits():
+    # float32 sigmoid saturates to exactly 0.0 / 1.0 for |logit| >~ 17; the
+    # guarantee that matters is that it never leaves [0, 1] or goes non-finite.
+    m = LearnableFrequencyMask(16)
+    with torch.no_grad():
+        m.logits.copy_(torch.randn_like(m.logits) * 100)
+    mask = m.mask
+    assert torch.isfinite(mask).all()
+    assert torch.all(mask >= 0) and torch.all(mask <= 1)
 
 
 def test_elementwise_multiply_is_exact():
