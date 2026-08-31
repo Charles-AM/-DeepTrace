@@ -1,0 +1,35 @@
+# data & derived artifacts — never commit these
+data/
+crops/
+*.mp4
+*.avi
+*.png
+*.jpg
+*.jpeg
+!docs/**/*.png
+
+# model / experiment outputs
+checkpoints/
+runs/
+wandb/
+lightning_logs/
+*.pth
+*.pt
+*.ckpt
+*.onnx
+results/*.csv
+!results/.gitkeep
+
+# python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+.ipynb_checkpoints/
+.pytest_cache/
+.mypy_cache/
+.DS_Store
+
+# kaggle
+kaggle.json
