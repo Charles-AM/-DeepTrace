@@ -24,18 +24,20 @@ unit tests. This guide gets a notebook running end to end.
 
 ## 3. Pull the code
 
-First cell:
+First cell (note the `./` before `-DeepTrace` — the leading dash in the repo name
+confuses `%cd` and most shell commands otherwise):
 
 ```python
 !git clone https://github.com/Charles-AM/-DeepTrace.git
-%cd -DeepTrace
+%cd ./-DeepTrace
 !pip -q install -r requirements.txt   # most deps already present on Kaggle
 ```
 
 To pull later changes, restart the session and re-run, or:
 
 ```python
-%cd /kaggle/working/-DeepTrace && !git pull
+%cd /kaggle/working/-DeepTrace
+!git pull
 ```
 
 You only ever **pull** on Kaggle. Editing and committing happens on your Mac.
@@ -56,7 +58,6 @@ count against your disk.
 ## 5. Run a task
 
 ```python
-import sys; sys.path.append("/kaggle/working/-DeepTrace")
 !pytest -q tests/test_dct.py            # Task 1 sanity check
 # later: !python -m src.train --config configs/full.yaml --data /kaggle/input/...
 ```
