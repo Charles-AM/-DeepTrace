@@ -18,8 +18,9 @@ unit tests. This guide gets a notebook running end to end.
 
 1. *Create → New Notebook*.
 2. Right sidebar → **Session options**:
-   - **Accelerator:** `GPU P100` (or `GPU T4 x2`).
-   - **Internet:** `On` (needed to `git clone` and `pip install`).
+   - **Accelerator:** `GPU T4 x2`. **Not `P100`** — Kaggle's current PyTorch build
+     has no kernels for the older P100 (`CUDA error: no kernel image available`).
+   - **Internet:** `On` (needed to `git clone`).
    - **Persistence:** `Files only` so `/kaggle/working` survives between sessions.
 
 ## 3. Pull the code
@@ -34,8 +35,12 @@ if not os.path.isdir("-DeepTrace"):
     !git clone https://github.com/Charles-AM/-DeepTrace.git
 %cd ./-DeepTrace
 !git pull -q
-!pip -q install -r requirements.txt   # most deps already present on Kaggle
 ```
+
+**Do not** `pip install -r requirements.txt` on Kaggle — the base image already has
+torch, torchvision, timm, scikit-learn, matplotlib, pandas and pytest, and
+reinstalling torch can pull a build that breaks the GPU. If an import turns out to
+be missing, install just that one package.
 
 You only ever **pull** on Kaggle. Editing and committing happens on your Mac.
 

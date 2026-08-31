@@ -116,3 +116,14 @@ def test_limit_truncates_splits(fake_dataset, tmp_path):
         manifest=tmp_path / "m.csv", limit=3,
     )
     assert all(len(d) <= 3 for d in ds.values())
+
+
+def test_limit_keeps_both_classes(fake_dataset, tmp_path):
+    # regression: --limit used to take the first N sorted paths, which on the
+    # 140k dataset were all in train/fake/ -> real:fake = 0:N
+    _, ds = build_dataloaders(
+        fake_dataset, image_size=32, batch_size=4, num_workers=0, seed=0,
+        manifest=tmp_path / "m.csv", limit=8,
+    )
+    n_real, n_fake = ds["train"].class_counts()
+    assert n_real > 0 and n_fake > 0, f"train lost a class: {n_real}:{n_fake}"

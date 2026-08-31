@@ -137,6 +137,23 @@ def read_manifest(path: str | Path) -> dict[str, list[tuple[str, int]]]:
     return splits
 
 
+def _subsample(rows: list[tuple[str, int]], n: int, seed: int) -> list[tuple[str, int]]:
+    """Seeded, roughly class-balanced subsample of at most ``n`` rows."""
+    if n >= len(rows):
+        return rows
+    rng = np.random.default_rng(seed)
+    by_label: dict[int, list[tuple[str, int]]] = {}
+    for r in rows:
+        by_label.setdefault(r[1], []).append(r)
+    per = max(1, n // max(len(by_label), 1))
+    picked: list[tuple[str, int]] = []
+    for group in by_label.values():
+        idx = rng.permutation(len(group))[:per]
+        picked.extend(group[i] for i in idx)
+    rng.shuffle(picked)
+    return sorted(picked[:n])
+
+
 def _transforms(image_size: int, train: bool):
     if T is None:
         raise ImportError("torchvision is required for image transforms")
@@ -206,7 +223,9 @@ def build_dataloaders(
     """Return ``({split: DataLoader}, {split: Dataset})``.
 
     If ``manifest`` exists it is loaded; otherwise the split is computed from
-    ``data_root`` and saved there. ``limit`` truncates each split (debug runs).
+    ``data_root`` and saved there. ``limit`` caps each split to a class-balanced,
+    seeded random subsample of that many items (debug runs) — the full manifest on
+    disk is never truncated.
     """
     if manifest and Path(manifest).exists():
         splits = read_manifest(manifest)
@@ -216,7 +235,7 @@ def build_dataloaders(
             write_manifest(splits, manifest)
 
     if limit:
-        splits = {k: v[:limit] for k, v in splits.items()}
+        splits = {k: _subsample(v, limit, seed) for k, v in splits.items()}
 
     datasets = {
         split: FaceCropDataset(rows, image_size=image_size, train=(split == "train"))
