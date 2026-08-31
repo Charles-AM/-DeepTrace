@@ -66,12 +66,11 @@ class DifferentiableDCT2D(nn.Module):
             raise ValueError(f"size must be positive, got {(h, w)}")
         self.h, self.w = h, w
 
+        # Both are registered as buffers (even when identical for square inputs) so
+        # that ``.to(device)`` / ``.cuda()`` move *both* — an alias attribute would
+        # be left behind on the original device.
         self.register_buffer("basis_h", dct_matrix(h).to(dtype), persistent=False)
-        if w == h:
-            # reuse the same matrix for both axes when the input is square
-            self.basis_w = self.basis_h
-        else:
-            self.register_buffer("basis_w", dct_matrix(w).to(dtype), persistent=False)
+        self.register_buffer("basis_w", dct_matrix(w).to(dtype), persistent=False)
 
     def _check(self, x: torch.Tensor) -> None:
         if x.dim() != 4:

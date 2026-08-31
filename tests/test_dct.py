@@ -89,7 +89,17 @@ def test_buffers_not_parameters():
     layer = DifferentiableDCT2D(16)
     assert len(list(layer.parameters())) == 0
     names = {n for n, _ in layer.named_buffers()}
-    assert "basis_h" in names
+    assert {"basis_h", "basis_w"} <= names
+
+
+def test_both_bases_move_together():
+    # regression: square inputs used to alias basis_w = basis_h as a plain
+    # attribute, so .to(cuda) / .to(dtype) moved only one of them.
+    layer = DifferentiableDCT2D(16)  # square -> the risky path
+    layer.to(torch.float64)
+    assert layer.basis_h.dtype == torch.float64
+    assert layer.basis_w.dtype == torch.float64
+    assert layer.basis_h.device == layer.basis_w.device
 
 
 @pytest.mark.parametrize("dtype", [torch.float32, torch.float64])
@@ -97,6 +107,15 @@ def test_dtype_passthrough(dtype):
     x = torch.randn(1, 1, 12, 12, dtype=dtype)
     layer = DifferentiableDCT2D(12)
     assert layer(x).dtype == dtype
+
+
+@pytest.mark.skipif(not torch.cuda.is_available(), reason="no CUDA device")
+def test_runs_on_cuda():
+    layer = DifferentiableDCT2D(32).cuda()
+    x = torch.randn(2, 3, 32, 32, device="cuda")
+    out = layer(x)
+    assert out.device.type == "cuda" and torch.isfinite(out).all()
+    assert torch.allclose(layer.inverse(out), x, atol=1e-4)  # round-trip on device
 
 
 @pytest.mark.skipif(not torch.backends.mps.is_available(), reason="no MPS device")
