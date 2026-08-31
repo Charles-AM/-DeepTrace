@@ -82,12 +82,35 @@ def parse_args(argv=None):
     p.add_argument("--margin", type=float, default=0.3)
     p.add_argument("--device", default="cuda")
     p.add_argument("--limit-videos", type=int, default=None)
+    p.add_argument(
+        "--video-list",
+        default=None,
+        help="only process videos whose relative path appears in this file "
+        "(e.g. Celeb-DF's List_of_testing_videos.txt); a leading label column is ignored",
+    )
     return p.parse_args(argv)
+
+
+def _read_video_list(path: Path) -> set[str]:
+    wanted: set[str] = set()
+    for line in Path(path).read_text().splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        parts = line.split()
+        wanted.add(parts[-1].replace("\\", "/"))  # drop optional leading label column
+    return wanted
 
 
 def main(argv=None):
     a = parse_args(argv)
-    videos = sorted(p for p in Path(a.videos).rglob("*") if p.suffix.lower() in VIDEO_EXTS)
+    root = Path(a.videos)
+    videos = sorted(p for p in root.rglob("*") if p.suffix.lower() in VIDEO_EXTS)
+
+    if a.video_list:
+        wanted = _read_video_list(Path(a.video_list))
+        videos = [p for p in videos if str(p.relative_to(root)) in wanted or p.name in wanted]
+        print(f"video-list: {len(wanted)} entries -> matched {len(videos)} files on disk")
     if a.limit_videos:
         videos = videos[: a.limit_videos]
     if not videos:
