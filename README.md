@@ -15,7 +15,7 @@ whether learnable frequency masking helps — not to assume it does.
 | Task | Component | State |
 |------|-----------|-------|
 | 1 | `DifferentiableDCT2D` — custom differentiable DCT layer | ✅ done (`src/models/dct.py`) |
-| 2 | `LearnableFrequencyMask` | ⬜ |
+| 2 | `LearnableFrequencyMask` | ✅ done (`src/models/frequency_mask.py`) |
 | 3 | `SpatialFrequencyDetector` (hybrid model + focal loss) | ⬜ |
 | 4 | Training / evaluation pipeline | ⬜ |
 | 5 | Ablations & baselines | ⬜ |
@@ -54,9 +54,11 @@ Do **not** commit dataset files or redistribute FF++ — the EULA forbids it.
 ```
 src/
   models/
-    dct.py            # Task 1 — DifferentiableDCT2D
+    dct.py             # Task 1 — DifferentiableDCT2D
+    frequency_mask.py  # Task 2 — LearnableFrequencyMask
 tests/
-  test_dct.py         # scipy equivalence, inverse roundtrip, gradient flow, Parseval
+  test_dct.py          # scipy equivalence, inverse roundtrip, gradient flow, Parseval
+  test_frequency_mask.py
 docs/
   kaggle-setup.md
 ```
