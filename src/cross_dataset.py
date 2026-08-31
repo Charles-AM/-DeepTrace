@@ -8,9 +8,9 @@ in-domain AUC, the cross-domain AUC, and the drop (Delta AUC).
 from __future__ import annotations
 
 import argparse
-import json
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 import torch
 
@@ -24,8 +24,6 @@ def _cross_loader(data_root: str, image_size: int, batch_size: int, num_workers:
     entries = scan_images(data_root)
     if limit:
         # keep class balance in the truncation
-        import numpy as np
-
         rng = np.random.default_rng(0)
         by = {0: [], 1: []}
         for e in entries:

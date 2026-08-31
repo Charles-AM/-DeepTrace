@@ -9,10 +9,8 @@ quality for all models on one axis and report a robustness score
 from __future__ import annotations
 
 import argparse
-import json
 from pathlib import Path
 
-import numpy as np
 import pandas as pd
 import torch
 
