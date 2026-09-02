@@ -49,6 +49,12 @@ def build_model(name: str, image_size: int = 128, pretrained: bool = True, **ove
             TIMM_BASELINES[name], pretrained=pretrained, image_size=image_size, **overrides
         )
 
+    if name == "f3net":
+        from .models.f3net import F3NetFAD
+
+        return F3NetFAD(image_size=image_size, pretrained=pretrained, **overrides)
+
     raise KeyError(
-        f"unknown config {name!r}; choices: {sorted(MODEL_CONFIGS) + sorted(TIMM_BASELINES)}"
+        f"unknown config {name!r}; choices: "
+        f"{sorted(MODEL_CONFIGS) + sorted(TIMM_BASELINES) + ['f3net']}"
     )
