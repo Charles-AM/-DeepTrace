@@ -10,6 +10,7 @@ import torch
 import torch.nn as nn
 
 from .dct import DifferentiableDCT2D
+from .freq_dropout import FrequencyBandDropout
 from .frequency_mask import LearnableFrequencyMask
 
 __all__ = ["FrequencyBranch"]
@@ -31,6 +32,8 @@ class FrequencyBranch(nn.Module):
         log_scale: apply ``sign(x)*log1p(|x|)`` to the (masked) coefficients before
             the CNN. DCT coefficients span many orders of magnitude; this keeps the
             conv inputs well-conditioned. On by default.
+        band_dropout_p: probability of applying :class:`FrequencyBandDropout` per
+            sample during training (Task 9). ``0`` disables it.
         widths: channel counts of the conv blocks. The first block is stride-1,
             the rest stride-2.
     """
@@ -42,12 +45,16 @@ class FrequencyBranch(nn.Module):
         use_mask: bool = True,
         mask_channels: int | None = None,
         log_scale: bool = True,
+        band_dropout_p: float = 0.0,
         widths: tuple[int, ...] = (32, 64, 128),
     ) -> None:
         super().__init__()
         self.dct = DifferentiableDCT2D(image_size)
         self.use_mask = use_mask
         self.log_scale = log_scale
+        self.band_dropout = (
+            FrequencyBandDropout(image_size, p=band_dropout_p) if band_dropout_p > 0 else None
+        )
         self.mask = (
             LearnableFrequencyMask(image_size, channels=mask_channels) if use_mask else None
         )
@@ -69,6 +76,8 @@ class FrequencyBranch(nn.Module):
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         coeff = self.dct(x)                       # (B, 3, H, W) frequency coefficients
+        if self.band_dropout is not None:
+            coeff = self.band_dropout(coeff)      # zero a random radial band (train only)
         if self.mask is not None:
             coeff = self.mask(coeff)              # element-wise gate on raw coefficients
         if self.log_scale:

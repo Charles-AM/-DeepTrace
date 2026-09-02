@@ -61,6 +61,8 @@ class SpatialFrequencyDetector(nn.Module):
         embed_dim: shared feature width of both branches.
         use_spatial / use_frequency: enable each branch (at least one required).
         use_mask: include the learnable frequency mask in the frequency branch.
+        band_dropout_p: per-sample probability of frequency-band dropout during
+            training (Task 9 regulariser); ``0`` disables it.
         fusion: ``"gated"`` (learnable scalar) or ``"concat"``. Ignored unless both
             branches are enabled.
         pretrained: load ImageNet weights for the ResNet-18 backbone.
@@ -82,6 +84,7 @@ class SpatialFrequencyDetector(nn.Module):
         pretrained: bool = True,
         freeze_spatial_until: str | None = "layer1",
         mask_channels: int | None = None,
+        band_dropout_p: float = 0.0,
         mlp_hidden: int = 128,
         dropout: float = 0.3,
     ) -> None:
@@ -101,7 +104,13 @@ class SpatialFrequencyDetector(nn.Module):
             _SpatialBranch(embed_dim, pretrained, freeze_spatial_until) if use_spatial else None
         )
         self.frequency = (
-            FrequencyBranch(image_size, embed_dim, use_mask=use_mask, mask_channels=mask_channels)
+            FrequencyBranch(
+                image_size,
+                embed_dim,
+                use_mask=use_mask,
+                mask_channels=mask_channels,
+                band_dropout_p=band_dropout_p,
+            )
             if use_frequency
             else None
         )
