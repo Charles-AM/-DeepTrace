@@ -25,26 +25,34 @@ if not os.path.isdir("-DeepTrace"):
 
 ## Stage 1 — Download a scoped FaceForensics++ subset  (20–40 min, ~15–25 GB)
 
-Put the emailed `faceforensics_download_v4.py` into the notebook (paste it into a
-`%%writefile download.py` cell). Then:
+Put the emailed download script into the notebook: a `%%writefile download.py` cell
+with the script pasted below it.
+
+The script has an interactive `input()` ("press any key") that crashes in a Kaggle
+cell — feed it a newline with `echo "" |`. It also skips already-downloaded files,
+so **re-run the cell if it errors partway** and it resumes.
 
 ```python
-!python download.py ./ffpp --server EU2 -c c23 -n 200 -d original       -t videos
-!python download.py ./ffpp --server EU2 -c c23 -n 200 -d Deepfakes      -t videos
-!python download.py ./ffpp --server EU2 -c c23 -n 200 -d Face2Face      -t videos
-!python download.py ./ffpp --server EU2 -c c23 -n 200 -d FaceSwap       -t videos
-!python download.py ./ffpp --server EU2 -c c23 -n 200 -d NeuralTextures -t videos
+!echo "" | python download.py ./ffpp --server EU2 -c c23 -n 400 -d original
+!echo "" | python download.py ./ffpp --server EU2 -c c23 -n 200 -d Deepfakes
+!echo "" | python download.py ./ffpp --server EU2 -c c23 -n 200 -d Face2Face
+!echo "" | python download.py ./ffpp --server EU2 -c c23 -n 200 -d FaceSwap
+!echo "" | python download.py ./ffpp --server EU2 -c c23 -n 200 -d NeuralTextures
 ```
 
-If EU2 rejects `c23`, use `-c c40`. `-n 200` = 200 videos/category.
+- `-n 400` original vs `-n 200` × 4 manipulations ≈ balanced crop counts.
+- If EU2 rejects `c23`, switch all to `-c c40` (smaller; note it in the paper).
+- `--server EU2` is currently the only working server (per the approval email).
 
 ```python
 !find ./ffpp -name "*.mp4" | wc -l
 !find ./ffpp -maxdepth 4 -type d
+!du -sh ./ffpp
 ```
 
-**✅ check:** ~1000 `.mp4` files; folders `original_sequences/...` and
-`manipulated_sequences/{Deepfakes,Face2Face,FaceSwap,NeuralTextures}/...`.
+**✅ check:** ~1200 `.mp4` files; folders `original_sequences/youtube/c23/videos/`
+and `manipulated_sequences/{Deepfakes,Face2Face,FaceSwap,NeuralTextures}/c23/videos/`;
+~15–25 GB.
 
 ---
 
