@@ -45,6 +45,9 @@ def parse_args(argv=None) -> argparse.Namespace:
     p.add_argument("--amp", action="store_true", help="mixed precision (CUDA only)")
     p.add_argument("--group-by", default=None, help="regex to group crops (avoid frame leakage)")
     p.add_argument("--limit", type=int, default=None, help="cap items per split (debug)")
+    p.add_argument("--sas", action="store_true", help="Spectral Artifact Simulation augmentation (Task 10)")
+    p.add_argument("--sas-fake-ratio", type=float, default=0.5, help="fraction of the SAS set that are pseudo-fakes")
+    p.add_argument("--band-dropout-p", type=float, default=None, help="override the config's frequency-band dropout")
     p.add_argument("--out-root", default="results")
     p.add_argument("--device", default=None)
     return p.parse_args(argv)
@@ -55,7 +58,7 @@ def main(argv=None) -> dict:
     seed_everything(args.seed)
     device = get_device(args.device)
 
-    run_name = f"{args.dataset_name}_{args.config}_seed{args.seed}"
+    run_name = f"{args.dataset_name}_{args.config}{'_sas' if args.sas else ''}_seed{args.seed}"
     out_dir = Path(args.out_root) / run_name
     out_dir.mkdir(parents=True, exist_ok=True)
     manifest = Path(args.out_root) / "manifests" / f"{args.dataset_name}_seed{args.seed}_sz{args.image_size}.csv"
@@ -69,12 +72,16 @@ def main(argv=None) -> dict:
         group_by=args.group_by,
         manifest=manifest,
         limit=args.limit,
+        sas={"fake_ratio": args.sas_fake_ratio} if args.sas else None,
     )
     n_real, n_fake = datasets["train"].class_counts()
     alpha = args.focal_alpha if args.focal_alpha is not None else n_real / max(n_real + n_fake, 1)
 
+    model_overrides = {}
+    if args.band_dropout_p is not None:
+        model_overrides["band_dropout_p"] = args.band_dropout_p
     model = build_model(
-        args.config, image_size=args.image_size, pretrained=not args.no_pretrained
+        args.config, image_size=args.image_size, pretrained=not args.no_pretrained, **model_overrides
     ).to(device)
     criterion = FocalLoss(gamma=args.focal_gamma, alpha=float(min(max(alpha, 1e-3), 1 - 1e-3)))
     optimizer = torch.optim.AdamW(
@@ -157,21 +164,28 @@ def _append_summary(path: Path, run_name: str, args, metrics: dict) -> None:
     import csv
 
     path.parent.mkdir(parents=True, exist_ok=True)
-    fields = ["run", "config", "dataset", "seed", "image_size", "epochs", *METRIC_KEYS]
+    fields = ["run", "config", "sas", "dataset", "seed", "image_size", "epochs", *METRIC_KEYS]
     row = {
         "run": run_name,
         "config": args.config,
+        "sas": int(bool(getattr(args, "sas", False))),
         "dataset": args.dataset_name,
         "seed": args.seed,
         "image_size": args.image_size,
         "epochs": args.epochs,
         **{k: round(metrics.get(k, float("nan")), 5) for k in METRIC_KEYS},
     }
-    exists = path.exists()
-    with path.open("a", newline="") as fh:
-        w = csv.DictWriter(fh, fieldnames=fields)
-        if not exists:
-            w.writeheader()
+    # rewrite the whole file so a schema change (e.g. adding the `sas` column) can't
+    # misalign appended rows against an older header
+    prior = []
+    if path.exists():
+        with path.open(newline="") as fh:
+            prior = list(csv.DictReader(fh))
+    with path.open("w", newline="") as fh:
+        w = csv.DictWriter(fh, fieldnames=fields, extrasaction="ignore")
+        w.writeheader()
+        for r in prior:
+            w.writerow({k: r.get(k, "") for k in fields})
         w.writerow(row)
 
 

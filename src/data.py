@@ -29,6 +29,7 @@ except Exception:  # torchvision optional at import time (tests that don't need 
 
 __all__ = [
     "FaceCropDataset",
+    "SASDataset",
     "scan_images",
     "make_splits",
     "build_dataloaders",
@@ -209,6 +210,47 @@ class FaceCropDataset(Dataset):
         return int((labs == 0).sum()), int((labs == 1).sum())
 
 
+class SASDataset(Dataset):
+    """Pristine (real) face images, a fraction returned as Spectral Artifact
+    Simulation pseudo-fakes (Task 10). Concatenated onto the real training set for
+    SAS-augmented training. Never used for val/test.
+    """
+
+    def __init__(
+        self,
+        real_entries: list[tuple[str, int]],
+        image_size: int = 128,
+        fake_ratio: float = 0.5,
+        sim_kwargs: dict | None = None,
+    ) -> None:
+        from .sas import SASTransform, SpectralArtifactSimulator
+
+        self.entries = [e for e in real_entries if e[1] == 0]
+        if not self.entries:
+            raise ValueError("SASDataset needs real (label 0) entries")
+        if T is None:
+            raise ImportError("torchvision is required for SASDataset")
+        self.pre = T.Compose(
+            [
+                T.RandomResizedCrop(image_size, scale=(0.8, 1.0), ratio=(0.9, 1.1)),
+                T.RandomHorizontalFlip(),
+                T.ToTensor(),
+            ]
+        )
+        self.norm = T.Normalize(IMAGENET_MEAN, IMAGENET_STD)
+        self.sas = SASTransform(SpectralArtifactSimulator(**(sim_kwargs or {})), fake_ratio=fake_ratio)
+
+    def __len__(self) -> int:
+        return len(self.entries)
+
+    def __getitem__(self, idx: int):
+        path, _ = self.entries[idx]
+        with Image.open(path) as img:
+            x01 = self.pre(img.convert("RGB"))
+        x01, label = self.sas(x01)
+        return self.norm(x01), label
+
+
 def build_dataloaders(
     data_root: str | Path,
     image_size: int = 128,
@@ -219,6 +261,7 @@ def build_dataloaders(
     group_by: str | None = None,
     manifest: str | Path | None = None,
     limit: int | None = None,
+    sas: dict | None = None,
 ) -> tuple[dict[str, DataLoader], dict[str, FaceCropDataset]]:
     """Return ``({split: DataLoader}, {split: Dataset})``.
 
@@ -226,6 +269,10 @@ def build_dataloaders(
     ``data_root`` and saved there. ``limit`` caps each split to a class-balanced,
     seeded random subsample of that many items (debug runs) — the full manifest on
     disk is never truncated.
+
+    ``sas`` (dict) enables Spectral Artifact Simulation: a :class:`SASDataset` over
+    the real training images is concatenated onto the training loader. Keys:
+    ``fake_ratio`` (default 0.5) and ``sim`` (kwargs for ``SpectralArtifactSimulator``).
     """
     if manifest and Path(manifest).exists():
         splits = read_manifest(manifest)
@@ -241,9 +288,23 @@ def build_dataloaders(
         split: FaceCropDataset(rows, image_size=image_size, train=(split == "train"))
         for split, rows in splits.items()
     }
-    loaders = {
-        split: DataLoader(
-            ds,
+
+    train_ds: Dataset = datasets["train"]
+    if sas:
+        from torch.utils.data import ConcatDataset
+
+        sas_ds = SASDataset(
+            splits["train"],
+            image_size=image_size,
+            fake_ratio=sas.get("fake_ratio", 0.5),
+            sim_kwargs=sas.get("sim"),
+        )
+        train_ds = ConcatDataset([datasets["train"], sas_ds])
+
+    loaders = {}
+    for split, ds in datasets.items():
+        loaders[split] = DataLoader(
+            train_ds if split == "train" else ds,
             batch_size=batch_size,
             shuffle=(split == "train"),
             num_workers=num_workers,
@@ -251,6 +312,4 @@ def build_dataloaders(
             drop_last=(split == "train"),
             persistent_workers=(num_workers > 0),
         )
-        for split, ds in datasets.items()
-    }
     return loaders, datasets
