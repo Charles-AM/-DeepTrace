@@ -31,6 +31,9 @@ whether learnable frequency masking helps — not to assume it does.
 Tasks 5–11 are code-complete and unit-tested; they produce final numbers once real
 training runs exist (needs a working GPU + the target datasets).
 
+▶ **Phase 2 execution:** [`docs/phase2-runbook.md`](docs/phase2-runbook.md) — stage-by-stage,
+with a validation check after each stage.
+
 ## Compute plan
 
 Development is disk-constrained locally, so:
