@@ -133,14 +133,73 @@ exist; scores table printed. Hypothesis to inspect: does `full_banddrop_sas` deg
 
 ---
 
-## Stage 6 — Cross-dataset generalization  (crops: ~1 h each; eval: ~15 min)
+## Stage 5.5 — Acquire the extra cross-test sets  (~1 h each)
 
-Get the unseen test sets as crops (same `extract_faces` flow, save each as a private
-dataset):
+FF++ + Celeb-DF alone = workshop tier. For ICASSP/WACV we need **three** zero-shot
+targets, one of them diffusion-based. None of these needs an approval form.
 
-- **Celeb-DF v2** — `--video-list <root>/List_of_testing_videos.txt`
-- **DFDC** — the preview/sample set on Kaggle, or the official test set
-- **DF40** — a subset (it is large; pick 4–6 methods)
+### Celeb-DF v2  (already approved — see the earlier download notes)
+9.3 GB Drive zip → unzip → extract **test-set** crops only:
+```python
+!python -m src.extract_faces --videos ./celebdf_v2 --out /kaggle/working/celebdf_crops \
+  --video-list ./celebdf_v2/List_of_testing_videos.txt \
+  --size 160 --every 15 --max-per-video 15 --device cuda
+```
+
+### DFDC — use the **Preview** set (public, ~5 GB, no form)
+Add Input → Datasets → search `deepfake detection challenge` → pick the one by
+**`gauravsharma`** / **`deepfake-detection-challenge`** *preview* (or `dfdc_train_part`
+sample). Confirm it has `.mp4` + a `metadata.json` (label per video).
+```python
+!ls /kaggle/input/deepfake-detection-challenge* | head
+# labels come from metadata.json: {"real"/"fake"} -> our scanner keys off folder
+# names, so first sort videos into real/ and fake/ using the metadata:
+!python - <<'PY'
+import json, shutil, glob, os
+root = glob.glob("/kaggle/input/*dfdc*") or glob.glob("/kaggle/input/deepfake-detection*")
+root = root[0]
+meta = json.load(open(glob.glob(f"{root}/**/metadata.json", recursive=True)[0]))
+out = "/kaggle/working/dfdc_sorted"
+for v, info in meta.items():
+    src = glob.glob(f"{root}/**/{v}", recursive=True)
+    if not src: continue
+    d = os.path.join(out, "fake" if info["label"].lower()=="fake" else "real")
+    os.makedirs(d, exist_ok=True)
+    try: os.symlink(src[0], os.path.join(d, v))
+    except FileExistsError: pass
+print("sorted", len(meta), "videos ->", out)
+PY
+!python -m src.extract_faces --videos /kaggle/working/dfdc_sorted --out /kaggle/working/dfdc_crops \
+  --size 160 --every 20 --max-per-video 12 --limit-videos 800 --device cuda
+```
+
+### DF40 — a **diffusion subset** (the acid test for SAS)
+DF40 (Yan et al., NeurIPS 2024) spans 40 methods. Search Kaggle/HF for `DF40`
+(project: `YZY-stack/DF40`). Download only a handful of method folders — pick
+**2 diffusion** (e.g. `sit`, `ddim`/`collaborative_diffusion`, `e4s`), **1 GAN-era**
+(`stylegan2` / `stargan`), **1 face-edit** — plus the DF40 real set.
+```python
+# DF40 ships already as face frames in method-named folders; the scanner needs
+# real/ + fake/ — symlink the real set to real/, each chosen method to fake/:
+!mkdir -p /kaggle/working/df40_eval/real /kaggle/working/df40_eval/fake
+!ln -s /kaggle/input/df40/<real_folder>/*        /kaggle/working/df40_eval/real/ 2>/dev/null; true
+!for m in sit collaborative_diffusion e4s stargan; do \
+    ln -s /kaggle/input/df40/$m/* /kaggle/working/df40_eval/fake/ 2>/dev/null; done; true
+!find /kaggle/working/df40_eval -type l | wc -l
+```
+If DF40 gives frames not videos, skip `extract_faces` and point `--targets` straight
+at `/kaggle/working/df40_eval` (already `real/`+`fake/`).
+
+**✅ check:** three crop dirs, each with `real/` + `fake/`, each ≥ ~3–4k images per
+class. Sample 4 from each and eyeball them. Save each as a **private** dataset
+(`celebdf-crops`, `dfdc-crops`, `df40-crops`).
+
+**Licence note:** Celeb-DF & FF++ crops stay private (EULA). DFDC and DF40 are
+research-licensed — keep private too and cite them.
+
+---
+
+## Stage 6 — Cross-dataset generalization  (eval: ~15 min)
 
 ```python
 !python -m src.cross_dataset \
