@@ -91,8 +91,11 @@ def run(
     image_size: int,
     perturbations=tuple(PERTURBATIONS),
     limit: int | None = None,
+    out_dir: Path | None = None,
 ) -> pd.DataFrame:
     device = get_device()
+    out_dir = Path(out_dir) if out_dir is not None else Path.cwd()  # results_root may be read-only
+    out_dir.mkdir(parents=True, exist_ok=True)
     manifest = results_root / "manifests" / f"{dataset_name}_seed{seed}_sz{image_size}.csv"
     if not manifest.exists():
         raise FileNotFoundError(f"missing split manifest {manifest} — train a model first")
@@ -108,17 +111,17 @@ def run(
         )
 
     df = pd.DataFrame(all_rows)
-    df.to_csv(results_root / "robustness.csv", index=False)
+    df.to_csv(out_dir / "robustness.csv", index=False)
     for pert in perturbations:
-        _plot(df[df.perturbation == pert], pert, results_root / f"robustness_{pert}.png")
+        _plot(df[df.perturbation == pert], pert, out_dir / f"robustness_{pert}.png")
 
     scores = (
         df.pivot_table(index=["run", "perturbation"], columns="severity", values="roc_auc")
         .assign(score=lambda t: t[max(SEVERITIES)] / t[0])
         .reset_index()[["run", "perturbation", "score"]]
     )
-    scores.to_csv(results_root / "robustness_scores.csv", index=False)
-    print(f"\nwrote {results_root/'robustness.csv'}\n{scores.to_string(index=False)}")
+    scores.to_csv(out_dir / "robustness_scores.csv", index=False)
+    print(f"\nwrote {out_dir/'robustness.csv'}\n{scores.to_string(index=False)}")
     return df
 
 
@@ -151,14 +154,16 @@ def parse_args(argv=None):
     p.add_argument("--image-size", type=int, default=128)
     p.add_argument("--perturbations", nargs="+", default=list(PERTURBATIONS))
     p.add_argument("--limit", type=int, default=None)
-    p.add_argument("--results-root", default="results")
+    p.add_argument("--results-root", default="results", help="dir with manifests/ + <run>/best.pt (may be read-only)")
+    p.add_argument("--out-dir", default=None, help="where to write robustness outputs (default: cwd)")
     return p.parse_args(argv)
 
 
 def main(argv=None):
     a = parse_args(argv)
     run(a.runs, Path(a.results_root), a.dataset_name, a.seed, a.image_size,
-        perturbations=tuple(a.perturbations), limit=a.limit)
+        perturbations=tuple(a.perturbations), limit=a.limit,
+        out_dir=Path(a.out_dir) if a.out_dir else None)
 
 
 if __name__ == "__main__":

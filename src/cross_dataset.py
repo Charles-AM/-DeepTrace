@@ -55,8 +55,12 @@ def run(
     batch_size: int = 128,
     num_workers: int = 2,
     limit: int | None = None,
+    out_dir: Path | None = None,
 ) -> pd.DataFrame:
     device = get_device()
+    # results_root may be a read-only mounted dataset; write CSVs elsewhere
+    out_dir = Path(out_dir) if out_dir is not None else Path.cwd()
+    out_dir.mkdir(parents=True, exist_ok=True)
     summary = pd.read_csv(results_root / "summary.csv")
     loader_cache: dict[tuple[str, int], tuple] = {}
 
@@ -109,11 +113,11 @@ def run(
             )
 
     df = pd.DataFrame(rows)
-    out = results_root / "cross_dataset.csv"
+    out = out_dir / "cross_dataset.csv"
     df.to_csv(out, index=False)
     pivot = df[df.target != "MEAN"].pivot_table(index="run", columns="target", values="auc_cross")
     pivot["mean_delta"] = df[df.target == "MEAN"].set_index("run")["delta_auc"]
-    pivot.to_csv(results_root / "cross_dataset_pivot.csv")
+    pivot.to_csv(out_dir / "cross_dataset_pivot.csv")
     print(f"\nwrote {out}\n{pivot.to_string()}")
     return df
 
@@ -126,13 +130,15 @@ def parse_args(argv=None):
         help="one or more NAME=PATH, e.g. celebdf=/kaggle/working/celebdf_crops dfdc=/path",
     )
     p.add_argument("--limit", type=int, default=None)
-    p.add_argument("--results-root", default="results")
+    p.add_argument("--results-root", default="results", help="dir with summary.csv + <run>/best.pt (may be read-only)")
+    p.add_argument("--out-dir", default=None, help="where to write cross_dataset.csv (default: cwd)")
     return p.parse_args(argv)
 
 
 def main(argv=None):
     a = parse_args(argv)
-    run(a.runs, _parse_targets(a.targets), Path(a.results_root), limit=a.limit)
+    run(a.runs, _parse_targets(a.targets), Path(a.results_root), limit=a.limit,
+        out_dir=Path(a.out_dir) if a.out_dir else None)
 
 
 if __name__ == "__main__":

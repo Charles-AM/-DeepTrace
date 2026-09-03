@@ -1,5 +1,30 @@
 # DeepTrace — Progress Log
 
+## 2026-09-03 — Phase 2 results in; project reframed as a controlled study
+
+**The proposed method does not beat well-tuned spatial baselines.** Firm result
+across 3 seeds + 2 cross-datasets (Celeb-DF v2, DFDC).
+
+In-domain FF++ c23 (3-seed mean ROC-AUC): Xception 0.9977, F3-Net 0.9971,
+full_banddrop+sas 0.9949, baseline_spatial 0.9949. F3-Net significantly beats the
+proposed model (p=0.049). No component (learnable mask, gated fusion, band-dropout,
+SAS) shows a significant AUC gain. `frequency_only` (raw DCT -> CNN) = 0.70 AUC
+(near chance) -- the v1 frequency branch is a poor representation (global-average-
+pooling over a DCT map discards frequency position).
+
+Cross-dataset (seed 0): on Celeb-DF the spatial baselines (Xception 0.827,
+F3-Net 0.820) beat the frequency-hybrid (0.744) by ~8 points; SAS *hurts* Celeb-DF
+transfer (0.756 -> 0.744). On DFDC everything clusters at 0.73-0.75.
+
+**Reframe:** controlled analysis / negative-results paper. Main claim: on a matched
+backbone, adding frequency-domain modelling does not improve deepfake detection over
+a well-tuned spatial CNN. Target paper: F3-Net (ECCV 2020). Next: compression-
+robustness sweep (F3-Net's headline claim was on c40), cross-dataset error bars,
+mask-interpretability figures.
+
+Fixed `src/cross_dataset.py` and `src/robustness.py` to accept `--out-dir` (they
+crashed writing CSVs into a read-only mounted `--results-root`).
+
 ## 2026-09-03 — Stage 4: training matrix launched
 - FaceForensics++ scoped subset: 1,500 videos (~300 pristine + ~1,200 manipulated,
   150 pairs x 2 directions x 4 methods, c23), via src/ffpp_fastdl.py.
