@@ -1,0 +1,90 @@
+# Phase 3 — analysis paper: next steps + supporting evidence
+
+Supersedes the Phase-2 execution plan in `docs/phase2-runbook.md` (that phase is
+done; result was negative — see `docs/progress-log.md` 2026-09-03).
+
+**Deliverable:** a controlled-study / negative-results paper.
+**Main claim:** on a matched backbone and controlled training budget, frequency-domain
+modelling does not beat a well-tuned spatial CNN for deepfake detection — in-domain,
+cross-dataset, or under compression.
+**Target:** F3-Net (ECCV 2020). **Base:** Frank et al. (ICML 2020).
+**Support:** SBI (CVPR 2022), Ojha et al. (CVPR 2023), Gragnaniello et al. (ICME 2021),
+Corvi et al. (ICASSP 2023), "Fake or JPEG?" (2024). Full list: `docs/related-work.md`.
+
+---
+
+## What we already have (paper-ready)
+
+- In-domain FF++ c23, 3 seeds, 10 configs → `results/ablation_table.md`.
+  Xception 0.9977, F3-Net 0.9971, proposed 0.9949; F3-Net > proposed p=0.049;
+  no frequency component significant; `frequency_only` = 0.70 (near chance).
+- Cross-dataset **seed 0 only**: Celeb-DF — Xception 0.827, F3-Net 0.820,
+  freq-hybrid 0.744; SAS hurts Celeb-DF transfer. DFDC — all ~0.73–0.75.
+
+## The gap: our evidence is c23-only and single-seed cross-dataset.
+F3-Net's headline claim is about **c40**. We have not tested it.
+
+---
+
+## Experiments — ranked
+
+### Tier 1 — required for the claim to hold
+
+| # | Experiment | Command / notes | Cost |
+|---|---|---|---|
+| 1 | **Compression-robustness sweep** on the 30 existing checkpoints — JPEG {90,70,50,30} + blur/noise/resize/contrast. Question: does F3-Net's FAD degrade *less* than Xception as quality drops? | `python -m src.robustness --runs <key runs> --dataset-name rvf --seed 0 --limit 3000 --results-root /kaggle/input/... --out-dir /kaggle/working` | ~1–2 h |
+| 2 | **One c40 training run** — Xception vs F3-Net only, same subset re-encoded at c40 (or download c40 crops). Directly engages F3-Net's main result. | re-run `ffpp_fastdl` with `--compression c40`, re-extract, train 2 configs × 3 seeds | ~3–4 h |
+| 3 | **Cross-dataset seeds 1 & 2** — error bars on the Celeb-DF / DFDC table. | `src.cross_dataset` on seed-1 and seed-2 checkpoints | ~35 min |
+| 4 | **Matched-backbone grid** — add `Xception + learnable mask` and `ResNet-18 + FAD` so the table is {ResNet-18, Xception} × {spatial, +FAD, +mask}. Frequency should fail to help in every cell. | new configs in `src/config.py`, 4 runs × 3 seeds | ~3 h |
+| 5 | **Data spectral analysis figure** — mean radial FFT/DCT power of real vs fake crops at raw / c23 / c40. Show the real-vs-fake gap that exists at raw is gone at c40. Explains *why* frequency fails on deployed (compressed) media. | new script `src/spectra.py` | ~1 h |
+
+### Tier 2 — makes it an analysis paper, not just a table
+
+| # | Experiment | Why |
+|---|---|---|
+| 6 | **Report the learned fusion gate α** (already logged in checkpoints). If α → ~1, the hybrid itself down-weights the frequency branch to nothing. | free — read from `best.pt` |
+| 7 | **CKA(spatial features, frequency features)** on the test set. High alignment ⇒ the frequency branch is redundant, not complementary. | ~1 h, `src/cka.py` |
+| 8 | **Test-time frequency-band ablation of a trained spatial model** — zero radial DCT bands of the input, measure AUC drop. Shows the spatial CNN already uses the "forensic" bands. | ~1 h |
+| 9 | **Cross-manipulation leave-one-out** within FF++ (train on 3 methods, test on the 4th). Does frequency help the hardest generalisation split? | ~2 h, re-split existing crops |
+| 10 | **Mask-interpretability figures** across seeds/datasets — show the learned mask is inconsistent and doesn't transfer. | ~10 min, `src.visualize` |
+
+### Tier 3 — strengthen / preempt reviewers
+
+| # | Experiment | Why |
+|---|---|---|
+| 11 | 5 seeds (not 3) for the two headline comparisons; bootstrap CIs on the AUC *difference*; report Cohen's d. | tighter significance |
+| 12 | Full F3-Net (FAD + LFS + MixBlock), not just FAD. If even that ties Xception, very strong. | closes the "you crippled F3-Net" objection |
+| 13 | DF40 diffusion subset as a 3rd cross-dataset target. | modern generators; ties to Corvi et al. |
+| 14 | "Published numbers vs our controlled numbers" table — F3-Net/SPSL as reported vs in our harness. | shows the gap is protocol, not re-implementation error |
+| 15 | Add EfficientNet-B4 as a higher-capacity backbone to rule out "the backbone was too weak to need frequency". | capacity control |
+
+---
+
+## Fixed order to execute
+
+1. Save `celebdf_crops` / `dfdc_crops` as **private** Kaggle datasets (currently
+   only in `/kaggle/working`, lost on session end). *(EULA: never make public.)*
+2. Tier-1 #1 robustness → #3 cross-dataset seeds → #5 spectral figure (no training).
+3. Tier-1 #2 c40 run, #4 matched-backbone grid (training).
+4. Tier-2 #6–#10.
+5. Tier-3 as time allows.
+6. Write-up: fill `results/` tables into the draft, verify every citation in
+   `docs/related-work.md`, draft LaTeX (intro → related work → controlled protocol →
+   results → analysis (#5–#8) → limitations → conclusion).
+
+## Venues
+
+Target a workshop or short-paper track that welcomes negative / analysis results:
+CVPR/ICCV/ECCV workshops on media forensics (e.g. WMF, DFAD), IEEE WIFS, IH&MMSec,
+or a "Reproducibility / negative results" track. DeepfakeBench (NeurIPS D&B 2023) is
+the methodological precedent to cite and match.
+
+## Known repo state
+
+- HEAD adds `--out-dir` to `src/cross_dataset.py` and `src/robustness.py`
+  (they crashed writing into a read-only mounted `--results-root`).
+- `src/extract_faces_v2.py` is the correct extractor (path-slug names).
+  `src/extract_faces.py` is buggy — deprecate.
+- `frequency_branch.py` v1 is broken (GAP over a raw DCT map discards frequency
+  position). A v2 (DCT → mask → IDCT → spatial CNN, FAD-style) is designed but not
+  built; only needed if we want a *working* frequency branch to also lose fairly.
