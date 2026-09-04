@@ -61,13 +61,18 @@ diversifies training-sample frequency characteristics, plus a **dual consistency
 regulariser** (local, via class-activation maps; global, via a von Mises-Fisher
 distribution over embeddings).
 
-Why it's the right recent target: it is the most current major statement in
-frequency-domain face-forgery detection (closes the base-paper-recency gap — F3-Net
-2020 → FreqDebias 2025), and its own diagnosis is **independent, top-venue support
-for our scepticism about frequency reliance** — it just responds by debiasing rather
-than dropping the frequency pathway. Their result also implies that *unregularised*
-frequency reliance (which is what F3-Net's FAD, and our custom DCT branch, are) is
-liable to exactly the failure our study documents.
+Why it's the right recent target — **a productive CONTRAST, not an ally** (wording
+corrected 2026-09-04): it is the most current major statement in frequency-domain
+face-forgery detection, closing the base-paper-recency gap (F3-Net 2020 →
+FreqDebias 2025). But its conclusion is *not* the same as ours: FreqDebias argues
+frequency modelling **can** help, provided its "spectral bias" failure mode is
+explicitly corrected for (Fo-Mixup + dual consistency regularisation); we test a
+*simpler, matched-backbone* frequency branch with no such correction and find it
+adds nothing. The useful framing is not "FreqDebias agrees with us" but: their
+paper's existence and engineering complexity is itself evidence that *naive*,
+unregularised frequency reliance (which is what F3-Net's FAD, and our custom DCT
+branch, are) does not straightforwardly pay off — real machinery was needed to make
+theirs work. That is consistent with, but distinct from, our own finding.
 
 **Scope note — do not fully reproduce.** Fo-Mixup + dual CR is materially heavier to
 train than F3-Net's FAD. Engage it via (a) citation/positioning, and (b) their own
@@ -180,5 +185,8 @@ discussion section.
 > own learnable DCT front-end) earn its computational cost at all? Across in-domain,
 > per-manipulation, cross-dataset, and compression-robustness evaluation, we find it
 > does not, consistent with the spectral bias FreqDebias identifies and with the
-> generalisation-favours-spatial pattern reported by Gragnaniello et al. (ICME
-> 2021), Corvi et al. (ICASSP 2023), and Ojha et al. (CVPR 2023).
+> generalisation-favours-spatial pattern reported by CADDM (Dong et al., CVPR 2023),
+> Gragnaniello et al. (ICME 2021), Corvi et al. (ICASSP 2023), and Ojha et al.
+> (CVPR 2023) — three independent groups, three different mechanisms (implicit
+> identity leakage, generator-specific spectral fingerprints, unregularised
+> spectral bias), converging on the same direction.

@@ -4,14 +4,33 @@ Supersedes the Phase-2 execution plan in `docs/phase2-runbook.md` (that phase is
 done; result was negative — see `docs/progress-log.md` 2026-09-03).
 
 **Deliverable:** a controlled trade-off study.
-**Central RQ:** under constrained inference budgets and increasing compression, does
-an explicit frequency-domain branch on a spatial CNN buy enough robustness to
-justify its computational overhead?
+**Central RQ** (tightened 2026-09-04, external review): *Under matched training
+data, backbone capacity, and inference constraints, does an explicit DCT-based
+frequency pathway provide incremental robustness beyond a spatial detector,
+especially under compression?* — "incremental" is deliberate: the claim is about
+predictive value added on top of a spatial baseline, not about whether frequency
+information is discriminative in isolation (it is — see C1 in `validation-plan.md`).
+Survives a positive OR negative c40 result.
+
+**Central claim (adopt near-verbatim, external review):** *Explicit frequency
+modelling is not intrinsically beneficial for face-forgery detection. In controlled
+FF++ experiments, spectral cues are measurable and survive compression, yet
+DCT-based frequency pathways provide little or no incremental accuracy over matched
+spatial baselines and may reduce cross-dataset generalisation. Their value, if any,
+is therefore conditional on degradation regime and must be weighed against
+additional compute and architectural complexity.*
+
 **Base/foundation (implemented + directly engaged):** F3-Net (ECCV 2020) — we build
 its FAD architecture and test its literal c40 claim.
-**Recent target (positioned against, cited not reproduced):** FreqDebias (CVPR 2025)
-— diagnoses "spectral bias" (frequency over-reliance hurts generalisation), closes
-the base/target recency gap, independent support for our scepticism.
+**Recent target — a productive CONTRAST, not an ally (corrected 2026-09-04):**
+FreqDebias (CVPR 2025) argues frequency modelling *can* help when its "spectral
+bias" failure mode is explicitly corrected for (Fo-Mixup + dual consistency
+regularisation). We show a *simpler, matched-backbone, no-special-machinery*
+frequency branch fails outright — i.e. whatever value frequency carries apparently
+needs substantial extra engineering to realise, which itself undercuts the
+"obvious win" assumption behind F3-Net-style architectures (ours included). Do not
+describe FreqDebias as "supporting our scepticism" — it explicitly does not share
+our conclusion, it just diagnoses a related problem.
 **Antecedents:** Frank et al. (ICML 2020), Zhang et al. (WIFS 2019), Durall et al.
 (CVPR 2020).
 **Support (co-primary):** SBI (CVPR 2022), **CADDM/Implicit Identity Leakage (Dong

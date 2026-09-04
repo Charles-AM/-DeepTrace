@@ -87,13 +87,15 @@ legitimate, publishable contribution.
 | **In-domain** | Detect fakes of the same kind you trained on | Our method ≈ ordinary CNN. Frequency-only ≈ near chance (0.70). |
 | **Compression robustness** | The frequency camp's strongest claim: "frequency survives when the video is squashed" | Re-tested with heavy JPEG. The frequency model's apparent edge was a **fluke of one random seed** — it vanished once we averaged 3 runs. Our full method was actually *worse* under compression. |
 | **Which fake types** | Break the score down by the 4 deepfake methods in the data | On the **subtlest** fake type (NeuralTextures), the plain CNN was **best**. The frequency-only model did best on the **crudest** fakes — the *opposite* of what the theory predicts. |
-| **The "frequency dial"** | Our model has a learnable knob balancing frequency vs. ordinary features | The knob **never moved** from its 50/50 start. The model saw no reason to lean on frequency. |
-| **Spectrum analysis** | Is there *any* real real-vs-fake difference in the frequency domain? | Yes — but **tiny** (a small statistical effect), and heavy compression barely dents it. So frequency doesn't fail because "compression destroys the signal" — it fails because the signal is **weak and the ordinary CNN already picks it up.** |
+| **The "frequency dial"** | Our model has a learnable knob balancing frequency vs. ordinary features | The knob **never moved** from its 50/50 start — **but** (added 2026-09-04) we found the training setup was accidentally nudging that knob back toward 50/50 on every step regardless of what it "wanted" to do (a technical bug: a setting called weight decay, meant for other parts of the model, was leaking onto this knob too). Fixed in code; needs a re-run to confirm the "no reason to lean on frequency" reading survives once the bug is gone. Flagging honestly rather than overselling it. |
+| **Spectrum analysis** | Is there *any* real real-vs-fake difference in the frequency domain? | Yes — but **tiny** (a small statistical effect), and heavy compression barely dents it. So frequency doesn't fail because "compression destroys the signal" — it fails because the signal is **weak and adds little on top of what the ordinary CNN already predicts.** |
 
-**The refined takeaway:** a real but faint frequency fingerprint exists; it's
-compression-resistant; and an ordinary spatial CNN already captures whatever
-usefulness it has. A dedicated frequency pathway adds nothing and can hurt
-generalisation to other datasets.
+**The refined takeaway (tightened 2026-09-04):** a real but faint frequency
+fingerprint exists; it's compression-resistant; and it has **low incremental
+predictive value** on top of an ordinary spatial CNN — meaning it doesn't move the
+accuracy needle, not (yet) that the CNN literally "sees" the same thing internally;
+that stronger claim needs one more check we haven't run. A dedicated frequency
+pathway adds nothing measurable and can hurt generalisation to other datasets.
 
 ## 5. The base paper, the recent target, and where to find them
 
@@ -121,17 +123,21 @@ see §7/§8) that tests its headline claim directly: that its frequency features
 > Frequency Debiasing"** — Hossein Kashiani, Niloufar Alipour Talemi, Fatemeh
 > Afghah. **CVPR 2025**, pp. 8775–8785. arXiv:2509.22412.
 
-**Why this is the right recent paper:** five years after F3-Net, this is the most
-current major work in frequency-domain face-forgery detection. It names a new
-problem — **"spectral bias"**: detectors that over-rely on specific frequency bands
-generalise *worse* to unseen forgeries — and proposes a training-time fix
-(augmentation + consistency regularisation) rather than abandoning frequency
-modelling. In plain terms: **even the field's newest paper agrees that leaning on
-frequency information is risky if you don't correct for it.** That's independent
-support, from a completely different research group, for exactly the scepticism our
-study is built on. We cite and position against it rather than fully reproducing
-its (heavier) training method — but we borrow its diagnostic idea cheaply: our
-existing frequency-band analysis (`results/analysis/spectra/`) can directly check
+**Why this is the right recent paper — a CONTRAST, not an ally (corrected
+2026-09-04):** five years after F3-Net, this is the most current major work in
+frequency-domain face-forgery detection. It names a new problem — **"spectral
+bias"**: detectors that over-rely on specific frequency bands generalise *worse* to
+unseen forgeries — and proposes a training-time fix (augmentation + consistency
+regularisation) so the model can keep using frequency safely. **This is not the
+same conclusion as ours.** FreqDebias's position is "frequency helps, if you
+correct for its failure mode"; our (still provisional) position is "a simple,
+matched-backbone frequency branch adds nothing, with no special machinery." The
+useful framing: FreqDebias's existence and complexity is itself evidence that
+*naive* frequency modelling (like F3-Net's FAD, like our own branch) doesn't just
+work — real engineering was needed to make theirs pay off. We cite and position
+against it rather than fully reproducing its (heavier) training method — but we
+borrow its diagnostic idea cheaply: our existing frequency-band analysis
+(`results/analysis/spectra/`) can directly check
 whether *our* frequency branch shows the same "spectral bias" they describe.
 
 Antecedents (the older foundation both F3-Net and FreqDebias build on) and the full

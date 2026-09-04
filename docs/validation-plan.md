@@ -26,6 +26,40 @@ tests against our own frequency branch. Details: `docs/related-work.md`.
 | Status | 🟡 c23 done (2 matched anchors, 3 seeds, frequency ≈ 0 gain). Need c40, raw, +2 seeds. |
 | Cost | c40 run ≈ 6 h; raw run ≈ 6 h; +2 seeds on 6 configs ≈ 6 h. |
 
+## C1b — Late-fusion complementarity test (added 2026-09-04, external review)
+
+The end-to-end gated branch could fail to help for reasons unrelated to whether
+frequency carries *any* independent signal — e.g. the optimisation confound in C2.
+This test is architecture-agnostic: it asks the question in the cleanest possible
+way, sidestepping the gate entirely.
+
+| | |
+|---|---|
+| Experiment | Using the **already-trained** `baseline_spatial` and `frequency_only` checkpoints (no retraining): get each model's predicted score on val+test. Fit a simple logistic regression (or a single learned scalar) combining the two score vectors on val, evaluate the combined score on test. Compare combined AUC to `baseline_spatial` alone. |
+| Data | none new — existing checkpoints + existing test split. |
+| Seeds | all 3 existing seeds. |
+| Confirms low incremental value if | combined AUC ≈ `baseline_spatial` alone (frequency-only's ~0.70 AUC adds nothing even in the most favourable, unconstrained combination). |
+| Falsified if | logistic-regression fusion beats `baseline_spatial` by a real margin — would mean frequency *does* carry complementary signal and our end-to-end architecture (not the concept) is the problem. |
+| Status | ⬜ not started — **top priority, do first**: zero new training, ~30 min of scripting, runs on CPU. |
+| Why it matters | Much stronger evidence for "low incremental predictive value" than the gated branch alone, because it removes every confound in C2 (weight decay, gate optimisation, architecture) — just two independently-trained models' scores, combined the simplest possible way. |
+
+## C1c — Parameter-matched capacity control (added 2026-09-04, external review)
+
+Addresses a real confound: if `full` (ResNet-18 + frequency branch) doesn't beat
+`baseline_spatial` (ResNet-18 alone), is that because frequency specifically doesn't
+help, or because *any* second branch/fusion mechanism doesn't help once the task is
+near ceiling on FF++ c23 (~0.995+ AUC everywhere)?
+
+| | |
+|---|---|
+| Experiment | New config: take the frequency branch's exact architecture (mask analog → conv blocks → GAP → proj) and feed it a **second RGB view** instead of DCT coefficients (same parameter count, same fusion mechanism, only the input domain changes). Compare `baseline_spatial` vs this `full_dualspatial` vs `full`. |
+| Data | FF++ c23 (have). |
+| Seeds | 3. |
+| Confirms if | `full_dualspatial` ALSO doesn't beat `baseline_spatial` — rules out "any second branch helps regardless of domain" and isolates the null result to frequency specifically (or to the near-ceiling task, which then generalises the finding). |
+| Falsified if | `full_dualspatial` beats `baseline_spatial` while `full` (frequency) does not — would mean capacity/second-view helps but frequency-as-a-domain specifically doesn't; still a fine result, just a different one. |
+| Status | ⬜ not started — needs a small new config in `src/config.py` + `src/models/`, then 3 training runs. |
+| Cost | ~30 min engineering + 3 × ~15 min training ≈ 1.5 h. |
+
 ## C2 — The learnable fusion gate never engages
 
 | | |
@@ -35,8 +69,30 @@ tests against our own frequency branch. Details: `docs/related-work.md`.
 | Seeds | 3 done → 5 with the extended runs. |
 | Confirms if | α stays within ~0.01 of 0.5 across all configs/seeds AND frozen-gate AUC ≈ learned-gate AUC. |
 | Falsified if | α drifts systematically (e.g. → >0.6 or <0.4) or frozen-gate hurts AUC. |
-| Status | ✅ readout done (α = 0.496 ± 0.001). ⬜ frozen-gate control. |
+| Status | ✅ readout done (α = 0.496 ± 0.001). ⬜ frozen-gate control. ⚠️ **CONFOUND FOUND 2026-09-04, must resolve before trusting this result** — see below. |
 | Cost | frozen-gate control ≈ 30 min × 3 seeds. |
+
+**⚠️ Confound identified (external review + code check, 2026-09-04):** `alpha_logit`
+(`src/models/detector.py:118`, `nn.Parameter(torch.zeros(()))`) is swept into the
+single AdamW param group in `src/train.py` (`weight_decay=0.05`, applied uniformly,
+no exclusion for scalars/biases/gates — standard recipes exclude these). Decoupled
+weight decay pulls `alpha_logit` toward 0 (α→0.5) **every step, regardless of the
+task gradient**. α sitting at *exactly* 0.496–0.497 (not drifting toward 1, which
+you'd expect if the model were free to favor the near-ceiling spatial branch) is
+consistent with this decay pull dominating a weak-but-real task gradient — i.e. the
+"gate never engages" result may currently be a training artifact, not evidence.
+
+**Required before this claim is used in the paper (cheap, ~30–40 min, do before
+anything else next session):**
+1. Re-run 1 seed each of `full` and `no_mask` with `alpha_logit` in a **separate
+   param group with `weight_decay=0`** (two-group AdamW — standard fix). If α still
+   sits at 0.5, the "no engagement" claim survives and gets *stronger* (ruled out
+   the artifact). If α moves, the original claim is wrong and needs to be redone
+   properly across all gated configs/seeds with the fixed optimizer — re-running the
+   in-domain table with this fix becomes a Tier-1 item, not optional.
+2. (Cheaper first check, no retrain) Load a trained checkpoint, run one forward +
+   backward pass on a batch, print `alpha_logit.grad` — confirms gradient reaches it
+   at all (rules out a detach/graph bug, distinct from the decay-pull hypothesis).
 
 ## C3 — Per-manipulation inversion: frequency helps on crude forgeries, not subtle ones
 
@@ -50,7 +106,16 @@ tests against our own frequency branch. Details: `docs/related-work.md`.
 | Status | ✅ FF++ 4-method, 3 seeds. 🟡 add FaceShifter + a crudeness quantification. |
 | Cost | ≈ 30 min (inference only) + FaceShifter extraction ≈ 1 h. |
 
-## C4 — "Redundant, not fragile": the spectral signal survives compression but is weak and already captured by the spatial CNN
+## C4 — Low incremental predictive value, not fragility: the spectral signal survives compression but adds little beyond the spatial CNN
+
+**Wording note (external review, 2026-09-04):** say **"low incremental predictive
+value beyond the spatial model"** — supported directly by `spatial ≈ hybrid` (C1)
+and the late-fusion test (C1b), no extra assumptions needed. Do **not** say "the
+spatial CNN already captures/encodes the same information" — that's a
+*representational* claim (same internal features), which needs the CKA result
+below to earn, not just matching predictive accuracy. Keep these two claims
+separate in the writeup; only promote to the stronger wording once CKA is run and
+confirms high spatial/frequency feature alignment.
 
 | | |
 |---|---|
@@ -106,7 +171,7 @@ tests against our own frequency branch. Details: `docs/related-work.md`.
 | Data | FF++ c40. |
 | Seeds | 3. |
 | Confirms the paper's spine if | `f3net` − `xception` at c40 is not significantly positive (CI includes 0). |
-| "Reverse" outcome | if F3-Net *does* win at c40, the paper reframes to "we reproduce the c40 gain but show it's the only regime it exists and it doesn't transfer" — still publishable. |
+| Outcome tree (external review, 2026-09-04) | **(a) no c40 gain** → "the classic compression-robustness motivation does not survive matched modern controls" (strongest version of our current claim). **(b) c40 gain, and it survives to C6 cross-dataset** → "frequency has a narrow, compression-specific utility" (conditional-value framing, still a fine paper). **(c) c40 gain but C6 cross-dataset gets WORSE for the frequency model** → "frequency trades corruption robustness for domain robustness" — a genuinely interesting result, arguably the most interesting of the three, and one the current plan already collects the data to detect (C7 + C6 together). |
 | Status | ⬜ not started — **the pivotal run.** |
 | Cost | ≈ 6 h (download + extract + 9 training runs). |
 
