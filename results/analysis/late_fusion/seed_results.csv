@@ -1,4 +1,4 @@
-seed,spatial_alone_auc,freq_alone_auc,logreg_fusion_auc,logreg_delta_vs_spatial,avg_fusion_auc,avg_delta_vs_spatial,logreg_coef_spatial,logreg_coef_freq
-0,0.9968,0.6962,0.9968,0.0000,0.9965,-0.0003,8.80977548025872,0.8713247602554277
-1,0.9927,0.7116,0.9927,-0.0000,0.9898,-0.0028,9.436929884812624,0.1837233039734918
-2,0.9951,0.6943,0.9951,-0.0000,0.9943,-0.0008,9.376030349040315,0.22249998959269296
+spatial_run,freq_run,seed,spatial_alone_auc,freq_alone_auc,logreg_fusion_auc,logreg_delta_vs_spatial,logreg_unreg_fusion_auc,logreg_unreg_delta_vs_spatial,avg_fusion_auc,avg_delta_vs_spatial,logreg_coef_spatial,logreg_coef_freq
+ffpp_baseline_spatial_seed0,ffpp_frequency_only_seed0,0,0.9968,0.6962,0.9968,0.0,0.9969,0.0,0.9965,-0.0003,8.8098,0.8713
+ffpp_baseline_spatial_seed1,ffpp_frequency_only_seed1,1,0.9927,0.7116,0.9927,-0.0,0.9927,0.0,0.9898,-0.0028,9.4369,0.1837
+ffpp_baseline_spatial_seed2,ffpp_frequency_only_seed2,2,0.9951,0.6943,0.9951,-0.0,0.9951,0.0,0.9943,-0.0008,9.376,0.2225

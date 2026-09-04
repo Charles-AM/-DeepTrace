@@ -13,11 +13,19 @@ possible way.
 
 **Result, 3 seeds:** logreg-fusion AUC is identical to spatial-alone AUC to 4
 decimal places on every seed (Δ = 0.0000, −0.0000, −0.0000), despite the fitted
-frequency coefficient being nonzero and positive every time (not driven all the way
-to zero, so this isn't just regularisation hiding the effect — worth a follow-up
-check with an unregularised fit before final write-up). The naive 50/50 average is
+frequency coefficient being nonzero and positive every time. **Checked and closed
+(2026-09-04):** re-fit with an effectively unregularised logistic regression
+(`C=1e6`) gives the same result (0.9969/0.9927/0.9951 vs 0.9968/0.9927/0.9951) —
+default L2 regularisation was not hiding the effect. The naive 50/50 average is
 consistently slightly *worse* than spatial alone. **Cleanest available evidence for
-"low incremental predictive value"** — no confounds from the gated architecture.
+"low incremental predictive value"** — no confounds from the gated architecture,
+and now no confound from the combiner's regularisation either.
+
+**Provenance:** `seed_results.csv` (both this file and `cka/seed_results.csv`
+below) are genuine `src.late_fusion` / `src.cka` output, re-run and re-downloaded
+from Kaggle on 2026-09-04 specifically to replace an earlier hand-transcription —
+bit-for-bit identical to the transcribed numbers, confirming both scripts are
+deterministic and the results reproducible.
 
 ## `efficiency/params_flops_latency.csv` — C8, no retraining
 
