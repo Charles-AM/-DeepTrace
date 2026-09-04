@@ -1,0 +1,5 @@
+run,perturbation,score
+ffpp_baseline_spatial_seed1,jpeg,0.8329644522898836
+ffpp_f3net_seed1,jpeg,0.8488146369892247
+ffpp_full_seed1,jpeg,0.8377341879538928
+ffpp_xception_seed1,jpeg,0.8446635832714956
