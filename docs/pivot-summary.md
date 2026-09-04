@@ -1,5 +1,31 @@
 # DeepTrace — the pivot, in plain language (2026-09-03)
 
+## 0. The framing we're using (tightened 2026-09-03)
+
+**Premise (conservative — defensible):**
+> Practical deepfake detection systems must balance detection performance against
+> computational cost and inference latency, while remaining robust to compression
+> and other post-processing commonly encountered in real-world media. One
+> architectural choice is whether a conventional spatial CNN benefits sufficiently
+> from an explicit frequency-domain branch to justify its additional computational
+> cost.
+
+**Central research question:**
+> Under constrained inference budgets and increasing levels of video/image
+> compression, does adding an explicit frequency-domain branch to a spatial CNN
+> provide enough robustness improvement to justify its computational overhead?
+
+This is a **trade-off study**, not a "we built a better detector" paper and not a
+"frequency is useless" debunking. Whatever the c40 result is, we get a clean answer
+(e.g. "worth it above compression level X, not below"). The negative findings
+(F3-Net's c23 advantage doesn't hold on a matched backbone; the fusion gate never
+engages; the spectral signal is redundant not fragile) are **supporting evidence**
+for the trade-off answer, not standalone claims.
+
+**Do NOT claim** knowledge of how proprietary platform detectors are architected or
+deployed — the literature establishes that latency/compute/compression are
+important *conditions*, not that we know Meta's stack.
+
 ## 1. What we set out to do
 
 Build a deepfake detector that works by **frequency analysis**. Think of it like a
@@ -144,15 +170,22 @@ non-consensual intimate imagery (most real-world deepfake harm), video/voice fra
 verification bypass, and election/disinformation. Detectors are the defensive
 layer; this paper makes them cheaper and better-targeted.
 
-**Draft application paragraph:**
+**Draft application paragraph (conservative):**
 
-> Deployed deepfake detectors operate under tight latency and compute budgets while
-> processing heavily recompressed media at scale. A recurring design choice is
-> whether to augment a spatial CNN with an explicit frequency-domain branch. We show
-> that under matched conditions this choice adds computational cost without accuracy
-> benefit — in-domain, per-manipulation, under compression, or cross-dataset —
-> allowing practitioners to allocate their budget elsewhere and directing research
-> attention toward representations that generalise.
+> Practical deepfake detection systems balance detection performance against
+> computational cost and inference latency while remaining robust to compression and
+> post-processing common in real-world media. A recurring architectural choice is
+> whether a spatial CNN benefits enough from an explicit frequency-domain branch to
+> justify its overhead. We study this trade-off under matched training and
+> increasing compression, and find the frequency branch adds cost without a
+> commensurate robustness or accuracy gain across the regimes we test — evidence
+> that, for this class of face-forgery detection, budget is better spent on the
+> spatial model, data, and augmentation.
+
+**Related design pattern (active — verify authors/venues before citing):** dual-domain /
+frequency-aware detectors combining spatial features with DCT/wavelet/frequency
+representations — e.g. TSFF-Net, WGN, DSTF-Net, FreqMamba, hybrid spatial-frequency
+EfficientNet. Establishes the design choice is current, not a 2020 relic.
 
 ## 8. What's left before writing the paper
 

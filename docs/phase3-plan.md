@@ -90,6 +90,28 @@ figures, Tier 3. A *proper* spectral figure now exists; a c40 spectra comparison
    `docs/related-work.md`, draft LaTeX (intro → related work → controlled protocol →
    results → analysis (#5–#8) → limitations → conclusion).
 
+## Framing — trade-off study (tightened 2026-09-03)
+
+**Central research question:** *Under constrained inference budgets and increasing
+levels of video/image compression, does adding an explicit frequency-domain branch
+to a spatial CNN provide enough robustness improvement to justify its computational
+overhead?*
+
+Not "we built a better detector", not "frequency is useless". A **trade-off study**
+of a real architectural decision — the intersection of C5 (compression robustness) +
+C7 (c40) + C8 (compute cost). Accommodates any c40 outcome ("worth it above
+compression X, not below" is still a clean result). The negative findings (C1–C4)
+are supporting evidence, not standalone claims.
+
+**Premise (conservative):** practical detectors balance performance vs compute /
+latency while staying robust to compression and post-processing; the design choice
+is whether a spatial CNN gains enough from a frequency branch to justify its cost.
+**Do not** assert knowledge of proprietary platform architectures/workloads — the
+literature establishes these as important *conditions*, nothing more.
+
+**Design pattern is current** (cite to show it's not a 2020 relic — verify first):
+TSFF-Net, WGN, DSTF-Net, FreqMamba, hybrid spatial-frequency EfficientNet.
+
 ## Paper positioning & the constructive turn (decided 2026-09-03)
 
 **Why "this is already known" does not sink it:** prior critiques of frequency
