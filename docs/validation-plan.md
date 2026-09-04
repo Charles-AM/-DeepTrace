@@ -62,6 +62,18 @@ tests against our own frequency branch. Details: `docs/related-work.md`.
 | Status | 🟡 c23 spectra done (d ≈ 0.15, JPEG-robust). ⬜ c40/raw spectra, CKA, band-ablation. |
 | Cost | spectra ≈ 5 min/condition; CKA script ≈ 1 h to write + 20 min run; band-ablation ≈ 1 h. |
 
+## C4b — "Spectral bias" diagnostic (added 2026-09-04, engages FreqDebias directly)
+
+| | |
+|---|---|
+| Experiment | On `frequency_only` and `full`'s frequency branch (existing checkpoints, no retraining): zero each radial DCT band **one at a time** at test time, measure the AUC drop per band → a per-band importance profile. Once C6's Celeb-DF/DFDC crops exist: check whether the band the model relies on most in-domain also predicts the cross-dataset AUC drop. |
+| Data | FF++ c23 (have) for the in-domain profile; Celeb-DF/DFDC (from C6) for the correlation check — no separate acquisition. |
+| Confirms FreqDebias's "spectral bias" in our model if | the AUC-drop-per-band curve is sharply peaked on a narrow range (over-reliance on one band) AND that band's importance correlates with worse cross-dataset transfer. |
+| Falsified if | importance is spread evenly across bands, or the most-relied-on band is *not* the one associated with the cross-dataset drop. |
+| Status | ⬜ not started. |
+| Cost | ~1–2 h, inference-only, reuses `src/spectra.py` band machinery. |
+| Why it matters | Without this, citing FreqDebias is decorative. This makes the connection substantive — same vocabulary, our data, no need to reproduce their training pipeline. |
+
 ## C5 — No frequency advantage under real-world perturbation
 
 | | |
