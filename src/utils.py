@@ -8,7 +8,10 @@ import random
 import numpy as np
 import torch
 
-__all__ = ["seed_everything", "get_device", "AverageMeter", "count_parameters"]
+__all__ = [
+    "seed_everything", "get_device", "AverageMeter", "count_parameters",
+    "no_decay_param_groups",
+]
 
 
 def seed_everything(seed: int) -> None:
@@ -54,3 +57,22 @@ def count_parameters(module: torch.nn.Module, trainable_only: bool = True) -> in
     return sum(
         p.numel() for p in module.parameters() if p.requires_grad or not trainable_only
     )
+
+
+def no_decay_param_groups(module: torch.nn.Module, weight_decay: float) -> list[dict]:
+    """Split parameters into a decayed group (conv/linear weights) and a
+    zero-weight-decay group (biases, norm params, and any 1-D/scalar parameter such
+    as a learnable fusion gate). AdamW's decoupled weight decay otherwise pulls a
+    scalar gate toward 0 every step regardless of its task gradient — a real bug we
+    hit (``alpha_logit`` sitting at exactly sigmoid(0)=0.5 across every seed/config
+    turned out to be consistent with weight decay dominating a weak task signal,
+    not necessarily the model "choosing" not to use the frequency branch)."""
+    decay, no_decay = [], []
+    for p in module.parameters():
+        if not p.requires_grad:
+            continue
+        (no_decay if p.ndim <= 1 else decay).append(p)
+    return [
+        {"params": decay, "weight_decay": weight_decay},
+        {"params": no_decay, "weight_decay": 0.0},
+    ]

@@ -23,7 +23,7 @@ from .data import build_dataloaders
 from .engine import evaluate, train_one_epoch
 from .losses import FocalLoss
 from .metrics import METRIC_KEYS
-from .utils import count_parameters, get_device, seed_everything
+from .utils import count_parameters, get_device, no_decay_param_groups, seed_everything
 
 
 def parse_args(argv=None) -> argparse.Namespace:
@@ -85,9 +85,8 @@ def main(argv=None) -> dict:
     ).to(device)
     criterion = FocalLoss(gamma=args.focal_gamma, alpha=float(min(max(alpha, 1e-3), 1 - 1e-3)))
     optimizer = torch.optim.AdamW(
-        (p for p in model.parameters() if p.requires_grad),
+        no_decay_param_groups(model, args.weight_decay),
         lr=args.lr,
-        weight_decay=args.weight_decay,
     )
     scheduler = CosineAnnealingLR(optimizer, T_max=args.epochs)
     scaler = torch.cuda.amp.GradScaler() if (args.amp and device.type == "cuda") else None
