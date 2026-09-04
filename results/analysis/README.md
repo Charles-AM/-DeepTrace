@@ -35,6 +35,27 @@ alone decide whether it's worth it. Our separate-branch design carries real cost
 "not worth it" result specific to that architectural choice, not a blanket property
 of "adding frequency."
 
+## `cka/seed_results.csv` — C4, representation-level check (2026-09-04)
+
+`src/cka.py`: linear CKA between the spatial-branch and frequency-branch features
+(pre-fusion, `full` config) vs a random-projection null baseline, 3 seeds.
+
+**Result: CKA(spatial, frequency) ≈ CKA(spatial, random) on every seed** (0.0051–
+0.0077 vs 0.0055–0.0058 — indistinguishable from the no-relationship floor). This
+**falsifies** the "the spatial CNN already encodes the same information as
+frequency" (redundancy) hypothesis exactly as pre-registered in this file's C4
+entry ("falsified if... CKA is low"). Correcting the theory, not hiding the result:
+
+**The two branches learn genuinely distinct (non-redundant) representations — the
+frequency branch's information is not duplicated by the spatial branch. It's
+simply not discriminative for this task.** `frequency_only` alone gets 0.70 AUC
+(some real signal, mostly noise relative to spatial's ~0.997), and that signal is
+orthogonal enough to spatial's that combining them (C1, C1b) adds nothing not
+because it's redundant, but because it isn't useful. This is a more precise and
+more interesting mechanism than "redundant" — replace that word wherever it
+appears in the writeup with "non-discriminative" / "adds nothing despite being
+representationally distinct."
+
 ## `fusion_alpha.csv` — learned gated-fusion weight
 
 `alpha_spatial = sigmoid(alpha_logit)`, the weight on the spatial branch

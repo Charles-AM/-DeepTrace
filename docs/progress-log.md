@@ -1,5 +1,36 @@
 # DeepTrace — Progress Log
 
+## 2026-09-04 — C1b, C8, gate confound resolved, CKA falsifies "redundant"
+
+External review (technically substantive, not generic) worked through point by
+point. One real bug found and fixed: `alpha_logit` (gated-fusion weight) was
+getting AdamW weight decay applied directly, no exclusion for scalars/gates —
+retrained `full`/`no_mask` seed0 with the fix (`utils.no_decay_param_groups`,
+commit `7bb4e11`), α landed at 0.4947/0.4941, same range as the original biased
+runs (0.4944–0.4964) — **weight decay was not the driver, the "gate never
+engages" finding survives its strongest objection.**
+
+**C1b (late fusion, `src/late_fusion.py`):** logistic-regression fusion of
+`baseline_spatial` + `frequency_only` scores = spatial-alone AUC to 4 decimal
+places, all 3 seeds. Cleanest available evidence for low incremental predictive
+value — no gate, no architecture, just two independently-trained models' scores.
+
+**C8 (efficiency, `fvcore`):** our separate frequency branch costs the ResNet-18
+baseline +31% GFLOPs / +44% latency for zero benefit. F3-Net's FAD (channel-
+stacking into the same Xception backbone, no separate branch) costs only +2.7%/+3%
+— the compute-cost side of the trade-off is architecture-specific, not a blanket
+property of "adding frequency."
+
+**C4 CKA (`src/cka.py`) — falsifies the "redundant" framing.** CKA(spatial,
+frequency) ≈ CKA(spatial, random) on all 3 seeds (0.0051–0.0077 vs 0.0055–0.0058) —
+essentially zero representational alignment. This was a pre-registered falsifiable
+claim ("CKA low ⇒ branches encode different things") and it was falsified as
+written: the frequency branch is **not** redundant with the spatial branch, it
+learns something genuinely distinct — that distinct information is simply
+non-discriminative for this task. Retiring "redundant" from the writeup in favour
+of "representationally distinct but non-discriminative" — a more precise and more
+interesting mechanism than the placeholder used through 2026-09-03.
+
 ## 2026-09-03 — Mechanistic analysis (fusion gate, per-manipulation, spectra)
 
 No retraining — c23 checkpoints + crops only. Outputs: `results/analysis/`.

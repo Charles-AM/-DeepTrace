@@ -76,14 +76,24 @@ F3-Net's headline claim is about **c40**. We have not tested it.
   sev4). Proposed `full` reliably ~2 AUC below the spatial baselines.
 - ✅ **#5 Spectral analysis** (`src/spectra.py`, rewritten). A real but small
   (Cohen's d ≈ 0.15) real-vs-fake DCT gap; JPEG-q30 attenuates it only ~15–25 %.
-  Reframes the thesis: signal is *marginal and redundant*, not destroyed by
-  compression.
+  Signal is marginal and compression-robust, not destroyed by compression.
 - ✅ **#6 Fusion gate α** — 0.496 ± 0.001 every config/seed; never left init.
+  Checked for a weight-decay optimisation confound (2026-09-04) and ruled it out —
+  finding survives.
 - ✅ **Per-manipulation breakdown** (3 seeds) — spatial Xception best on all 4 FF++
   methods incl. NeuralTextures; `frequency_only` best on Deepfakes / worst on NT.
+- ✅ **#7 CKA** (2026-09-04) — CKA(spatial, freq) ≈ CKA(spatial, random) on all 3
+  seeds. **Falsifies "redundant"**: the frequency branch is representationally
+  *distinct* from the spatial branch, not overlapping with it — it's simply
+  non-discriminative for this task, not duplicated information. This is the
+  correct mechanism going forward; retire "redundant" from the writeup.
+- ✅ **C1b late fusion, C8 efficiency** (2026-09-04) — logreg-fusion AUC = spatial
+  alone to 4dp, 3 seeds (cleanest low-incremental-value evidence, no gate
+  confound); our separate-branch design costs +44% latency for zero benefit,
+  F3-Net's channel-stacking FAD costs only +3% (cost is architecture-specific).
 
 Still open: #2 (c40 training — now the pivotal one), #3 (cross-dataset seeds 1&2),
-#4 (matched-backbone grid), #7 CKA, #8 band-ablation, #9 leave-one-out, #10 mask
+#4 (matched-backbone grid), #8 band-ablation, #9 leave-one-out, #10 mask
 figures, Tier 3. A *proper* spectral figure now exists; a c40 spectra comparison
 (needs c40 crops) would still add value.
 
@@ -104,7 +114,7 @@ figures, Tier 3. A *proper* spectral figure now exists; a c40 spectra comparison
 | # | Experiment | Why |
 |---|---|---|
 | 6 | **Report the learned fusion gate α** (already logged in checkpoints). If α → ~1, the hybrid itself down-weights the frequency branch to nothing. | free — read from `best.pt` |
-| 7 | **CKA(spatial features, frequency features)** on the test set. High alignment ⇒ the frequency branch is redundant, not complementary. | ~1 h, `src/cka.py` |
+| 7 | ✅ DONE 2026-09-04 — **CKA(spatial features, frequency features)**. Result: CKA ≈ random-baseline on all 3 seeds — branches are representationally *distinct*, not redundant; frequency is simply non-discriminative, not duplicated. | `src/cka.py` |
 | 8 | **Test-time frequency-band ablation of a trained spatial model** — zero radial DCT bands of the input, measure AUC drop. Shows the spatial CNN already uses the "forensic" bands. | ~1 h |
 | 9 | **Cross-manipulation leave-one-out** within FF++ (train on 3 methods, test on the 4th). Does frequency help the hardest generalisation split? | ~2 h, re-split existing crops |
 | 10 | **Mask-interpretability figures** across seeds/datasets — show the learned mask is inconsistent and doesn't transfer. | ~10 min, `src.visualize` |
@@ -172,12 +182,17 @@ are about **GAN-generated whole images**. Our target is **face-swap deepfake vid
 (FF++) — a different problem, and the frequency-for-face-forgery line (F3-Net, SPSL,
 + 2024 follow-ups) has not had a controlled mechanistic re-evaluation.
 
-**The three findings that are ours, not folklore:** (1) the learnable fusion gate
-never engages (α = 0.496 ± 0.001, all seeds); (2) per-manipulation inversion —
-frequency-only best on the *crudest* forgery, worst on the *subtlest*; (3)
-"redundant, not fragile" — the spectral signal survives JPEG (d ≈ 0.15, barely
-attenuated), so it fails from redundancy, not brittleness (a distinct claim from the
-prior work).
+**The four findings that are ours, not folklore:** (1) the learnable fusion gate
+never engages (α = 0.496 ± 0.001, all seeds; checked for a weight-decay confound
+and it survives); (2) per-manipulation inversion — frequency-only best on the
+*crudest* forgery, worst on the *subtlest*; (3) "non-discriminative, not fragile" —
+the spectral signal survives JPEG (d ≈ 0.15, barely attenuated), so it fails from
+being unhelpful, not from being destroyed by compression; (4) **CKA shows the
+frequency branch is representationally distinct from the spatial branch, not
+redundant with it** — it fails because that distinct information isn't useful for
+the task, not because the spatial CNN already encodes it. (4) directly corrects an
+earlier, weaker "redundant" framing — a distinct claim from the prior work either
+way.
 
 **Constructive turn — chosen:** *reproducibility framing as the spine* ("F3-Net's
 c40 gains do not replicate under matched training") *+ efficiency angle as a

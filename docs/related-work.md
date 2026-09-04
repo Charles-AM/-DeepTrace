@@ -119,8 +119,9 @@ Both above are *on-task* (face-forgery video, our exact benchmark suite) and
 *positive* (a working spatial method beating SOTA), which makes them stronger
 support than a purely critical paper. Together with **FreqDebias** (recent target,
 above) they give three independent mechanisms for the same directional finding:
-we say the frequency signal is real but small and redundant with what a spatial CNN
-already learns; CADDM says the real generalisation killer is identity leakage,
+we say the frequency signal is real but small and, per CKA, representationally
+*distinct* from (not redundant with) what a spatial CNN learns — it's simply not
+discriminative; CADDM says the real generalisation killer is identity leakage,
 unrelated to frequency; FreqDebias says frequency reliance itself causes "spectral
 bias." Three groups, three mechanisms, one direction — worth a paragraph in the
 discussion section.

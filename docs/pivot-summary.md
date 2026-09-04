@@ -19,8 +19,10 @@ This is a **trade-off study**, not a "we built a better detector" paper and not 
 "frequency is useless" debunking. Whatever the c40 result is, we get a clean answer
 (e.g. "worth it above compression level X, not below"). The negative findings
 (F3-Net's c23 advantage doesn't hold on a matched backbone; the fusion gate never
-engages; the spectral signal is redundant not fragile) are **supporting evidence**
-for the trade-off answer, not standalone claims.
+engages; the spectral signal survives compression but is non-discriminative — CKA
+shows it's representationally *distinct* from the spatial branch, not redundant
+with it, just not useful) are **supporting evidence** for the trade-off answer, not
+standalone claims.
 
 **Do NOT claim** knowledge of how proprietary platform detectors are architected or
 deployed — the literature establishes that latency/compute/compression are

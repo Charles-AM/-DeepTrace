@@ -112,26 +112,30 @@ ruled it out" — it's the strongest form of this kind of claim).
 | Status | ✅ FF++ 4-method, 3 seeds. 🟡 add FaceShifter + a crudeness quantification. |
 | Cost | ≈ 30 min (inference only) + FaceShifter extraction ≈ 1 h. |
 
-## C4 — Low incremental predictive value, not fragility: the spectral signal survives compression but adds little beyond the spatial CNN
+## C4 — Non-discriminative, not redundant, not fragile: the frequency branch learns a genuinely distinct representation that just isn't useful for this task
 
-**Wording note (external review, 2026-09-04):** say **"low incremental predictive
-value beyond the spatial model"** — supported directly by `spatial ≈ hybrid` (C1)
-and the late-fusion test (C1b), no extra assumptions needed. Do **not** say "the
-spatial CNN already captures/encodes the same information" — that's a
-*representational* claim (same internal features), which needs the CKA result
-below to earn, not just matching predictive accuracy. Keep these two claims
-separate in the writeup; only promote to the stronger wording once CKA is run and
-confirms high spatial/frequency feature alignment.
+**RESOLVED 2026-09-04.** CKA ran and **falsified** the redundancy hypothesis this
+entry was originally set up to test (pre-registered falsification criterion: "CKA
+is low ⇒ branches encode different things" — that's what happened). Updated
+wording: do **not** say "the spatial CNN already captures/encodes the same
+information" or call the frequency branch "redundant" — CKA(spatial, freq) ≈
+CKA(spatial, random) on all 3 seeds (0.0051–0.0077 vs 0.0055–0.0058), i.e.
+statistically no representational alignment. The correct, now evidence-backed
+mechanism: **the two branches learn distinct representations; the frequency
+branch's distinct information is simply non-discriminative for this task** (not
+duplicated by the spatial branch — just not useful). `frequency_only` = 0.70 AUC is
+consistent with this: some real signal, but not enough, and not overlapping with
+what makes the spatial branch work.
 
 | | |
 |---|---|
-| Experiment | (a) `src/spectra.py` real-vs-fake DCT gap + per-coefficient t-map at c23, c40, raw, and JPEG-{90..30}. (b) **CKA** between the spatial-branch and frequency-branch features on the test set — high alignment ⇒ redundant. (c) Test-time frequency-band ablation of a trained spatial model — if zeroing the "forensic" bands drops its AUC, it was already using them. |
+| Experiment | (a) `src/spectra.py` real-vs-fake DCT gap + per-coefficient t-map at c23, c40, raw, and JPEG-{90..30}. (b) **CKA** between the spatial-branch and frequency-branch features (`src/cka.py`) — ✅ done, see above. (c) Test-time frequency-band ablation of a trained spatial model — if zeroing the "forensic" bands drops its AUC, it was already using them. |
 | Data | FF++ c23 (have), c40, raw. |
 | Seeds | spectra is dataset-level (seed only affects the split) — run on all 3 split seeds. |
-| Confirms if | gap has small effect size (\|d\| < 0.3) AND changes little c23→c40 AND CKA(spatial, freq) is high AND the spatial model already relies on the informative bands. |
-| Falsified if | the gap is large, or collapses under c40 (that would mean "fragile", not "redundant"), or CKA is low (branches encode different things). |
-| Status | 🟡 c23 spectra done (d ≈ 0.15, JPEG-robust). ⬜ c40/raw spectra, CKA, band-ablation. |
-| Cost | spectra ≈ 5 min/condition; CKA script ≈ 1 h to write + 20 min run; band-ablation ≈ 1 h. |
+| Confirms if | gap has small effect size (\|d\| < 0.3) AND changes little c23→c40 AND (CKA resolved: low, not high — see above) AND the spatial model already relies on the informative bands. |
+| Falsified/updated | ~~"CKA is low ⇒ branches encode different things"~~ — this happened; the "redundant" framing is now retired in favour of "non-discriminative." |
+| Status | 🟡 c23 spectra done (d ≈ 0.15, JPEG-robust). ✅ CKA done (3 seeds, falsifies redundancy). ⬜ c40/raw spectra, band-ablation. |
+| Cost | spectra ≈ 5 min/condition; band-ablation ≈ 1 h. |
 
 ## C4b — "Spectral bias" diagnostic (added 2026-09-04, engages FreqDebias directly)
 
