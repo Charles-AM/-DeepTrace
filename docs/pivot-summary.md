@@ -111,7 +111,50 @@ Everything is committed to the repo under `results/` (permanent, version-control
 Local backups: `~/Downloads/deeptrace_results_20260904.tar.gz` and
 `~/Downloads/analysis_final_0117.tar.gz`.
 
-## 7. What's left before writing the paper
+## 7. Real-world application (why anyone should care)
+
+This is a **"science that guides practice"** paper — it changes what people build
+and where they spend effort, not a product.
+
+**Who acts differently because of it:**
+
+- **Teams that deploy deepfake detectors** — platform moderation (Meta, TikTok,
+  YouTube), newsroom verification (Reuters, AFP), identity-verification vendors
+  (Onfido, Jumio, bank video-KYC), video-call security. They face a concrete design
+  choice: bolt a frequency-analysis branch onto the detector? It costs latency,
+  memory, complexity. Our result: on a matched backbone it is not worth it — put
+  the compute into the spatial model, data, and augmentation.
+- **At platform scale** (billions of items scanned) a frequency branch that ~doubles
+  inference FLOPs for zero accuracy gain is real money and energy. This is the
+  efficiency angle.
+- **Practitioner robustness expectations** — deployed content is always recompressed
+  on upload; someone reading F3-Net might over-trust frequency methods for
+  compressed video. Our compression results correct that.
+- **The research community** — frequency-domain deepfake detection still gets new
+  papers (2024). A rigorous "here is exactly what it buys you and where the
+  boundary is" redirects effort toward what generalises (semantic / CLIP features,
+  self-blending).
+- **Reusable methodology** — the controlled protocol (matched backbone, seeds, the
+  fusion-gate readout that shows a component "doesn't engage") is a template for
+  fairly evaluating any "add-a-branch" claim in detection.
+
+**Bigger-picture stakes (for the intro):** deepfake detection matters because of
+non-consensual intimate imagery (most real-world deepfake harm), video/voice fraud
+(2024 Arup Hong Kong case — $25M lost to a deepfake video call), identity-
+verification bypass, and election/disinformation. Detectors are the defensive
+layer; this paper makes them cheaper and better-targeted.
+
+**Draft application paragraph:**
+
+> Deployed deepfake detectors operate under tight latency and compute budgets while
+> processing heavily recompressed media at scale. A recurring design choice is
+> whether to augment a spatial CNN with an explicit frequency-domain branch. We show
+> that under matched conditions this choice adds computational cost without accuracy
+> benefit — in-domain, per-manipulation, under compression, or cross-dataset —
+> allowing practitioners to allocate their budget elsewhere and directing research
+> attention toward representations that generalise.
+
+## 8. What's left before writing the paper
 
 1. **The c40 experiment** — train *and* test at heavy compression (F3-Net's home
    turf). ~5 hours of Kaggle GPU when the quota resets. Plan in
