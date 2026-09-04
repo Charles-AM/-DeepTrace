@@ -4,6 +4,16 @@ Supersedes the Phase-2 execution plan in `docs/phase2-runbook.md` (that phase is
 done; result was negative — see `docs/progress-log.md` 2026-09-03).
 
 **Deliverable:** a controlled trade-off study.
+
+**One-sentence framing (2026-09-04, use this for the abstract opener / elevator
+pitch):** *What does frequency add?* — not "are frequencies present" (yes, trivially
+— C4), not "can a DCT classifier detect deepfakes" (yes, trivially — `frequency_only`
+= 0.70 AUC), not "is F3-Net good" (not a referendum on one paper). The question is
+whether an explicit frequency pathway adds enough predictive/robustness value beyond
+a matched spatial model to justify its cost and any generalisation penalty. Current
+best-guess answer: **much less than its presence alone would suggest** — detectable
+(C4) ≠ useful in isolation (`frequency_only` 0.70 vs spatial 0.998) ≠ complementary
+when combined (C1, pending C1b).
 **Central RQ** (tightened 2026-09-04, external review): *Under matched training
 data, backbone capacity, and inference constraints, does an explicit DCT-based
 frequency pathway provide incremental robustness beyond a spatial detector,
