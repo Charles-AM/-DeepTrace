@@ -12,13 +12,18 @@ predictive value added on top of a spatial baseline, not about whether frequency
 information is discriminative in isolation (it is — see C1 in `validation-plan.md`).
 Survives a positive OR negative c40 result.
 
-**Central claim (adopt near-verbatim, external review):** *Explicit frequency
-modelling is not intrinsically beneficial for face-forgery detection. In controlled
-FF++ experiments, spectral cues are measurable and survive compression, yet
-DCT-based frequency pathways provide little or no incremental accuracy over matched
-spatial baselines and may reduce cross-dataset generalisation. Their value, if any,
-is therefore conditional on degradation regime and must be weighed against
-additional compute and architectural complexity.*
+**Central claim (two independent review passes converged on this wording,
+2026-09-04):** *Explicit DCT-based frequency pathways provide little incremental
+predictive value beyond matched spatial detectors in FaceForensics++; any benefit
+is narrow and condition-dependent, while added computation and degraded
+cross-dataset transfer can outweigh the gain.* Full version: spectral cues are
+measurable and survive compression, yet frequency pathways add little or no
+incremental accuracy over matched spatial baselines and may reduce cross-dataset
+generalisation — value, if any, is conditional on degradation regime and must be
+weighed against compute/complexity cost. If c40 shows a real gain, this **sharpens
+rather than breaks** the claim: *"frequency helps under corruption, but not
+generally — and may trade corruption robustness for domain robustness"* (the C7
+outcome-tree case (c), possibly the most interesting result available).
 
 **Base/foundation (implemented + directly engaged):** F3-Net (ECCV 2020) — we build
 its FAD architecture and test its literal c40 claim.
