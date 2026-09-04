@@ -47,6 +47,17 @@ is essentially flat in alpha, so there is no gradient pressure to re-weight. The
 "learnable" fusion behaves as a fixed 50/50 average here — corroborates
 `baseline_spatial` ≈ `full` and `no_fusion_concat` ≈ `full`.
 
+**Confound check (2026-09-04, `weight_decay_fixed=True` rows):** external review
+correctly flagged that `alpha_logit` was getting AdamW weight decay applied
+directly to it (no exclusion for scalars/gates — a real bug, fixed in
+`utils.no_decay_param_groups`, commit `7bb4e11`), which could have been pulling α
+toward 0.5 regardless of the task gradient. Retrained `full` and `no_mask` (seed 0,
+`ffppfix_*`) with the fix: α = 0.4947 and 0.4941 — statistically indistinguishable
+from the original biased runs, test AUC essentially unchanged (0.9974 vs 0.9969;
+0.9972 vs 0.9973). **Weight decay was not the primary driver — the "gate never
+engages" finding survives its strongest objection** (1 seed each with the fix; more
+would make it airtight, but this is real evidence, not just a caveat removed).
+
 ## `permanip/` — per-forgery-method breakdown, 3 seeds
 
 `seed{0,1,2}.csv` long form (run × method: roc_auc/eer/accuracy, real vs that

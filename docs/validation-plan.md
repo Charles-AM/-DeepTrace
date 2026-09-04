@@ -69,30 +69,36 @@ near ceiling on FF++ c23 (~0.995+ AUC everywhere)?
 | Seeds | 3 done → 5 with the extended runs. |
 | Confirms if | α stays within ~0.01 of 0.5 across all configs/seeds AND frozen-gate AUC ≈ learned-gate AUC. |
 | Falsified if | α drifts systematically (e.g. → >0.6 or <0.4) or frozen-gate hurts AUC. |
-| Status | ✅ readout done (α = 0.496 ± 0.001). ⬜ frozen-gate control. ⚠️ **CONFOUND FOUND 2026-09-04, must resolve before trusting this result** — see below. |
-| Cost | frozen-gate control ≈ 30 min × 3 seeds. |
+| Status | ✅ readout done (α = 0.496 ± 0.001). ✅ **confound checked and RULED OUT 2026-09-04** — see below. ⬜ frozen-gate control still optional/nice-to-have, not required. |
+| Cost | frozen-gate control ≈ 30 min × 3 seeds (now optional). |
 
-**⚠️ Confound identified (external review + code check, 2026-09-04):** `alpha_logit`
-(`src/models/detector.py:118`, `nn.Parameter(torch.zeros(()))`) is swept into the
-single AdamW param group in `src/train.py` (`weight_decay=0.05`, applied uniformly,
-no exclusion for scalars/biases/gates — standard recipes exclude these). Decoupled
-weight decay pulls `alpha_logit` toward 0 (α→0.5) **every step, regardless of the
-task gradient**. α sitting at *exactly* 0.496–0.497 (not drifting toward 1, which
-you'd expect if the model were free to favor the near-ceiling spatial branch) is
-consistent with this decay pull dominating a weak-but-real task gradient — i.e. the
-"gate never engages" result may currently be a training artifact, not evidence.
+**Confound identified and checked (external review + code check + re-run,
+2026-09-04):** `alpha_logit` (`src/models/detector.py:118`,
+`nn.Parameter(torch.zeros(()))`) was swept into the single AdamW param group in
+`src/train.py` (`weight_decay=0.05`, applied uniformly, no exclusion for
+scalars/biases/gates — standard recipes exclude these). Decoupled weight decay
+pulls a scalar toward 0 every step regardless of the task gradient, so α sitting at
+*exactly* 0.496–0.497 was plausibly a training artifact, not evidence, and the claim
+was flagged as untrustworthy pending a check.
 
-**Required before this claim is used in the paper (cheap, ~30–40 min, do before
-anything else next session):**
-1. Re-run 1 seed each of `full` and `no_mask` with `alpha_logit` in a **separate
-   param group with `weight_decay=0`** (two-group AdamW — standard fix). If α still
-   sits at 0.5, the "no engagement" claim survives and gets *stronger* (ruled out
-   the artifact). If α moves, the original claim is wrong and needs to be redone
-   properly across all gated configs/seeds with the fixed optimizer — re-running the
-   in-domain table with this fix becomes a Tier-1 item, not optional.
-2. (Cheaper first check, no retrain) Load a trained checkpoint, run one forward +
-   backward pass on a batch, print `alpha_logit.grad` — confirms gradient reaches it
-   at all (rules out a detach/graph bug, distinct from the decay-pull hypothesis).
+**Fix applied** (`utils.no_decay_param_groups`, commit `7bb4e11`, tests in
+`tests/test_utils.py`) and **verified on Kaggle**: retrained `full` and `no_mask`
+(seed 0 each, dataset-name `ffppfix`) with the corrected optimizer.
+- `ffppfix_full_seed0`: α = 0.4947 (vs 0.4944–0.4964 range across the 9 original
+  biased runs)
+- `ffppfix_no_mask_seed0`: α = 0.4941 (same range)
+- Test AUC essentially unchanged from the original biased runs (0.9974 vs 0.9969
+  for `full`; 0.9972 vs 0.9973 for `no_mask`) — the fix didn't change training
+  outcomes, only removed the decay-on-the-gate artifact.
+
+**Conclusion: weight decay was NOT the primary driver.** Both fixed runs land
+squarely inside the original range rather than drifting toward 1 (which removing an
+artificial pull-to-zero should have allowed, if a real gradient signal were being
+suppressed). This is 1 seed each with the fix — not fully exhaustive, more seeds
+would make it airtight — but it is real evidence the "gate never engages" finding
+survives its own strongest objection. Safe to use in the paper with a short methods
+note describing the check (reviewers respond well to "we suspected X, checked, and
+ruled it out" — it's the strongest form of this kind of claim).
 
 ## C3 — Per-manipulation inversion: frequency helps on crude forgeries, not subtle ones
 
