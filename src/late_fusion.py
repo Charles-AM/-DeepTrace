@@ -37,7 +37,8 @@ def _scores(ckpt_path: Path, entries, device) -> np.ndarray:
 
 
 def run(spatial_run: str, freq_run: str, results_root: Path, dataset_name: str,
-        seed: int, image_size: int) -> dict:
+        seed: int, image_size: int, out_dir: Path | None = None) -> dict:
+    import csv
     from sklearn.linear_model import LogisticRegression
 
     device = get_device()
@@ -54,26 +55,46 @@ def run(spatial_run: str, freq_run: str, results_root: Path, dataset_name: str,
     spatial_alone = compute_metrics(y_test, s_test)["roc_auc"]
     freq_alone = compute_metrics(y_test, f_test)["roc_auc"]
 
-    clf = LogisticRegression()
-    clf.fit(np.stack([s_val, f_val], axis=1), y_val)
-    combined_score = clf.predict_proba(np.stack([s_test, f_test], axis=1))[:, 1]
-    combined = compute_metrics(y_test, combined_score)["roc_auc"]
+    # default (L2, C=1.0) fit -- and an effectively unregularised fit, since a
+    # weak-but-real coefficient could otherwise be shrunk by the default penalty
+    # the same way weight decay shrank alpha_logit (C2) -- close that gap here too.
+    Xval = np.stack([s_val, f_val], axis=1)
+    Xtest = np.stack([s_test, f_test], axis=1)
+    clf = LogisticRegression().fit(Xval, y_val)
+    combined = compute_metrics(y_test, clf.predict_proba(Xtest)[:, 1])["roc_auc"]
+    clf_unreg = LogisticRegression(C=1e6, max_iter=5000).fit(Xval, y_val)
+    combined_unreg = compute_metrics(y_test, clf_unreg.predict_proba(Xtest)[:, 1])["roc_auc"]
 
     # equal-weight average, no fitting -- a second, dumber combiner as a sanity check
     avg_score = (s_test + f_test) / 2
     avg = compute_metrics(y_test, avg_score)["roc_auc"]
 
     out = {
+        "spatial_run": spatial_run, "freq_run": freq_run, "seed": seed,
         "spatial_alone_auc": round(spatial_alone, 4),
         "freq_alone_auc": round(freq_alone, 4),
         "logreg_fusion_auc": round(combined, 4),
         "logreg_delta_vs_spatial": round(combined - spatial_alone, 4),
+        "logreg_unreg_fusion_auc": round(combined_unreg, 4),
+        "logreg_unreg_delta_vs_spatial": round(combined_unreg - spatial_alone, 4),
         "avg_fusion_auc": round(avg, 4),
         "avg_delta_vs_spatial": round(avg - spatial_alone, 4),
-        "logreg_coefs": clf.coef_[0].tolist(),
+        "logreg_coef_spatial": round(float(clf.coef_[0][0]), 4),
+        "logreg_coef_freq": round(float(clf.coef_[0][1]), 4),
     }
     for k, v in out.items():
         print(f"  {k:28s} {v}")
+
+    out_dir = Path(out_dir) if out_dir is not None else Path.cwd()
+    out_dir.mkdir(parents=True, exist_ok=True)
+    csv_path = out_dir / "late_fusion_results.csv"
+    write_header = not csv_path.exists()
+    with csv_path.open("a", newline="") as fh:
+        w = csv.DictWriter(fh, fieldnames=list(out.keys()))
+        if write_header:
+            w.writeheader()
+        w.writerow(out)
+    print(f"  appended to {csv_path}")
     return out
 
 
@@ -85,12 +106,14 @@ def parse_args(argv=None):
     p.add_argument("--dataset-name", default="ffpp")
     p.add_argument("--seed", type=int, default=0)
     p.add_argument("--image-size", type=int, default=128)
+    p.add_argument("--out-dir", default=None)
     return p.parse_args(argv)
 
 
 def main(argv=None):
     a = parse_args(argv)
-    run(a.spatial_run, a.freq_run, Path(a.results_root), a.dataset_name, a.seed, a.image_size)
+    run(a.spatial_run, a.freq_run, Path(a.results_root), a.dataset_name, a.seed, a.image_size,
+        out_dir=Path(a.out_dir) if a.out_dir else None)
 
 
 if __name__ == "__main__":

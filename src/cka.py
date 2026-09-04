@@ -15,6 +15,7 @@ not that it duplicates the spatial one).
 from __future__ import annotations
 
 import argparse
+import csv
 from pathlib import Path
 
 import numpy as np
@@ -45,7 +46,7 @@ def linear_cka(x: np.ndarray, y: np.ndarray) -> float:
 
 
 def run(run_name: str, results_root: Path, dataset_name: str, seed: int,
-        image_size: int, limit: int | None = None) -> dict:
+        image_size: int, limit: int | None = None, out_dir: Path | None = None) -> dict:
     device = get_device()
     manifest = results_root / "manifests" / f"{dataset_name}_seed{seed}_sz{image_size}.csv"
     entries = read_manifest(manifest)["test"]
@@ -68,10 +69,21 @@ def run(run_name: str, results_root: Path, dataset_name: str, seed: int,
     rng = np.random.default_rng(0)
     null = linear_cka(s, rng.standard_normal(f.shape).astype(np.float32))
 
-    out = {"run": run_name, "n": len(entries), "cka_spatial_freq": round(cka, 4),
+    out = {"run": run_name, "seed": seed, "n": len(entries), "cka_spatial_freq": round(cka, 4),
            "cka_null_baseline": round(null, 4)}
     for k, v in out.items():
         print(f"  {k:20s} {v}")
+
+    out_dir = Path(out_dir) if out_dir is not None else Path.cwd()
+    out_dir.mkdir(parents=True, exist_ok=True)
+    csv_path = out_dir / "cka_results.csv"
+    write_header = not csv_path.exists()
+    with csv_path.open("a", newline="") as fh:
+        w = csv.DictWriter(fh, fieldnames=list(out.keys()))
+        if write_header:
+            w.writeheader()
+        w.writerow(out)
+    print(f"  appended to {csv_path}")
     return out
 
 
@@ -83,12 +95,14 @@ def parse_args(argv=None):
     p.add_argument("--seed", type=int, default=0)
     p.add_argument("--image-size", type=int, default=128)
     p.add_argument("--limit", type=int, default=None)
+    p.add_argument("--out-dir", default=None)
     return p.parse_args(argv)
 
 
 def main(argv=None):
     a = parse_args(argv)
-    run(a.run, Path(a.results_root), a.dataset_name, a.seed, a.image_size, a.limit)
+    run(a.run, Path(a.results_root), a.dataset_name, a.seed, a.image_size, a.limit,
+        out_dir=Path(a.out_dir) if a.out_dir else None)
 
 
 if __name__ == "__main__":
