@@ -1,0 +1,7 @@
+run,Deepfakes,Face2Face,FaceSwap,NeuralTextures
+ffpp_baseline_spatial_seed1,0.9976,0.9935,0.9969,0.9831
+ffpp_f3net_seed1,0.9982,0.9962,0.9982,0.9907
+ffpp_frequency_only_seed1,0.8601,0.6743,0.679,0.6362
+ffpp_full_banddrop_sas_seed1,0.9965,0.9939,0.9971,0.9838
+ffpp_full_seed1,0.9963,0.9928,0.996,0.9831
+ffpp_xception_seed1,0.9986,0.9977,0.999,0.9932

@@ -52,9 +52,23 @@ spatial baselines under JPEG (and blur, noise).
 to the fine detail that carries both compression and generation artifacts.
 Robustness by ignorance, not a competitive result.
 
+## `analysis/` — mechanistic follow-ups (2026-09-03, no retraining)
+
+See `analysis/README.md`. Summary:
+- **fusion α** never moved from 0.5 init (0.496 ± 0.001, all configs/seeds) — flat
+  loss at ceiling, gate is effectively a fixed average.
+- **per-manipulation** (3 seeds): spatial Xception best on every method incl.
+  NeuralTextures; `frequency_only` best on Deepfakes / worst on NeuralTextures —
+  opposite of the frequency premise.
+- **spectra** (`src/spectra.py`, native-res, Hann-windowed, DCT t-maps): a real but
+  small (Cohen's d ≈ 0.15) real-vs-fake spectral gap exists and is largely
+  JPEG-robust (5.6 % → 4.8 % of coeffs at |t|>3). Frequency modelling fails because
+  the signal is marginal and redundant, not absent or compression-fragile.
+
 ### Not yet run (see `docs/phase3-plan.md`)
 - c40 **training** run (Xception vs F3-Net) — F3-Net's literal claim; test-time JPEG
-  here is a proxy.
+  here is a proxy. The spectra result tempers expectations: the global spectrum
+  barely changes c23→jpeg30, so any real F3-Net c40 gain is likely its *local*
+  statistics (LFS), not the global spectrum.
 - cross-dataset seeds 1 & 2 (seed 0 only so far: Celeb-DF spatial ~0.82 vs
   freq-hybrid ~0.74).
-- per-manipulation-method breakdown; spectral-gap figure; fusion-gate α readout.

@@ -1,0 +1,17 @@
+,0
+radial_absgap_db_c23,0.9419458342653264
+radial_absgap_db_hi_c23,1.240254429996228
+radial_absgap_db_jpeg30,0.7893497408400318
+radial_absgap_db_hi_jpeg30,0.9406016684828754
+dct_raw_c23_maxabs_t,5.7617590420332885
+dct_raw_c23_frac_t_gt3,0.056015625
+dct_raw_c23_frac_t_gt5,0.000390625
+dct_residual_c23_maxabs_t,5.761759042487731
+dct_residual_c23_frac_t_gt3,0.056015625
+dct_residual_c23_frac_t_gt5,0.000390625
+dct_raw_jpeg30_maxabs_t,5.551486558991034
+dct_raw_jpeg30_frac_t_gt3,0.0475390625
+dct_raw_jpeg30_frac_t_gt5,0.00015625
+dct_residual_jpeg30_maxabs_t,5.551486569576301
+dct_residual_jpeg30_frac_t_gt3,0.0475390625
+dct_residual_jpeg30_frac_t_gt5,0.00015625

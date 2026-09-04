@@ -1,5 +1,27 @@
 # DeepTrace — Progress Log
 
+## 2026-09-03 — Mechanistic analysis (fusion gate, per-manipulation, spectra)
+
+No retraining — c23 checkpoints + crops only. Outputs: `results/analysis/`.
+
+- **Fusion gate α = 0.496 ± 0.001** for every gated config and seed — never moved
+  from the 0.5 init. Spatial branch is already at ceiling on c23, loss is flat in
+  α, no pressure to re-weight. The learnable fusion behaves as a fixed average.
+- **Per-manipulation (3 seeds):** spatial Xception is the best model on all four FF++
+  methods including NeuralTextures (the subtlest). `frequency_only` scores best on
+  Deepfakes (0.85, crudest) and worst on NeuralTextures (0.62) — the inverse of the
+  "frequency reveals subtle traces" argument. Order stable everywhere:
+  xception ≥ f3net > full ≈ full_banddrop+sas ≈ baseline_spatial.
+- **Spectra (`src/spectra.py`, rewritten):** native-resolution crops, 2-D Hann
+  window, DCT-domain fake−real difference + per-coefficient t-map. A real
+  real-vs-fake spectral gap exists in FF++ c23 (5.6% of DCT coeffs at |t|>3 vs
+  ~0.3% by chance; ~1 dB radial power, larger at high freq) but the **effect size
+  is small** (max t≈5.8 at n=3000/class → Cohen's d≈0.15) and **JPEG-q30 attenuates
+  it only ~15–25%**, not destroys it. So frequency modelling fails here because the
+  signal is marginal and redundant (a spatial CNN captures it), not because it is
+  absent or compression-fragile. (First spectra version was flawed — bilinear
+  resize to 128 before FFT low-passed away the signal; fixed in fda0d73.)
+
 ## 2026-09-03 — Robustness sweep (test-time perturbations, seed-0 all pert + 3-seed JPEG)
 
 Re-evaluated existing FF++ c23 checkpoints under JPEG/blur/noise/resize/contrast at

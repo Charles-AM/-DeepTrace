@@ -26,6 +26,24 @@ F3-Net's headline claim is about **c40**. We have not tested it.
 
 ---
 
+## DONE 2026-09-03 (results in `results/`)
+
+- ✅ **#1 Robustness sweep** — seed-0 all perturbations + 3-seed JPEG. F3-Net's JPEG
+  edge was a seed-0 artifact; over 3 seeds all models tie under JPEG (~0.85 AUC at
+  sev4). Proposed `full` reliably ~2 AUC below the spatial baselines.
+- ✅ **#5 Spectral analysis** (`src/spectra.py`, rewritten). A real but small
+  (Cohen's d ≈ 0.15) real-vs-fake DCT gap; JPEG-q30 attenuates it only ~15–25 %.
+  Reframes the thesis: signal is *marginal and redundant*, not destroyed by
+  compression.
+- ✅ **#6 Fusion gate α** — 0.496 ± 0.001 every config/seed; never left init.
+- ✅ **Per-manipulation breakdown** (3 seeds) — spatial Xception best on all 4 FF++
+  methods incl. NeuralTextures; `frequency_only` best on Deepfakes / worst on NT.
+
+Still open: #2 (c40 training — now the pivotal one), #3 (cross-dataset seeds 1&2),
+#4 (matched-backbone grid), #7 CKA, #8 band-ablation, #9 leave-one-out, #10 mask
+figures, Tier 3. A *proper* spectral figure now exists; a c40 spectra comparison
+(needs c40 crops) would still add value.
+
 ## Experiments — ranked
 
 ### Tier 1 — required for the claim to hold
