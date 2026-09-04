@@ -93,18 +93,44 @@ Secondary/contemporaneous targets (frequency-domain face-forgery detectors, for 
 
 ### A. Spatial / semantic representations generalise better than spectral ones
 
+**Co-primary supports (updated 2026-09-04):**
+
 - **Shiohara, Yamasaki. "Detecting Deepfakes with Self-Blended Images (SBI)."
   CVPR 2022 (oral).** arXiv:2204.08376. ~93% AUC on Celeb-DF with **no real
   deepfakes in training** — a purely spatial blending-artifact method that is still
   among the strongest cross-dataset results.
+- **Dong, Wang, Ji, Liang, Fan, Ge. "Implicit Identity Leakage: The Stumbling Block
+  to Improving Deepfake Detection (CADDM)." CVPR 2023**, pp. 3994–4004.
+  code: megvii-research/CADDM. Diagnoses a *different* generalisation-killer than
+  frequency fragility — binary classifiers spuriously learn identity (who) rather
+  than forgery (what) — and shows a spatial artifact-detection module that avoids
+  this beats prior SOTA in-dataset **and** cross-dataset, on the same FF++/Celeb-DF/
+  DFDC suite we use. Strongest support paper for our claim: same task (not generic
+  GAN-image detection like Ojha/Corvi below), a positive result (not just "X is
+  fragile"), independent mechanism. **Verify their exact reported number against
+  F3-Net specifically before quoting it** — not confirmed in our source search.
+
+Both above are *on-task* (face-forgery video, our exact benchmark suite) and
+*positive* (a working spatial method beating SOTA), which makes them stronger
+support than a purely critical paper. Together with **FreqDebias** (recent target,
+above) they give three independent mechanisms for the same directional finding:
+we say the frequency signal is real but small and redundant with what a spatial CNN
+already learns; CADDM says the real generalisation killer is identity leakage,
+unrelated to frequency; FreqDebias says frequency reliance itself causes "spectral
+bias." Three groups, three mechanisms, one direction — worth a paragraph in the
+discussion section.
+
+**Further support:**
+
 - **Ojha, Li, Lee. "Towards Universal Fake Image Detectors that Generalize Across
   Generative Models." CVPR 2023.** arXiv:2302.10174. A *frozen* CLIP (semantic,
   non-spectral) feature space with nearest-neighbours generalises far better than
-  trained spectral/artifact features (+15 mAP, +26% acc on unseen models).
-- **Dong et al. "Implicit Identity Leakage (CADDM)." CVPR 2023.** Spatial
-  artifact-detection module; strong cross-dataset.
+  trained spectral/artifact features (+15 mAP, +26% acc on unseen models). Generic
+  GAN/diffusion-image detection, not face-forgery-video specific — cite as broader
+  context, not a same-task result.
 - **Yan et al. "UCF: Uncovering Common Features for Generalizable Deepfake
-  Detection." ICCV 2023.** Spatial-domain disentanglement of content vs forgery.
+  Detection." ICCV 2023.** Spatial-domain disentanglement of content vs forgery,
+  same task as CADDM.
 
 ### B. Frequency cues are fragile / biased — compression, post-processing, transfer
 

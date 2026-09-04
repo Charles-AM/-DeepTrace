@@ -14,8 +14,11 @@ its FAD architecture and test its literal c40 claim.
 the base/target recency gap, independent support for our scepticism.
 **Antecedents:** Frank et al. (ICML 2020), Zhang et al. (WIFS 2019), Durall et al.
 (CVPR 2020).
-**Support:** SBI (CVPR 2022), Ojha et al. (CVPR 2023), Gragnaniello et al. (ICME 2021),
-Corvi et al. (ICASSP 2023), "Fake or JPEG?" (2024). Full list: `docs/related-work.md`.
+**Support (co-primary):** SBI (CVPR 2022), **CADDM/Implicit Identity Leakage (Dong
+et al., CVPR 2023)** — on-task, positive result, independent mechanism (identity
+leakage, not frequency). Further: Ojha et al. (CVPR 2023), Gragnaniello et al.
+(ICME 2021), Corvi et al. (ICASSP 2023), "Fake or JPEG?" (2024). Full list:
+`docs/related-work.md`.
 
 ---
 
