@@ -1,0 +1,5 @@
+config,backbone_family,params_M,gflops,batch32_latency_ms
+baseline_spatial,resnet18,11.34,0.59,10.1
+full,resnet18,11.48,0.77,14.5
+xception,xception,20.81,1.48,39.3
+f3net,xception,20.86,1.52,40.5

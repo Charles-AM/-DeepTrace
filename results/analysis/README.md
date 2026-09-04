@@ -1,7 +1,39 @@
-# Analysis experiments (2026-09-03)
+# Analysis experiments (2026-09-03, updated 2026-09-04)
 
-Mechanistic follow-ups on the c23 checkpoints. All use existing checkpoints /
-crops — no retraining.
+Mechanistic follow-ups on the c23 checkpoints. Sections below marked "no
+retraining" reuse existing checkpoints/crops only.
+
+## `late_fusion/seed_results.csv` — C1b, no retraining (external-review addition)
+
+`src/late_fusion.py`: combine `baseline_spatial` and `frequency_only` scores via
+logistic regression fit on val, evaluated on test. Sidesteps the gated-fusion
+weight-decay confound (see `fusion_alpha.csv` note below) entirely — no gate, no
+architecture, just two independently-trained models' scores combined the simplest
+possible way.
+
+**Result, 3 seeds:** logreg-fusion AUC is identical to spatial-alone AUC to 4
+decimal places on every seed (Δ = 0.0000, −0.0000, −0.0000), despite the fitted
+frequency coefficient being nonzero and positive every time (not driven all the way
+to zero, so this isn't just regularisation hiding the effect — worth a follow-up
+check with an unregularised fit before final write-up). The naive 50/50 average is
+consistently slightly *worse* than spatial alone. **Cleanest available evidence for
+"low incremental predictive value"** — no confounds from the gated architecture.
+
+## `efficiency/params_flops_latency.csv` — C8, no retraining
+
+Params (M) / GFLOPs / batch-32 GPU latency (ms), matched input size 128px, via
+`fvcore`. Two different frequency-branch designs cost very different amounts:
+
+| comparison | params | GFLOPs | latency |
+|---|---|---|---|
+| `full` vs `baseline_spatial` (ResNet-18 + separate freq branch + gated fusion) | +1.2% | **+31%** | **+44%** |
+| `f3net` vs `xception` (FAD = 9-channel input to the *same* backbone, no separate branch) | +0.2% | +2.7% | +3% |
+
+F3-Net's channel-stacking design is nearly free — its accuracy/robustness numbers
+alone decide whether it's worth it. Our separate-branch design carries real cost
+(44% more latency) on top of zero accuracy/predictive benefit (C1, C1b) — a cleanly
+"not worth it" result specific to that architectural choice, not a blanket property
+of "adding frequency."
 
 ## `fusion_alpha.csv` — learned gated-fusion weight
 
