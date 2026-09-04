@@ -90,6 +90,32 @@ figures, Tier 3. A *proper* spectral figure now exists; a c40 spectra comparison
    `docs/related-work.md`, draft LaTeX (intro → related work → controlled protocol →
    results → analysis (#5–#8) → limitations → conclusion).
 
+## Paper positioning & the constructive turn (decided 2026-09-03)
+
+**Why "this is already known" does not sink it:** prior critiques of frequency
+detection (Frank et al. ICML'20, Gragnaniello et al. ICME'21, "Fake or JPEG?" '24)
+are about **GAN-generated whole images**. Our target is **face-swap deepfake video**
+(FF++) — a different problem, and the frequency-for-face-forgery line (F3-Net, SPSL,
++ 2024 follow-ups) has not had a controlled mechanistic re-evaluation.
+
+**The three findings that are ours, not folklore:** (1) the learnable fusion gate
+never engages (α = 0.496 ± 0.001, all seeds); (2) per-manipulation inversion —
+frequency-only best on the *crudest* forgery, worst on the *subtlest*; (3)
+"redundant, not fragile" — the spectral signal survives JPEG (d ≈ 0.15, barely
+attenuated), so it fails from redundancy, not brittleness (a distinct claim from the
+prior work).
+
+**Constructive turn — chosen:** *reproducibility framing as the spine* ("F3-Net's
+c40 gains do not replicate under matched training") *+ efficiency angle as a
+secondary section* ("the frequency pathway is a pure computational cost — F3-Net
+≈ 2× Xception FLOPs for zero gain"). Scoping angle ("find the regime where
+frequency wins") rejected as primary — open-ended search, and current data shows no
+regime where frequency wins in absolute terms.
+
+**Data-readiness:** in-domain (matched, 3-seed), fusion-gate, per-manipulation, and
+JPEG-robustness claims are all supported by committed `results/`. Still needed:
+c40 run (pivotal), cross-dataset seeds 1 & 2, the params/FLOPs/latency table.
+
 ## Venues
 
 Target a workshop or short-paper track that welcomes negative / analysis results:
