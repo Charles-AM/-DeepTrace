@@ -11,5 +11,5 @@ ffpp_full_seed2,full,0.4954,0.5046,-0.0184,False
 ffpp_no_mask_seed0,no_mask,0.4963,0.5037,-0.0148,False
 ffpp_no_mask_seed1,no_mask,0.496,0.504,-0.0162,False
 ffpp_no_mask_seed2,no_mask,0.4944,0.5056,-0.0226,False
-ffppfix_full_seed0,full,0.4947,0.5053,-0.0212,True
-ffppfix_no_mask_seed0,no_mask,0.4941,0.5059,-0.0236,True
+ffppfix_full_seed0,full,0.4947,0.5053,-0.021,True
+ffppfix_no_mask_seed0,no_mask,0.4941,0.5059,-0.0235,True

@@ -1,0 +1,15 @@
+run,config,alpha_spatial,one_minus_alpha_freq,alpha_logit
+ffpp_full_banddrop_sas_seed0,full_banddrop,0.4957,0.5043,-0.0172
+ffpp_full_banddrop_sas_seed1,full_banddrop,0.4961,0.5039,-0.0156
+ffpp_full_banddrop_sas_seed2,full_banddrop,0.4953,0.5047,-0.019
+ffpp_full_banddrop_seed0,full_banddrop,0.4961,0.5039,-0.0156
+ffpp_full_banddrop_seed1,full_banddrop,0.4964,0.5036,-0.0143
+ffpp_full_banddrop_seed2,full_banddrop,0.4947,0.5053,-0.0211
+ffpp_full_seed0,full,0.496,0.504,-0.016
+ffpp_full_seed1,full,0.4961,0.5039,-0.0156
+ffpp_full_seed2,full,0.4954,0.5046,-0.0184
+ffpp_no_mask_seed0,no_mask,0.4963,0.5037,-0.0148
+ffpp_no_mask_seed1,no_mask,0.496,0.504,-0.0162
+ffpp_no_mask_seed2,no_mask,0.4944,0.5056,-0.0226
+ffppfix_full_seed0,full,0.4947,0.5053,-0.021
+ffppfix_no_mask_seed0,no_mask,0.4941,0.5059,-0.0235

@@ -58,6 +58,17 @@ from the original biased runs, test AUC essentially unchanged (0.9974 vs 0.9969;
 engages" finding survives its strongest objection** (1 seed each with the fix; more
 would make it airtight, but this is real evidence, not just a caveat removed).
 
+**Provenance (2026-09-04):** `fusion_alpha.csv` above is now byte-for-byte the
+genuine output of `src.gate_readout` run on Kaggle (`fusion_alpha_raw.csv` is the
+untouched copy) — not a hand transcription of pasted console text. Per-run test
+metrics for the two `ffppfix_*` checkpoints are at
+`results/in_domain/per_run/ffppfix_{full,no_mask}_seed0.json`, also copied directly
+from the generated files (each includes a precise `alpha` field independently
+confirming the gate_readout numbers: 0.49474871.../0.49413418...). The actual
+`best.pt` checkpoint weights (44MB each) are **not** in git, consistent with every
+other checkpoint in this project (see `results/README.md`) — backed up locally at
+`~/Downloads/gatefix_artifacts.tar.gz`.
+
 ## `permanip/` — per-forgery-method breakdown, 3 seeds
 
 `seed{0,1,2}.csv` long form (run × method: roc_auc/eer/accuracy, real vs that
