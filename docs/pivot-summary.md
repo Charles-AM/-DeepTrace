@@ -95,40 +95,49 @@ compression-resistant; and an ordinary spatial CNN already captures whatever
 usefulness it has. A dedicated frequency pathway adds nothing and can hurt
 generalisation to other datasets.
 
-## 5. The target paper and where to find it
+## 5. The base paper, the recent target, and where to find them
 
-**Target paper** (the benchmark our study argues against):
+*(Updated 2026-09-04 — the base/target pairing was sharpened, see below for why.)*
+
+**Base / foundation paper** (the method we actually build and directly test):
 
 > **"Thinking in Frequency: Face Forgery Detection by Mining Frequency-Aware Clues"**
-> — Yuyang Qian, Guojun Yin, Lu Sheng, Zixuan Chen, Jing Shao.
-> Often called **F3-Net**.
+> — Yuyang Qian, Guojun Yin, Lu Sheng, Zixuan Chen, Jing Shao. Often called
+> **F3-Net**. **ECCV 2020** — the *European Conference on Computer Vision*, one of
+> the top three computer-vision conferences (with CVPR and ICCV).
 
-**Conference:** **ECCV 2020** — the *European Conference on Computer Vision*, one of
-the top three computer-vision conferences in the world (with CVPR and ICCV).
+**How to find it:** search `F3-Net Thinking in Frequency ECCV 2020`; free PDF on
+arXiv and the ECCV 2020 open-access proceedings (SpringerLink, LNCS 12357); code
+(unofficial) at github.com/yyk-wew/F3Net.
 
-**How to find it:**
-- Search: `F3-Net Thinking in Frequency ECCV 2020`
-- Free PDF: arXiv (search the title) and the ECCV 2020 open-access proceedings
-  (`eccv2020.eu` / SpringerLink, vol. LNCS 12357)
-- Code (unofficial): github.com/yyk-wew/F3Net
+This is our base paper because we don't just cite it — we **built its FAD
+architecture into our own code** and are running the one experiment (the c40 run,
+see §7/§8) that tests its headline claim directly: that its frequency features help
+**most on heavily-compressed video**.
 
-F3-Net's headline claim is that its frequency features help **most on
-heavily-compressed video** (the "c40" setting). That specific claim is the one
-experiment we still owe (see §7).
+**Recent target paper** (the current state of the art we position against):
 
-**Base paper** (the older foundation the whole idea — ours and F3-Net's — rests on):
+> **"FreqDebias: Towards Generalizable Deepfake Detection via Consistency-Driven
+> Frequency Debiasing"** — Hossein Kashiani, Niloufar Alipour Talemi, Fatemeh
+> Afghah. **CVPR 2025**, pp. 8775–8785. arXiv:2509.22412.
 
-> **"Leveraging Frequency Analysis for Deep Fake Image Recognition"**
-> — Joel Frank, Thorsten Eisenhofer, Lea Schönherr, Asja Fischer, Dorothea Kolossa,
-> Thorsten Holz. **ICML 2020** (*International Conference on Machine Learning* — a
-> top machine-learning conference). arXiv:2003.08685.
+**Why this is the right recent paper:** five years after F3-Net, this is the most
+current major work in frequency-domain face-forgery detection. It names a new
+problem — **"spectral bias"**: detectors that over-rely on specific frequency bands
+generalise *worse* to unseen forgeries — and proposes a training-time fix
+(augmentation + consistency regularisation) rather than abandoning frequency
+modelling. In plain terms: **even the field's newest paper agrees that leaning on
+frequency information is risky if you don't correct for it.** That's independent
+support, from a completely different research group, for exactly the scepticism our
+study is built on. We cite and position against it rather than fully reproducing
+its (heavier) training method — but we borrow its diagnostic idea cheaply: our
+existing frequency-band analysis (`results/analysis/spectra/`) can directly check
+whether *our* frequency branch shows the same "spectral bias" they describe.
 
-It first showed that GAN-generated images carry a grid-like artefact in the DCT
-spectrum. Our custom DCT layer is a "learnable" version of their fixed analysis.
-
-Supporting papers that back our conclusion are listed in `docs/related-work.md`
-(SBI, CVPR 2022; Ojha et al., CVPR 2023; Gragnaniello et al., ICME 2021; Corvi et
-al., ICASSP 2023).
+Antecedents (the older foundation both F3-Net and FreqDebias build on) and the full
+supporting-paper list are in `docs/related-work.md` (Frank et al. ICML 2020; Zhang
+et al. WIFS 2019; Durall et al. CVPR 2020; SBI CVPR 2022; Ojha et al. CVPR 2023;
+Gragnaniello et al. ICME 2021; Corvi et al. ICASSP 2023).
 
 ## 6. Where the results live
 

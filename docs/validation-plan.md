@@ -7,6 +7,11 @@ only when it holds across **multiple seeds** and, where it's a generalisation cl
 
 Legend — status: ✅ done · 🟡 partial · ⬜ not started.
 
+**Base/target (2026-09-04):** base/foundation = F3-Net (ECCV 2020, implemented +
+c40-tested = C7). Recent target = FreqDebias (CVPR 2025, cited/positioned against,
+not reproduced) — its "spectral bias" diagnosis is what C4's band-ablation directly
+tests against our own frequency branch. Details: `docs/related-work.md`.
+
 ---
 
 ## C1 — On a matched backbone, adding frequency modelling does not improve accuracy

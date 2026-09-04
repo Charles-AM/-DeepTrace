@@ -3,11 +3,17 @@
 Supersedes the Phase-2 execution plan in `docs/phase2-runbook.md` (that phase is
 done; result was negative — see `docs/progress-log.md` 2026-09-03).
 
-**Deliverable:** a controlled-study / negative-results paper.
-**Main claim:** on a matched backbone and controlled training budget, frequency-domain
-modelling does not beat a well-tuned spatial CNN for deepfake detection — in-domain,
-cross-dataset, or under compression.
-**Target:** F3-Net (ECCV 2020). **Base:** Frank et al. (ICML 2020).
+**Deliverable:** a controlled trade-off study.
+**Central RQ:** under constrained inference budgets and increasing compression, does
+an explicit frequency-domain branch on a spatial CNN buy enough robustness to
+justify its computational overhead?
+**Base/foundation (implemented + directly engaged):** F3-Net (ECCV 2020) — we build
+its FAD architecture and test its literal c40 claim.
+**Recent target (positioned against, cited not reproduced):** FreqDebias (CVPR 2025)
+— diagnoses "spectral bias" (frequency over-reliance hurts generalisation), closes
+the base/target recency gap, independent support for our scepticism.
+**Antecedents:** Frank et al. (ICML 2020), Zhang et al. (WIFS 2019), Durall et al.
+(CVPR 2020).
 **Support:** SBI (CVPR 2022), Ojha et al. (CVPR 2023), Gragnaniello et al. (ICME 2021),
 Corvi et al. (ICASSP 2023), "Fake or JPEG?" (2024). Full list: `docs/related-work.md`.
 
@@ -111,6 +117,15 @@ literature establishes these as important *conditions*, nothing more.
 
 **Design pattern is current** (cite to show it's not a 2020 relic — verify first):
 TSFF-Net, WGN, DSTF-Net, FreqMamba, hybrid spatial-frequency EfficientNet.
+
+**Base/target updated 2026-09-04:** base/foundation is now **F3-Net (ECCV 2020)**
+(implemented + c40-tested directly); recent target is **FreqDebias (CVPR 2025)**,
+which diagnoses "spectral bias" — frequency over-reliance hurting generalisation —
+independent support for our scepticism, cited not reproduced (its Fo-Mixup + dual
+consistency regulariser is out of scope for our compute/timeline). We engage it via
+its own diagnostic lens: the DCT band-ablation in C4 (`docs/validation-plan.md`)
+tests whether *our* frequency branch shows the spectral bias FreqDebias describes.
+Full rationale in `docs/related-work.md`.
 
 ## Paper positioning & the constructive turn (decided 2026-09-03)
 
