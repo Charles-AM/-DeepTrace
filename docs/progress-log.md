@@ -1,5 +1,29 @@
 # DeepTrace — Progress Log
 
+## 2026-09-03 — Robustness sweep (test-time perturbations, seed-0 all pert + 3-seed JPEG)
+
+Re-evaluated existing FF++ c23 checkpoints under JPEG/blur/noise/resize/contrast at
+4 severities (`src/robustness.py`, `--limit 3000`). Outputs: `results/robustness/`.
+
+**JPEG sev4 (~q30), absolute ROC-AUC, 3-seed mean ± sd:**
+baseline_spatial 0.846 ± 0.017 · xception 0.848 ± 0.012 · f3net 0.857 ± 0.011 ·
+full 0.829 ± 0.002. Per-seed (f3net − xception) = +2.9 / +0.3 / −0.3 → straddles
+zero. **F3-Net's apparent JPEG-robustness edge is a seed-0 artifact; it ties the
+spatial baselines over 3 seeds.** The proposed hybrid (`full`) is reliably ~2 AUC
+below both spatial baselines under JPEG (and under blur/noise), every seed.
+
+**Other perturbations (seed 0):** blur/noise/resize collapse every trained model to
+AUC ~0.5 by severity 2. `frequency_only` retains a higher *fraction* of its score
+(JPEG 0.94, blur 0.74 vs ~0.5 for others) but its absolute AUC is 0.5–0.65
+throughout — robustness by ignorance (it never used the fine detail that both
+compression and generation artifacts occupy), not a competitive result.
+
+**Effect on the claim:** the strong version holds under *test-time* compression — no
+frequency method beats a spatial CNN under JPEG once seeds are averaged. Caveat: a
+c23-trained model tested with JPEG is a proxy for F3-Net's literal train+test-on-c40
+setting. The c40 training run (Xception vs F3-Net) remains the one experiment that
+fully closes this; the proxy now favours the spatial baseline.
+
 ## 2026-09-03 — Phase 2 results in; project reframed as a controlled study
 
 **The proposed method does not beat well-tuned spatial baselines.** Firm result
