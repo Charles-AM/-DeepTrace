@@ -27,13 +27,31 @@ generated artifact or explicitly marked as a gap to close.
 incompatible with the installed torch build — `CUDA error: no kernel image
 available` — never use it for this project).
 
-**Software:** ⚠️ **GAP — not yet captured.** `requirements.txt` only pins lower
-bounds (`torch>=2.2`, `torchvision>=0.17`, `numpy>=1.24`, `scipy>=1.10`,
-`timm>=0.9`, `scikit-learn>=1.3`, `matplotlib>=3.7`, `pandas>=2.0`), not what
-Kaggle actually had installed at run time. **Action for next session:** run
-`!pip freeze > /kaggle/working/pip_freeze.txt` early in the c40 runbook, download
-it, and commit as `docs/pip_freeze_2026-09.txt`. Until then, exact package
-versions used for any run before that capture are unverified.
+**Software — captured 2026-09-05** (`pip freeze` on a live Kaggle session; full
+snapshot in `docs/pip_freeze_2026-09-05.txt`). Key packages:
+
+| package | version |
+|---|---|
+| torch | 2.10.0+cu128 |
+| torchvision | 0.25.0+cu128 |
+| numpy | 2.0.2 |
+| scipy | 1.16.3 |
+| scikit-learn | 1.6.1 |
+| timm | 1.0.26 |
+| pandas | 2.3.3 |
+| matplotlib | 3.10.0 |
+| pillow | 11.3.0 |
+| opencv-python | 4.13.0.92 |
+
+**Scope caveat — state this honestly if asked.** This snapshot was taken
+2026-09-05. The original 30-run in-domain matrix trained 2026-09-03, and the
+robustness / spectra / per-manipulation / CKA / late-fusion / gate-fix runs on
+2026-09-03–04. Kaggle rebuilds its base image periodically; two days apart is very
+likely the identical image, but that was **not independently verified** at the
+time. Treat these versions as: confirmed for all runs from 2026-09-05 onward
+(c40 and later), and high-confidence-but-unverified for the 09-03/09-04 runs.
+`requirements.txt` still carries only lower bounds and is not the authoritative
+record — this table is.
 
 **Install notes (do not deviate):**
 - Never `pip install -r requirements.txt` on Kaggle — it breaks the pre-installed
