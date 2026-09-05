@@ -14,6 +14,113 @@ tests against our own frequency branch. Details: `docs/related-work.md`.
 
 ---
 
+# 🔴 C0 — PROTOCOL INTEGRITY (blocks the validity of every other claim)
+
+**Found 2026-09-05, mid-c40-run.** `--group-by` defaults to `None` and was never
+passed in any `run_ablation` invocation, so **every split to date is frame-level**:
+crops from the same source video are scattered across train/val/test. This is not a
+minor detail — it is the single strongest attack available against our central
+(null) claim, and it must be resolved before any result is written up.
+
+### Why it specifically endangers a *null* result
+
+1. **It inflates every number.** A model can memorise a video's identity,
+   background, lighting and compression signature from training frames, then
+   recognise different frames of the same video at test time.
+2. **Our numbers are implausibly high.** We report ~0.989–0.993 AUC at c40; F3-Net's
+   published c40 figures are far lower (~0.90–0.96 depending on metric/protocol).
+   Beating published SOTA by that margin on the same dataset and compression level
+   is a red flag about our protocol, not a triumph.
+3. **Ceiling effects manufacture null results.** At 0.993 AUC there is almost no
+   headroom. If leakage saturates every method near ceiling, "no difference between
+   methods" is what you would observe **whether or not a real difference exists**.
+   Our conclusion and this artifact are observationally identical — which is exactly
+   the objection a reviewer will raise.
+4. **It is thematically self-defeating.** We cite **CADDM, "Implicit Identity
+   Leakage" (CVPR 2023)** as a co-primary support paper. Publishing a leakage-prone
+   protocol while citing the paper about leakage would be caught instantly and would
+   undermine the whole submission's credibility.
+
+### What is NOT compromised
+
+The split is seeded and **identical across every config**, so all models faced the
+same leakage. The *internal, relative* comparison ("frequency adds nothing on a
+matched backbone") remains internally valid. What is compromised is (a)
+generalisation of that conclusion to a leakage-free regime, and (b) any comparison
+of our absolute numbers against published ones.
+
+### Three levels of split rigour — implement and compare
+
+| level | definition | how | leaks? |
+|---|---|---|---|
+| **L1 — frame** (current) | random over crops | `--group-by None` | ❌ same video in train+test |
+| **L2 — video** | all crops of a video in one split | `--group-by 'videos-([0-9]+)'` | ⚠️ partially — captures the *target* id only |
+| **L3 — identity** | no actor appears in more than one split | connected components over the FF++ pair graph (see below) | ✅ strictest |
+
+**Why L2 is not sufficient.** FF++ manipulated videos are named
+`<target>_<source>` (e.g. `004_982`), originals are `<id>` (e.g. `602`). The regex
+`videos-([0-9]+)` captures only the **target** (`004`). But identity `982` can
+appear as the *target* of another video (`982_004`), which would then land in a
+different split — the same actor's face in both train and test. That is precisely
+CADDM's identity leakage.
+
+**L3 implementation sketch:** build a graph where each identity is a node and each
+manipulated video `A_B` is an edge between A and B; originals are isolated nodes.
+Take connected components; assign whole components to train/val/test. Guarantees no
+identity crosses a split boundary. Needs a new `group_by`-style hook in
+`src/data.py::make_splits` (the current one groups by a regex capture, which cannot
+express component membership).
+
+### Experiments required
+
+| # | experiment | purpose | cost |
+|---|---|---|---|
+| C0.1 | Re-run `xception` + `f3net` at **c40, L2 video-level**, 3 seeds | Does the null survive once the ceiling is removed? **Minimum bar for publication.** | ~3.5 h |
+| C0.2 | Same at **c23, L2**, 3 seeds | Keeps the c23/c40 comparison protocol-matched | ~3.5 h |
+| C0.3 | **Leakage quantification**: report L1 vs L2 vs L3 AUC for the same configs | A methodological contribution in its own right — "frame-level splits inflate FF++ AUC by X points" is publishable and useful to the field | free (falls out of C0.1–C0.4) |
+| C0.4 | Implement **L3 identity-level** splits + re-run the headline pair | Closes the CADDM objection completely | ~2 h build + ~3.5 h run |
+| C0.5 | Add **video-level metric aggregation** (mean frame score per video → AUC over videos) | See C0b below | ~1 h build, free to run |
+
+**Confirms the paper's claim if:** at L2 and L3, with absolute AUCs dropping into a
+range comparable to published work, `f3net − xception` remains non-significant.
+**Falsifies it if:** the gap opens up significantly once the ceiling is removed —
+in which case the honest conclusion becomes "the apparent null was a ceiling
+artifact, and frequency does help when the task is hard enough."
+
+---
+
+## C0b — Metric comparability: frame-level vs video-level AUC
+
+Separate from the split issue and equally important for comparing to the
+literature. We report **frame-level (crop-level) AUC**. F3-Net, SBI, CADDM and
+essentially all FF++ work report **video-level AUC** (average the frame scores
+within a video, then compute AUC across videos). Even with perfect splits, our
+numbers are not directly comparable to theirs until we report the same metric.
+
+**Action:** add video-level aggregation to `src/metrics.py` / the eval path and
+report **both** frame-level and video-level AUC in every table. Video id is already
+recoverable from the crop filename slug, so this needs no re-training — only
+re-scoring existing checkpoints. Status: ⬜ not started, ~1 h.
+
+---
+
+## Protocol comparability audit — every way our setup differs from published FF++ work
+
+Disclose each of these explicitly in the paper's Experimental Setup, or fix it.
+
+| dimension | ours | typical published | action |
+|---|---|---|---|
+| split granularity | frame-level | video- or identity-level | **fix** (C0) |
+| metric | frame-level AUC | video-level AUC | **fix** (C0b) |
+| dataset scope | 150 pairs (~1,500 videos) | full FF++ (~1,000 pairs) | disclose as scoped-for-compute |
+| class balance | ~1:4 real:fake | often balanced | disclose; AUC is threshold-free so impact is mainly on acc/F1 |
+| frames per video | ≤20, every 12th | varies widely | disclose |
+| epochs / budget | 15 epochs, fixed | varies | disclose — matched across all our configs, which is the point |
+| test set size | 3,000 crops from ~150 videos | larger | report CIs; small-n is a real limitation |
+| F3-Net variant | FAD only | FAD + LFS + MixBlock | disclose — already noted as Tier-3 item #12 |
+
+---
+
 ## C1 — On a matched backbone, adding frequency modelling does not improve accuracy
 
 | | |
