@@ -14,10 +14,19 @@ the browser tab closing. ~5 h. Accelerator: **GPU T4 x2** (never P100).
 !cd /kaggle/working && rm -rf ./-DeepTrace && git clone -q https://github.com/Charles-AM/-DeepTrace.git ./-DeepTrace && cd ./-DeepTrace && git log --oneline -1
 ```
 
-**Cell 2 — deps** (do NOT `pip install -r requirements.txt` — it breaks Kaggle's torch)
+**Cell 2 — deps + environment snapshot** (do NOT `pip install -r requirements.txt`
+— it breaks Kaggle's torch)
 ```bash
-!pip -q install --no-deps facenet-pytorch
+!pip -q install --no-deps facenet-pytorch && pip freeze > /kaggle/working/pip_freeze.txt && echo "env snapshot saved"
 ```
+
+⚠️ **Jupyter gotchas that cost time in past sessions — do not deviate:**
+- Never use a `<<'PY' ... PY` heredoc in a `!` cell. Jupyter runs each line as its
+  own shell call, so the heredoc body leaks into the notebook kernel and fails
+  with `ModuleNotFoundError`. For multi-line Python use `%%writefile script.py`
+  (must be the first line of its cell) then `!python script.py` in a separate cell.
+- Any path starting with `-DeepTrace` needs a `./` prefix, or `rm`/`cp`/`tar` read
+  it as a flag.
 
 **Cell 3 — download FF++ at c40** (same 150 pairs as c23 → same videos → same split)
 ```bash
@@ -42,7 +51,7 @@ Output: `results/ablation_table.md` (rename to `ablation_c40.md` after), `summar
 
 **Cell 6 — bundle + link**
 ```bash
-!cd /kaggle/working && cp -r -DeepTrace/results ./c40_results && mv c40_results/ablation_table.md c40_results/ablation_c40.md && tar czf c40_results.tar.gz c40_results && du -h c40_results.tar.gz
+!cd /kaggle/working && cp -r ./-DeepTrace/results ./c40_results && mv c40_results/ablation_table.md c40_results/ablation_c40.md && cp /kaggle/working/pip_freeze.txt ./c40_results/ 2>/dev/null; tar czf c40_results.tar.gz c40_results && du -h c40_results.tar.gz
 ```
 ```python
 from IPython.display import FileLink
