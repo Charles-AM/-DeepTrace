@@ -3,11 +3,48 @@
 The north-star document. If any decision, experiment, or paragraph doesn't serve
 what's below, it's drift. Read this first; everything else is detail.
 
-Last updated 2026-09-05 (rev. 2 — thesis corrected after external review).
+Last updated 2026-09-05 (rev. 3 — **framing FROZEN**).
 
 ---
 
-## 1. The thesis
+## 0. 🔒 FROZEN — the headline
+
+**No further framing critique until every queued experiment has run.** Three rounds
+of external review have converged; the last two corrected wording, not substance.
+Further rounds trade execution time for polish. Re-open only if an experimental
+result contradicts something below.
+
+### Title
+> **Evaluation Units Matter: A Cluster-Aware Assessment of Frequency-Domain
+> Deepfake Detection**
+
+### Thesis
+> Evaluation design changes both apparent detector performance and the **evidential
+> warrant** of architectural comparisons. On FaceForensics++ we separate seen-video
+> leakage, test-content uncertainty, and optimisation variability, using F3-Net's
+> FAD component as a controlled case study.
+
+### The line the paper is built around
+> **The conclusion was stable; its warrant was not.**
+
+### The fact that unifies all three contributions
+> **3,000 test crops. 30 independent videos.** Apparent precision came from frame
+> count; real resolution comes from independent clusters. Everything else follows
+> from that gap.
+
+### Three contributions
+1. **Protocol effect** — the seen-video vs unseen-video performance gap across
+   matched detectors (~18 AUC points in our subset).
+2. **Inference effect** — separating crop, test-content, and optimisation
+   randomness, and reporting what resolution the design actually achieves.
+3. **FAD case study** — whether FAD's benefit exceeds externally-anchored
+   thresholds at c23 and c40, cost-accounted.
+
+Everything below is supporting detail for these four boxes.
+
+---
+
+## 1. The thesis (expanded)
 
 > Evaluation design changes both apparent detector performance and the **evidential
 > warrant** of architectural comparisons. On FaceForensics++ we separate seen-video
