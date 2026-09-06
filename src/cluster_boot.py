@@ -33,7 +33,6 @@ import csv
 from pathlib import Path
 
 import numpy as np
-from sklearn.metrics import roc_auc_score
 
 from .clusters import build_component_clusters
 
@@ -91,8 +90,36 @@ def _prepare(rows_a: list[dict], rows_b: list[dict], aggregate: bool):
     return labels, sa, sb, keys, idents
 
 
+def equivalence_flags(ci_lo: float, ci_hi: float, margins) -> dict:
+    """V6 sensitivity flags for a single interval, at each margin.
+
+    `equivalent_m` — the whole interval lies inside (-m, +m): evidence *against*
+    an effect as large as m in either direction.
+    `excludes_m`   — the interval's upper bound is below +m: rules out a benefit
+    of at least m, saying nothing about the other direction.
+
+    These are different claims and are reported separately; collapsing them is
+    how "not significant" gets misread as "no effect".
+
+    Column names go through `:g` rather than raw interpolation: f"{0.010}" is
+    "0.01", so the header would otherwise depend on how the caller happened to
+    type the number. Margins that collide under that format are rejected instead
+    of silently overwriting one another.
+    """
+    keys = [f"{m:g}" for m in margins]
+    if len(set(keys)) != len(keys):
+        raise ValueError(f"margins collide under :g formatting: {list(margins)}")
+    out = {}
+    for m, k in zip(margins, keys):
+        out[f"equivalent_{k}"] = bool(ci_lo > -m and ci_hi < m)
+        out[f"excludes_{k}"] = bool(ci_hi < m)
+    return out
+
+
 def paired_bootstrap(labels, sa, sb, vids, idents, unit: str = "component",
                      n_boot: int = 2000, seed: int = 0) -> dict:
+    from sklearn.metrics import roc_auc_score   # lazy: keeps the pure helpers
+                                                # above importable without sklearn
     rng = np.random.default_rng(seed)
     if unit == "frame":
         groups = [str(i) for i in range(len(labels))]
@@ -144,7 +171,8 @@ def paired_bootstrap(labels, sa, sb, vids, idents, unit: str = "component",
 
 
 def run(path_a: Path, path_b: Path, aggregate: bool = True, n_boot: int = 2000,
-        margin: float | None = None, out_dir: Path | None = None) -> list[dict]:
+        margin: float | None = None, margins: list[float] | None = None,
+        out_dir: Path | None = None) -> list[dict]:
     rows_a, rows_b = _load(path_a), _load(path_b)
     labels, sa, sb, vids, idents = _prepare(rows_a, rows_b, aggregate)
     print(f"aggregate={'video-level' if aggregate else 'frame-level'}  "
@@ -161,6 +189,12 @@ def run(path_a: Path, path_b: Path, aggregate: bool = True, n_boot: int = 2000,
             r["margin"] = margin
             r["equivalent"] = bool(r["ci_lo"] > -margin and r["ci_hi"] < margin)
             r["excludes_margin"] = bool(r["ci_hi"] < margin)
+        # V6 sensitivity. "Not significant" is not "no effect", and a single
+        # margin hides how much the verdict depends on the margin chosen — which
+        # was picked after exploratory runs and is a stakeholder judgement, not a
+        # constant. Every margin is read off the SAME bootstrap distribution, so
+        # these columns cost nothing and are mutually consistent.
+        r.update(equivalence_flags(r["ci_lo"], r["ci_hi"], margins or []))
         results.append(r)
         print(f"  unit={unit:9s} n={r['n_units']:4d}  diff={r['diff']:+.4f}  "
               f"95% CI [{r['ci_lo']:+.4f}, {r['ci_hi']:+.4f}]  se={r['se']:.4f}")
@@ -189,6 +223,9 @@ def parse_args(argv=None):
     p.add_argument("--n-boot", type=int, default=2000)
     p.add_argument("--margin", type=float, default=None,
                    help="smallest worthwhile AUC difference, for equivalence testing")
+    p.add_argument("--margins", type=float, nargs="*", default=None,
+                   help="V6 sensitivity: extra margins scored off the same bootstrap "
+                        "(e.g. --margins 0.005 0.010 0.014 0.020)")
     p.add_argument("--out-dir", default=None)
     return p.parse_args(argv)
 
@@ -196,7 +233,8 @@ def parse_args(argv=None):
 def main(argv=None):
     a = parse_args(argv)
     run(Path(a.a), Path(a.b), aggregate=not a.frame_level, n_boot=a.n_boot,
-        margin=a.margin, out_dir=Path(a.out_dir) if a.out_dir else None)
+        margin=a.margin, margins=a.margins,
+        out_dir=Path(a.out_dir) if a.out_dir else None)
 
 
 if __name__ == "__main__":
