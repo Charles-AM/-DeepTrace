@@ -107,6 +107,20 @@ def paired_bootstrap(labels, sa, sb, vids, idents, unit: str = "identity",
         index_of.setdefault(g, []).append(i)
     keys = list(index_of)
 
+    # A bootstrap over very few clusters degenerates *silently*: with one cluster
+    # every replicate is identical and the interval has width 0, which reads as
+    # perfect precision when it is actually no information at all.
+    if len(keys) < 2:
+        raise ValueError(
+            f"unit={unit!r} yields {len(keys)} cluster(s) — a bootstrap over this is "
+            "degenerate (zero-width interval, not high precision). Check the "
+            "clustering: a cyclic pair graph can collapse every sequence into one "
+            "component."
+        )
+    if len(keys) < 10:
+        print(f"  WARNING: unit={unit!r} has only {len(keys)} clusters — the interval "
+              "will be very wide and percentile bootstrap is unreliable at this size.")
+
     point = roc_auc_score(labels, sb) - roc_auc_score(labels, sa)
     diffs, skipped = [], 0
     for _ in range(n_boot):

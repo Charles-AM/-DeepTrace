@@ -79,3 +79,28 @@ def test_video_id_matches_the_group_by_regex_capture():
     ]:
         regex_capture = re.search(r"videos-([0-9]+)", path).group(1)
         assert parse_crop_name(path)["video_id"] == regex_capture
+
+
+def test_ffpp_pair_graph_gives_size_two_components_not_one_giant():
+    """Real FF++ pairs are disjoint couples, so identity clustering yields many
+    small components. A cyclic pair set (a->b->c->a) would instead collapse
+    everything into one component and make the identity bootstrap degenerate —
+    this test pins the distinction."""
+    disjoint = [("004", "982"), ("982", "004"), ("111", "222"), ("222", "111")]
+    c = build_identity_clusters(disjoint)
+    assert cluster_stats(c)["n_components"] == 2
+    assert cluster_stats(c)["largest"] == 2
+
+    cyclic = [("1", "2"), ("2", "3"), ("3", "1")]
+    assert cluster_stats(build_identity_clusters(cyclic))["n_components"] == 1
+
+
+def test_identity_clustering_halves_units_relative_to_video_grouping():
+    """Each FF++ couple contributes two target sequences (a_b and b_a), so
+    grouping by identity yields half as many independent units as grouping by
+    target video. This is why intervals widen at the stricter unit."""
+    pairs = [("004", "982"), ("982", "004"), ("111", "222"), ("222", "111")]
+    targets = {t for t, _ in pairs}
+    comps = set(build_identity_clusters(pairs).values())
+    assert len(targets) == 4
+    assert len(comps) == 2
