@@ -45,10 +45,11 @@ than the spatial models (+0.078 to +0.096).
 
 We predicted the opposite: that a frequency model would be *more* protocol-sensitive,
 since compression signatures are video-specific and live in the spectrum. That
-prediction was wrong, and the likely reason is capacity — **exploiting leakage
-requires the ability to memorise, and `frequency_only` (176k trainable
-parameters, 0.69 AUC) has too little of either.** It cannot benefit from a
-shortcut it lacks the capacity to learn.
+prediction was wrong. The likely reason is capacity — **exploiting a
+seen-video shortcut requires the ability to memorise, and `frequency_only` (176k
+trainable parameters, 0.69 AUC) has too little of either.** It cannot benefit
+from a shortcut it lacks the capacity to learn. (Stated as a mechanism
+hypothesis; V2 would test it directly.)
 
 Consistent with the earlier robustness finding: this model is stable across
 conditions because it is weak, not because it is well-founded.
@@ -61,8 +62,11 @@ conditions because it is weak, not because it is well-founded.
 | **c40** | 3 | −0.0196, −0.0101, +0.0142 | −0.0052 | [−0.0484, +0.0381] |
 | c40 | 5 | (see `in_domain_c40_vid/`) | +0.0049 | [−0.0185, +0.0283] |
 
-**Unresolvable at both compressions.** No interval excludes zero, +0.010, or the
-verified published FAD gain of +0.014.
+**Small point estimates at both compressions** (|Δ| ≤ 0.005). The intervals shown
+are **seed-level diagnostics** — they measure optimisation variability confounded
+with split composition, not test-content uncertainty — and none excludes zero,
++0.010, or the verified +0.014. Whether the comparison is *resolvable* with
+respect to independent test content is pending V1.
 
 ## 4. Compression interaction — no evidence, and the sign opposes F3-Net
 
