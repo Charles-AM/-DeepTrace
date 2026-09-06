@@ -10,9 +10,16 @@ from pathlib import Path
 REPO = "/kaggle/working/-DeepTrace"
 OUT = Path("/kaggle/working/results")
 PRED = Path("/kaggle/working/preds")
-DS, SPLIT_SEED, SEEDS = "ffpp_c40_vid", 0, [0, 1, 2, 3, 4]
-CONFIGS = ["xception", "xception_fad"]
-EPOCHS, IMG = 15, 128
+# Every training hyperparameter comes from the reference file, which records the
+# EFFECTIVE config of the varying-split runs this experiment is compared against.
+# Nothing here is typed twice: --amp cost a 155-minute run precisely because a
+# flag lived in this script and nowhere else.
+ARGS = json.load(open("results/reference/train_args_c40_vid.json"))
+DS = ARGS["dataset_name"]
+SPLIT_SEED = ARGS["_v8_only"]["split_seed"]
+SEEDS = ARGS["_v8_only"]["seeds"]
+CONFIGS = ARGS["_v8_only"]["configs"]
+IMG = ARGS["image_size"]
 BUDGET_S = 10.5 * 3600          # stop launching new runs after this
 # Seed 0 doubles as a reproducibility control: split_seed=0/seed=0 is nominally
 # the same configuration as the varying-split seed-0 run, so its AUCs should
@@ -79,6 +86,42 @@ log(f"split VERIFIED against reference: {len(test_targets)} test targets match")
 counts = {s: sum(1 for r in rows if r["split"] == s) for s in ("train", "val", "test")}
 log(f"crops OK  splits={counts}  data_root={data_root}")
 
+# ---------------------------------------------------------------- command build
+def train_cmd(cfg, seed, data_root):
+    """Build the training command entirely from ARGS.
+
+    Store-true flags are emitted only when the reference says true, so a false
+    entry cannot silently become a passed flag. Anything in ARGS that is not
+    handled here raises rather than being ignored -- a hyperparameter added to
+    the reference file and quietly dropped from the command line is the same
+    class of bug as --amp, just in the other direction.
+    """
+    cmd = [sys.executable, "-m", "src.train",
+           "--data-root", data_root, "--config", cfg,
+           "--dataset-name", DS, "--seed", str(seed),
+           "--split-seed", str(SPLIT_SEED), "--out-root", str(OUT)]
+    scalars = {"epochs": "--epochs", "batch_size": "--batch-size", "lr": "--lr",
+               "weight_decay": "--weight-decay", "image_size": "--image-size",
+               "num_workers": "--num-workers", "focal_gamma": "--focal-gamma",
+               "focal_alpha": "--focal-alpha", "grad_clip": "--grad-clip",
+               "group_by": "--group-by", "limit": "--limit",
+               "band_dropout_p": "--band-dropout-p"}
+    flags = {"amp": "--amp", "no_pretrained": "--no-pretrained", "sas": "--sas"}
+    for key, opt in scalars.items():
+        if ARGS[key] is not None:
+            cmd += [opt, str(ARGS[key])]
+    for key, opt in flags.items():
+        if ARGS[key]:
+            cmd.append(opt)
+    unhandled = {k for k in ARGS
+                 if not k.startswith("_") and k not in scalars and k not in flags
+                 and k != "dataset_name"}
+    if unhandled:
+        sys.exit(f"FATAL: reference file has parameters this script does not pass: "
+                 f"{sorted(unhandled)}. Add them to train_cmd or remove them.")
+    return cmd
+
+
 # ---------------------------------------------------------------- run loop
 def sh(cmd, stream=False):
     """stream=True for training: a 6-hour batch log that prints nothing until each
@@ -94,6 +137,14 @@ def sh(cmd, stream=False):
         log("FAILED:", " ".join(cmd)); print(r.stdout[-3000:]); print(r.stderr[-3000:], flush=True)
     return r.returncode == 0, r.stdout
 
+# Print the exact command once, BEFORE hours of compute depend on it, and name
+# the reproducibility control. Both were previously implicit.
+log("effective training command (from results/reference/train_args_c40_vid.json):")
+log("   " + " ".join(str(x) for x in train_cmd(CONFIGS[0], 0, data_root)[2:]))
+ctrl = ARGS["_reproducibility_control"]
+log(f"seed {ctrl['seed']} is a reproducibility control: expect xception "
+    f"{ctrl['expected_xception_roc_auc']}, +FAD {ctrl['expected_fad_roc_auc']}")
+
 done, failed = [], []
 for seed in SEEDS:                      # interleaved: both configs per seed
     if time.time() - T0 > BUDGET_S:
@@ -105,18 +156,7 @@ for seed in SEEDS:                      # interleaved: both configs per seed
         if (OUT / run_name / "best.pt").exists():
             log("skip (exists):", run_name); done.append(run_name); continue
         log("TRAIN", run_name)
-        ok, _ = sh([sys.executable, "-m", "src.train",
-                    "--data-root", data_root, "--config", cfg,
-                    "--dataset-name", DS, "--epochs", str(EPOCHS),
-                    "--image-size", str(IMG), "--seed", str(seed),
-                    "--split-seed", str(SPLIT_SEED),
-                    # NO --amp. run_ablation.py never passed it, so every
-                    # varying-split c40 run is fp32. V8's sd is subtracted from
-                    # that sd, so the training procedure must match exactly --
-                    # mixed precision changes the optimisation trajectory and
-                    # would confound precision mode with split policy.
-                    "--group-by", "videos-([0-9]+)",
-                    "--num-workers", "2", "--out-root", str(OUT)], stream=True)
+        ok, _ = sh(train_cmd(cfg, seed, data_root), stream=True)
         (done if ok else failed).append(run_name)
 
     # dump predictions for this seed's pair while the data is fresh

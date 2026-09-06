@@ -1,0 +1,34 @@
+{
+  "_purpose": "The EFFECTIVE training configuration of every varying-split c40 video-level run (results/in_domain_c40_vid/). V8's fixed-split sd is subtracted from that run's sd, which is only valid if the training procedure is identical. docs/v8_run.py builds its command from this file and aborts on any divergence, so the two can no longer drift apart by oversight.",
+  "_derivation": "src/run_ablation.py main() passes data-root, dataset-name, epochs, image-size, batch-size, out-root and --extra; docs/overnight-plan.md supplies --extra '--group-by videos-([0-9]+)'. Everything else is the src/train.py default at commit e68b559. Verified 7bb4e11 (no_decay_param_groups) is an ancestor of e68b559, so the weight-decay fix is present in both.",
+  "_history": "V8 attempt 1 passed --amp, which run_ablation never does. It confounded precision mode with split policy and cost a 155-minute run. This file exists so that cannot recur.",
+  "epochs": 15,
+  "batch_size": 64,
+  "lr": 0.0003,
+  "weight_decay": 0.05,
+  "image_size": 128,
+  "num_workers": 2,
+  "focal_gamma": 2.0,
+  "focal_alpha": null,
+  "grad_clip": 1.0,
+  "group_by": "videos-([0-9]+)",
+  "amp": false,
+  "no_pretrained": false,
+  "sas": false,
+  "band_dropout_p": null,
+  "limit": null,
+  "dataset_name": "ffpp_c40_vid",
+  "_v8_only": {
+    "split_seed": 0,
+    "seeds": [0, 1, 2, 3, 4],
+    "configs": ["xception", "xception_fad"],
+    "_note": "split_seed is the ONE intended difference from the comparison runs, which left it unset so it followed --seed."
+  },
+  "_reproducibility_control": {
+    "seed": 0,
+    "expected_xception_roc_auc": 0.81347,
+    "expected_fad_roc_auc": 0.79391,
+    "expected_diff": -0.01956,
+    "_note": "Nominally the same configuration as the varying-split seed-0 run. If it reproduces, cross-session drift is negligible and the sd comparison is sound. If not, the decomposition cannot be done across sessions and that is the reportable result."
+  }
+}
