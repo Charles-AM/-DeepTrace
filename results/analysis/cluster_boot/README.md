@@ -9,7 +9,8 @@ checkpoints. `ALL.csv` concatenates every row; per-comparison files are alongsid
 
 ---
 
-## 1. The headline: the same estimate, three different conclusions
+## 1. The headline: one estimate, three uncertainty models, opposite
+naive-versus-clustered conclusions
 
 FAD − Xception, c40 seed 0, **no aggregation** (individual crops scored):
 
@@ -17,20 +18,24 @@ FAD − Xception, c40 seed 0, **no aggregation** (individual crops scored):
 |---|---|---|---|---|
 | **frame** (naive) | 3000 | **[−0.0325, −0.0079]** | 0.0063 | 1.00× |
 | **video** | 150 | [−0.0606, +0.0167] | 0.0199 | **3.16×** |
-| **identity** | 29 | [−0.0534, +0.0096] | 0.0158 | **2.51×** |
+| **component** | 29 | [−0.0534, +0.0096] | 0.0158 | **2.51×** |
 
 Point estimate is **−0.0196 in all three**. Only the uncertainty model differs.
 
+Three intervals, but **two** inferential outcomes: the frame bootstrap excludes
+zero, and both clustered bootstraps include it. Do not describe this as "three
+different conclusions" — the video and component analyses agree.
+
 **The naive frame bootstrap excludes zero.** It would be reported as *"Xception +
 FAD performs significantly worse than Xception (p<0.05)"*. Resampling videos or
-identity components instead — the units that are actually independent — the
+source-target components instead — the units that are actually independent — the
 interval spans zero and no such claim survives.
 
 A researcher using the standard frame-pooled bootstrap on this exact data would
 have published a significant architectural finding the evidence does not support.
 That is contribution 2, measured rather than argued.
 
-Note the identity interval is *narrower* than the video interval despite having
+Note the component interval is *narrower* than the video interval despite having
 fewer units (29 vs 150). Bootstrap width depends on within-cluster homogeneity as
 well as cluster count, so "fewer clusters ⇒ wider interval" does not hold
 mechanically. Report both; do not assume monotonicity.

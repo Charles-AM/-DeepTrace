@@ -111,7 +111,7 @@ def test_degenerate_size_is_flagged_not_reported_as_precise():
     assert by_n[120]["degenerate"] is False
 
     fit = fit_power_law(rows)
-    assert fit["sizes_excluded_degenerate"] == "5"
+    assert "5" in fit["sizes_excluded"]
     assert fit["n_points_fitted"] == 3
 
 
@@ -148,3 +148,15 @@ def test_matches_sklearn_where_sklearn_is_available():
         scores = rng.normal(size=n).round(2)          # ties on purpose
         assert auc(labels, scores) == pytest.approx(
             sklearn_metrics.roc_auc_score(labels, scores), abs=1e-12)
+
+
+def test_small_n_is_excluded_from_the_fit_by_default():
+    """At n<10 with a 1:4 unit ratio a draw holds one or two real units; the
+    width then reflects AUC coarseness, not the sample-size trend."""
+    rows = [{"n_units": n, "halfwidth_median": 1.0 / np.sqrt(n)}
+            for n in (5, 8, 10, 20, 40, 80)]
+    fit = fit_power_law(rows)
+    assert fit["min_fit_n"] == 10
+    assert fit["n_points_fitted"] == 4
+    assert fit["sizes_excluded"] == "5;8"
+    assert fit_power_law(rows, min_fit_n=1)["n_points_fitted"] == 6

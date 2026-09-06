@@ -161,21 +161,28 @@ def curve(labels, sa, sb, groups, ns, n_draws=200, n_boot=400, seed=0) -> list[d
     return rows
 
 
-def fit_power_law(rows: list[dict], targets=DEFAULT_TARGETS) -> dict:
+def fit_power_law(rows: list[dict], targets=DEFAULT_TARGETS,
+                  min_fit_n: int = 10) -> dict:
     """Fit log(halfwidth) = a + b*log(n) and solve for the N reaching each target.
 
     b is the informative number: -0.5 is the rate independent sampling would give,
     and a shallower slope means added videos buy less than sqrt(n) would suggest.
     """
+    # Very small subsamples are excluded from the fit as well as degenerate ones.
+    # At n<10 with a 1:4 unit ratio a draw holds one or two real units, so AUC is
+    # coarse and its bootstrap width reflects that coarseness rather than the
+    # sample-size trend the fit is trying to estimate.
     usable = [r for r in rows if r["halfwidth_median"] > 0
-              and not r.get("degenerate", False)]
+              and not r.get("degenerate", False)
+              and r["n_units"] >= min_fit_n]
     dropped = [r["n_units"] for r in rows if r not in usable]
     n = np.array([r["n_units"] for r in usable], dtype=float)
     w = np.array([r["halfwidth_median"] for r in usable], dtype=float)
     if len(n) < 3:
         raise ValueError(
-            f"need >=3 non-degenerate curve points to fit, got {len(n)} "
-            f"(sizes {dropped} were degenerate). Widen --ns or raise --n-boot.")
+            f"need >=3 usable curve points to fit, got {len(n)} "
+            f"(sizes {dropped} were degenerate or below min_fit_n={min_fit_n}). "
+            f"Widen --ns or raise --n-boot.")
     x, y = np.log(n), np.log(w)
     b, a = np.polyfit(x, y, 1)
     resid = y - (a + b * x)
@@ -183,8 +190,8 @@ def fit_power_law(rows: list[dict], targets=DEFAULT_TARGETS) -> dict:
 
     out = {"slope": round(float(b), 4), "intercept": round(float(a), 4),
            "r2": round(r2, 4), "n_max_observed": int(n.max()),
-           "n_points_fitted": len(n),
-           "sizes_excluded_degenerate": ";".join(str(d) for d in dropped) or "none",
+           "n_points_fitted": len(n), "min_fit_n": min_fit_n,
+           "sizes_excluded": ";".join(str(d) for d in dropped) or "none",
            "slope_note": "-0.5 == independent-sampling rate"}
     for t in targets:
         need = float(np.exp((np.log(t) - a) / b))
@@ -195,7 +202,7 @@ def fit_power_law(rows: list[dict], targets=DEFAULT_TARGETS) -> dict:
 
 def run(path_a: Path, path_b: Path, unit: str = "video", aggregate: bool = True,
         ns=None, n_draws: int = 200, n_boot: int = 400, seed: int = 0,
-        targets=DEFAULT_TARGETS, out_dir: Path | None = None) -> tuple[list[dict], dict]:
+        targets=DEFAULT_TARGETS, min_fit_n: int = 10, out_dir: Path | None = None) -> tuple[list[dict], dict]:
     # imported lazily: cluster_boot pulls in sklearn, and the curve machinery
     # above is deliberately dependency-light so it stays unit-testable anywhere.
     from .cluster_boot import _load, _prepare
@@ -211,7 +218,7 @@ def run(path_a: Path, path_b: Path, unit: str = "video", aggregate: bool = True,
     print(f"unit={unit}  available={n_avail}  items={len(labels)}  sizes={ns}")
 
     rows = curve(labels, sa, sb, groups, ns, n_draws=n_draws, n_boot=n_boot, seed=seed)
-    fit = fit_power_law(rows, targets=targets)
+    fit = fit_power_law(rows, targets=targets, min_fit_n=min_fit_n)
     print(f"\n  fit: halfwidth ~ n^{fit['slope']}  (R2={fit['r2']})")
     for t in targets:
         flag = " [EXTRAPOLATED beyond observed range]" if fit[f"extrapolated_{t}"] else ""
@@ -240,6 +247,8 @@ def parse_args(argv=None):
     p.add_argument("--n-boot", type=int, default=400)
     p.add_argument("--seed", type=int, default=0)
     p.add_argument("--targets", type=float, nargs="*", default=list(DEFAULT_TARGETS))
+    p.add_argument("--min-fit-n", type=int, default=10,
+                   help="smallest subsample size admitted to the power-law fit")
     p.add_argument("--out-dir", default=None)
     return p.parse_args(argv)
 
@@ -248,7 +257,7 @@ def main(argv=None):
     a = parse_args(argv)
     run(Path(a.a), Path(a.b), unit=a.unit, aggregate=not a.frame_level, ns=a.ns,
         n_draws=a.n_draws, n_boot=a.n_boot, seed=a.seed, targets=tuple(a.targets),
-        out_dir=Path(a.out_dir) if a.out_dir else None)
+        min_fit_n=a.min_fit_n, out_dir=Path(a.out_dir) if a.out_dir else None)
 
 
 if __name__ == "__main__":

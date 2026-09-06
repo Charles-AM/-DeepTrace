@@ -118,7 +118,18 @@ def equivalence_flags(ci_lo: float, ci_hi: float, margins) -> dict:
 
 
 def paired_bootstrap(labels, sa, sb, vids, idents, unit: str = "component",
-                     n_boot: int = 2000, seed: int = 0) -> dict:
+                     n_boot: int = 2000, seed: int = 0,
+                     stratified: bool = False) -> dict:
+    """Percentile cluster bootstrap for the paired AUC difference.
+
+    `stratified` resamples all-real and all-fake clusters within their own
+    strata, holding each replicate's class composition fixed. It is a sensitivity
+    option, not the default: the unstratified resample is the standard cluster
+    bootstrap and is what every reported interval uses. Note it can only matter
+    for the `video` unit -- a component carries both real and fake videos, so at
+    the component unit every cluster is mixed, there is one stratum, and the two
+    procedures coincide exactly.
+    """
     rng = np.random.default_rng(seed)
     if unit == "frame":
         groups = [str(i) for i in range(len(labels))]
@@ -148,10 +159,21 @@ def paired_bootstrap(labels, sa, sb, vids, idents, unit: str = "component",
         print(f"  WARNING: unit={unit!r} has only {len(keys)} clusters — the interval "
               "will be very wide and percentile bootstrap is unreliable at this size.")
 
+    # strata for the optional class-stratified variant: a cluster is all-real,
+    # all-fake, or mixed. Mixed clusters form their own stratum.
+    strata: dict[int, list[int]] = {}
+    for k_i, k in enumerate(keys):
+        vals = set(labels[index_of[k]].tolist())
+        strata.setdefault(vals.pop() if len(vals) == 1 else -1, []).append(k_i)
+
     point = roc_auc_score(labels, sb) - roc_auc_score(labels, sa)
     diffs, skipped = [], 0
     for _ in range(n_boot):
-        picked = rng.choice(len(keys), size=len(keys), replace=True)
+        if stratified:
+            picked = np.concatenate([rng.choice(m, size=len(m), replace=True)
+                                     for m in strata.values()])
+        else:
+            picked = rng.choice(len(keys), size=len(keys), replace=True)
         idx = np.concatenate([index_of[keys[k]] for k in picked])
         y = labels[idx]
         if y.min() == y.max():          # single-class replicate -> AUC undefined
@@ -162,6 +184,7 @@ def paired_bootstrap(labels, sa, sb, vids, idents, unit: str = "component",
     return {"unit": unit, "n_units": len(keys), "n_items": len(labels),
             "auc_a": round(float(roc_auc_score(labels, sa)), 4),
             "auc_b": round(float(roc_auc_score(labels, sb)), 4),
+            "stratified": stratified,
             "diff": round(float(point), 4),
             "ci_lo": round(float(np.percentile(d, 2.5)), 4),
             "ci_hi": round(float(np.percentile(d, 97.5)), 4),
