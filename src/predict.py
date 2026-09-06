@@ -103,15 +103,30 @@ def run(run_name: str, results_root: Path, dataset_name: str, seed: int,
     assert len(margins) == len(entries), "prediction/entry misalignment"
 
     out_path = out_dir / f"{run_name}_{split}.csv"
+    unparsed: list[str] = []
     with out_path.open("w", newline="") as fh:
         w = csv.DictWriter(fh, fieldnames=FIELDS)
         w.writeheader()
         for (path, label), margin, prob in zip(entries, margins, probs):
             meta = parse_crop_name(path)
+            if not meta["video_id"]:
+                unparsed.append(path)
             w.writerow({"run": run_name, "config": ckpt["config"], "seed": seed,
                         "split": split, "label": int(label),
                         "logit_margin": round(float(margin), 6),
                         "prob_fake": round(float(prob), 6), "path": path, **meta})
+
+    # An unparsed crop name yields an EMPTY video_id — and an empty key is still a
+    # key, so every such row silently merges into one bogus cluster and corrupts
+    # any cluster-aware interval computed downstream. Nothing about the output
+    # looks wrong when this happens, so refuse to emit it rather than warn.
+    if unparsed:
+        out_path.unlink(missing_ok=True)
+        raise ValueError(
+            f"{len(unparsed)}/{len(entries)} crop names did not parse — refusing to "
+            f"write {out_path.name}, since empty video_ids would collapse into a "
+            f"single cluster. First offenders: {unparsed[:3]}"
+        )
     print(f"wrote {out_path}  ({len(entries)} predictions, "
           f"{len({parse_crop_name(p)['video_id'] for p, _ in entries})} video groups)")
     return out_path
