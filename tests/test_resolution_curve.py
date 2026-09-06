@@ -132,3 +132,19 @@ def test_fit_error_names_the_degenerate_sizes():
             {"n_units": 10, "halfwidth_median": 0.3}]
     with pytest.raises(ValueError, match=r"\[5, 8\]"):
         fit_power_law(rows)
+
+
+def test_matches_sklearn_where_sklearn_is_available():
+    """cluster_boot computes every reported interval with this AUC rather than
+    sklearn's, so the two must agree exactly. Skipped where sklearn is absent;
+    it runs in CI/Kaggle, which is where the reported numbers are produced."""
+    sklearn_metrics = pytest.importorskip("sklearn.metrics")
+    rng = np.random.default_rng(0)
+    for _ in range(50):
+        n = int(rng.integers(8, 400))
+        labels = rng.integers(0, 2, size=n)
+        if labels.min() == labels.max():
+            labels[0] = 1 - labels[0]
+        scores = rng.normal(size=n).round(2)          # ties on purpose
+        assert auc(labels, scores) == pytest.approx(
+            sklearn_metrics.roc_auc_score(labels, scores), abs=1e-12)

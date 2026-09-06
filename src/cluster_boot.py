@@ -35,6 +35,7 @@ from pathlib import Path
 import numpy as np
 
 from .clusters import build_component_clusters
+from .resolution_curve import auc as roc_auc_score
 
 UNITS = ("frame", "video", "component")
 
@@ -118,8 +119,6 @@ def equivalence_flags(ci_lo: float, ci_hi: float, margins) -> dict:
 
 def paired_bootstrap(labels, sa, sb, vids, idents, unit: str = "component",
                      n_boot: int = 2000, seed: int = 0) -> dict:
-    from sklearn.metrics import roc_auc_score   # lazy: keeps the pure helpers
-                                                # above importable without sklearn
     rng = np.random.default_rng(seed)
     if unit == "frame":
         groups = [str(i) for i in range(len(labels))]
@@ -176,7 +175,7 @@ def run(path_a: Path, path_b: Path, aggregate: bool = True, n_boot: int = 2000,
     rows_a, rows_b = _load(path_a), _load(path_b)
     labels, sa, sb, vids, idents = _prepare(rows_a, rows_b, aggregate)
     print(f"aggregate={'video-level' if aggregate else 'frame-level'}  "
-          f"items={len(labels)}  videos={len(set(vids))}  identities={len(set(idents))}")
+          f"items={len(labels)}  videos={len(set(vids))}  components={len(set(idents))}")
 
     results = []
     for unit in UNITS:
