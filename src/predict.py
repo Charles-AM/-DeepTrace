@@ -33,8 +33,12 @@ from .utils import get_device
 
 # manipulated: .../manipulated-sequences-<Method>-<comp>-videos-<target>-<source>_<frame>.jpg
 # original:    .../original-sequences-youtube-<comp>-videos-<id>_<frame>.jpg
+# NOTE: the method group must allow digits — "Face2Face" contains one, and an
+# [A-Za-z]+ class silently failed to match it, leaving those rows with an empty
+# video_id that would have collapsed into a single bogus cluster. Caught by the
+# unparsed-rows gate in the V1 pipeline; see tests/test_clusters.py.
 _FAKE_RE = re.compile(
-    r"manipulated-sequences-(?P<method>[A-Za-z]+)-(?P<comp>c\d+|raw)-videos-"
+    r"manipulated-sequences-(?P<method>[A-Za-z0-9]+)-(?P<comp>c\d+|raw)-videos-"
     r"(?P<target>\d+)-(?P<source>\d+)_(?P<frame>\d+)"
 )
 _REAL_RE = re.compile(

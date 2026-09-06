@@ -104,3 +104,31 @@ def test_identity_clustering_halves_units_relative_to_video_grouping():
     comps = set(build_identity_clusters(pairs).values())
     assert len(targets) == 4
     assert len(comps) == 2
+
+
+def test_all_four_ffpp_methods_parse_including_digits_in_the_name():
+    """Face2Face contains a digit. An [A-Za-z]+ method class silently failed to
+    match it, leaving 600 rows with an empty video_id that would have collapsed
+    into one bogus cluster and corrupted every downstream interval. Regression
+    test for that bug."""
+    cases = [
+        ("manipulated-sequences-Deepfakes-c40-videos-004-982_00012.jpg", "Deepfakes"),
+        ("manipulated-sequences-Face2Face-c40-videos-004-982_00012.jpg", "Face2Face"),
+        ("manipulated-sequences-FaceSwap-c23-videos-111-222_00000.jpg", "FaceSwap"),
+        ("manipulated-sequences-NeuralTextures-raw-videos-7-8_00036.jpg", "NeuralTextures"),
+    ]
+    for path, method in cases:
+        m = parse_crop_name(path)
+        assert m["manipulation"] == method, (path, m)
+        assert m["video_id"], f"empty video_id for {path}"
+        assert m["source_seq"], f"empty source_seq for {path}"
+
+
+def test_no_crop_name_yields_an_empty_video_id():
+    """Any unparsed path becomes a cluster of its own with an empty key, which
+    silently merges unrelated items. Nothing should reach that fallback."""
+    for path in [
+        "manipulated-sequences-Face2Face-c40-videos-004-982_00012.jpg",
+        "original-sequences-youtube-c40-videos-602_00036.jpg",
+    ]:
+        assert parse_crop_name(path)["video_id"] != ""
