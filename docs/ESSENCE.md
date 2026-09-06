@@ -3,174 +3,221 @@
 The north-star document. If any decision, experiment, or paragraph doesn't serve
 what's below, it's drift. Read this first; everything else is detail.
 
-Last updated 2026-09-05.
+Last updated 2026-09-05 (rev. 2 — thesis corrected after external review).
 
 ---
 
-## 1. The one sentence
+## 1. The thesis
 
-> Conclusions about whether an explicit frequency pathway helps deepfake detection
-> depend more on **how you evaluate** than on **what you build** — and we quantify
-> both effects under a controlled protocol, using F3-Net's FAD component as the
-> case study.
+> Evaluation design changes both apparent detector performance and the **evidential
+> warrant** of architectural comparisons. On FaceForensics++ we separate seen-video
+> leakage, test-content uncertainty, and optimisation variability, using F3-Net's
+> FAD component as a controlled case study.
 
-Deliberately **result-independent**: it holds whether FAD turns out to help, not
-help, or remain inconclusive. That is the property that has protected this project
-through three separate findings that overturned what we expected.
+Result-independent by construction — it holds whether FAD helps, doesn't, or stays
+inconclusive.
+
+**The strongest line available to us:**
+
+> *The conclusion was stable; its warrant was not.*
+
+At L1 (crop-randomised) and L2 (video-disjoint) the FAD-vs-Xception result was null
+both times. What changed was not the answer but what the answer is worth. Be precise
+about why — warrant is **three** things, and only two are established:
+
+| dimension | at L1 | status |
+|---|---|---|
+| **Construct validity** — are we measuring unseen-video generalisation? | No: performance on unseen *crops from seen videos* is a different estimand | ✅ established |
+| **Statistical validity** — are independent units treated as independent? | No: thousands of crops from ~30 videos are pseudoreplicated | ✅ established |
+| **Practical resolution** — can the design exclude an effect large enough to matter? | Possibly compressed by the ceiling | ⬜ **hypothesis — must be demonstrated**, not assumed from a high AUC |
+
+⚠️ **Do not claim L1 "could not have detected a difference."** Near-ceiling AUC does
+not prove low power; with paired predictions and large n, small differences are
+sometimes resolvable. That claim requires an interval or a detectable-effect
+calculation.
+
+⚠️ **Do not yet claim L2 is informative either.** Until the cluster-aware interval is
+computed, the honest statement is *"its warrant changed and remains under
+evaluation."* Upgrade only if the cluster-aware upper bound excludes the target
+effect.
 
 ## 2. Title options
 
-| | title | centre of gravity | risk |
-|---|---|---|---|
-| **1 (recommended)** | *Protocol Before Architecture: Evaluation Design and the Assessment of Frequency Features in Deepfake Detection* | protocol finding leads, frequency is the case study | low — works under any outcome |
-| 2 | *Evaluation Units Matter: Cluster-Aware Assessment of Frequency-Domain Deepfake Detection* | statistical inference leads | needs the uncertainty-decomposition figure to earn it |
-| 3 | *What Does Frequency Add? A Protocol-Controlled Assessment of DCT Pathways* | original question leads | weaker — the frequency null is semi-expected |
-| 4 | *Detectable but Not Complementary: Frequency Features Under Leakage-Free Evaluation* | finding leads | **premature** — commits to a result our intervals don't yet support |
+| | title | risk |
+|---|---|---|
+| **1 (recommended)** | *Evaluation Units Matter: A Cluster-Aware Assessment of Frequency-Domain Deepfake Detection* | low — states what's distinctive without implying we invented grouped splitting |
+| 2 | *Protocol Before Architecture: Evaluation Design and the Assessment of Frequency Features* | fine **if** "before" means evaluation validity logically precedes architectural comparison — not that protocol reverses the conclusion |
+| 3 | *What Does Frequency Add?* | weaker — the frequency null is semi-expected |
+| ~~4~~ | ~~*Detectable but Not Complementary*~~ | **rejected** — commits to a result our intervals cannot support |
 
 ## 3. Motivation
 
-Deepfake detection carries real stakes (fraud — the 2024 Arup HK deepfake-call
-case; non-consensual imagery; journalistic verification; video-KYC). Practitioners
-building detectors face a concrete recurring choice: **add an explicit
-frequency-domain branch, or spend that budget elsewhere?** The literature has said
-yes since 2020 and the design pattern is still active (Frequency Masking ICASSP'24,
-FreqMamba, FreqDebias CVPR'25).
+Deepfake detection carries real stakes (video-call fraud, non-consensual imagery,
+journalistic verification, video-KYC). Practitioners face a recurring architectural
+choice: **add an explicit frequency branch, or spend that budget elsewhere?** The
+literature has said yes since 2020, and the pattern is still active (Frequency
+Masking ICASSP'24, FreqMamba, FreqDebias CVPR'25).
 
-Answering that question requires an evaluation protocol capable of *resolving* it.
-We found that the protocol commonly used in reimplementation pipelines is not —
-frame-level splits inflate AUC by ~18 points and compress all architectural
-differences into a ceiling regime, where a null result and a masked real effect are
-observationally identical.
+Answering that requires an evaluation design capable of resolving it. A convenient
+but invalid crop-randomised protocol — **the one our own initial pipeline used** —
+inflates FF++ AUC by ~18 points and measures the wrong estimand entirely.
+
+*(Do not claim this protocol is widespread without a documented code/literature
+audit. We know it is easy to fall into because we fell into it.)*
 
 ## 4. Application
 
-| audience | what changes for them |
+| audience | what changes |
 |---|---|
-| Practitioners building detectors | Evidence on whether a frequency branch earns its cost — ours measures +31% FLOPs / +44% latency for the separate-branch design, ~+3% for FAD |
-| Anyone benchmarking on FF++ | Frame-level splits inflate by ~18 points; grouped splits and cluster-aware intervals are necessary, not optional |
-| Researchers running ablations | Uncertainty must be estimated over *test content*, not just seeds — otherwise intervals understate what they don't know |
+| Practitioners | Evidence on whether a frequency branch earns its cost: +31% FLOPs / +44% latency for a separate branch, ~+3% for FAD |
+| Benchmarkers | Crop-randomised splits inflate ~18 points; grouped splits and cluster-aware intervals are necessary |
+| Researchers running ablations | **How much resolution an FF++ ablation actually has** — plausibly less than the effects routinely claimed from it |
 
-**Do not claim** knowledge of proprietary deployment architectures, and **do not
-claim** published FF++ results are inflated — reputable work uses the official
-video-level splits. The finding is about what happens when they aren't used.
+**Never claim:** knowledge of proprietary deployment stacks, or that published FF++
+results are inflated (reputable work uses the official video-level splits).
 
 ## 5. Prior work — what they say vs. what we say
 
-### Base / foundation — the method we implement and test
-**Qian et al., "Thinking in Frequency" (F3-Net), ECCV 2020.**
-*They say:* frequency-aware decomposition (FAD) + local frequency statistics (LFS)
-in a two-stream design improves face-forgery detection, with the largest gains on
-low-quality (c40) media.
-*We say:* under matched backbone, data, and budget, we cannot detect an advantage
-from **FAD specifically** at c23 or c40.
-⚠️ **We implement FAD only** — not LFS, not MixBlock. Report configurations as
-`Xception` and `Xception + FAD`, never as "F3-Net". We test whether *its FAD
-component* reproduces the reported low-quality advantage; we do not reproduce the
-complete system.
+### Base — the method we implement and test
+**Qian et al., "Thinking in Frequency" (F3-Net), ECCV 2020.** *They say:*
+frequency-aware decomposition (FAD) + local frequency statistics (LFS) improve
+face-forgery detection, most on low-quality media.
+*We say:* under matched backbone, data and budget we assess whether **FAD alone**
+delivers an advantage compatible with its reported magnitude.
+⚠️ **We implement FAD only** — not LFS, not MixBlock. Configs are `Xception` and
+`Xception + FAD`, **never "F3-Net"**. Avoid "replication failure": our subset,
+resolution, epochs and implementation differ. The question is *compatibility with
+the reported effect size*, not reproduction of the system.
 
-### Recent target — the current state of the art
-**Kashiani, Alipour Talemi, Afghah, "FreqDebias," CVPR 2025.**
-*They say:* frequency reliance produces *spectral bias* — over-reliance on narrow
-bands that harms generalisation — and propose augmentation + consistency
-regularisation to correct it.
-*We say:* consistent in spirit, and it sharpens our framing — if the field's newest
-work needs dedicated machinery to make frequency reliance safe, the *unregularised*
-frequency pathway (F3-Net's, and ours) is exactly what should be questioned. A
-productive contrast, **not an ally**.
+### Recent reference point
+**Kashiani et al., "FreqDebias," CVPR 2025.** *They say:* frequency reliance can
+create spectral bias harming generalisation; augmentation + consistency
+regularisation corrects it.
+*We say:* a complementary perspective — frequency reliance can create
+manipulation-specific shortcuts, so *explicitly adding frequency access does not
+guarantee generalisable information*. **Not** "current SOTA" (that depends on
+dataset/protocol/backbone/metric), and their result does **not** prove FAD is
+unhelpful.
 
-### Support — closest intellectual kin
+### Support
 **Dong et al., "Implicit Identity Leakage" (CADDM), CVPR 2023.** *They say:*
 detectors latch onto identity as a shortcut, harming generalisation.
-*We say:* identity leakage corrupts **evaluation** too, not just generalisation —
-and we quantify by how much. Now the most load-bearing support paper, because our
-identity-disjoint splitting is a direct application of their thesis.
+*We say:* CADDM **motivates our identity-disjoint extension**. Video grouping
+prevents frame overlap but may leave source-side overlap. We have quantified
+**video-level** leakage; identity-level effects remain under evaluation.
+⚠️ Our 18-point figure is same-video leakage, **not** identity leakage.
 
-**Shiohara & Yamasaki, "SBI," CVPR 2022.** *They say:* spatial self-blending
-generalises best, with no real manipulated training data.
-*We say:* consistent — the field's strongest generalisation comes from spatial
-artifact modelling.
+**Shiohara & Yamasaki, "SBI," CVPR 2022.** *They say / we say:* SBI demonstrates
+that carefully synthesised spatial blending artifacts support strong cross-dataset
+generalisation **without an explicit frequency branch**. (Do not inflate this into
+"the field's strongest generalisation is spatial" — that's broader than SBI
+establishes and reads as selective citation.)
 
-Antecedents (cite, don't reproduce): Frank et al. ICML 2020; Zhang et al. WIFS
-2019; Durall et al. CVPR 2020. Full annotated list: `docs/related-work.md`.
+Antecedents: Frank et al. ICML 2020; Zhang et al. WIFS 2019; Durall et al. CVPR
+2020. Full list: `docs/related-work.md`.
 
-## 6. What we're trying to achieve
+## 6. Contributions (three, in order)
 
-Three contributions, in priority order:
+1. **Protocol effect** — quantify the seen-video vs unseen-video performance gap
+   across matched detectors.
+2. **Inference effect** — separate crop, test-content, and training randomness via
+   paired cluster-aware evaluation; report what resolution the design actually has.
+3. **FAD case study** — determine whether FAD's benefit exceeds prespecified
+   thresholds at c23 and c40, accounting for computational cost.
 
-1. **A controlled measurement of protocol effect.** Frame-level vs video-level vs
-   identity-disjoint splitting, across matched architectures — how much does the
-   evaluation unit move absolute performance, and does it move *conclusions*?
-2. **A cost-accounted, cluster-aware assessment of FAD.** Paired comparison with
-   intervals estimated over independent test clusters, against a prespecified
-   practical-effect margin.
-3. **Evidence on complementarity.** Whether a frequency representation can be
-   distinct and weakly discriminative without adding incremental predictive value
-   (late fusion, gate α-sweep).
+Complementarity (late fusion, α-sweep) is **explanatory evidence**, not a fourth
+contribution.
 
-## 7. What is already achieved
+## 7. Effect thresholds — anchored externally
+
+Set from the literature, never from our own pilots.
+
+| threshold | value | basis |
+|---|---|---|
+| Published FAD-specific gain | **≈ +0.014 AUC** | F3-Net's *FAD ablation* row (Xception ≈ 89.3 → +FAD ≈ 90.7) — ⚠️ **VERIFY against the actual table before use** |
+| Full-system gain (**do not use**) | ≈ +0.040 | full F3-Net; we don't implement LFS/MixBlock |
+| Practical threshold | 0.010, with sensitivity at 0.005 / 0.010 / 0.020 | a **stakeholder judgement**, not a principled constant — present it as such |
+
+**Sobering implication.** Our seed-level CI half-width was ±0.043; a cluster-aware
+interval over ~30 test videos is unlikely to be much tighter. That is **wider than
+the +0.014 effect we are trying to adjudicate** — so the study as currently scoped
+may not be able to answer its own question. This is not a failure; it *is*
+contribution 2, and it makes scaling independent test videos **necessary rather
+than optional**.
+
+## 8. Status of findings
 
 | finding | status | evidence |
 |---|---|---|
-| Frame-level splits inflate FF++ AUC by 17.6–19.2 pts, consistent across 3 architectures | **solid** (c40; c23 running) | `results/in_domain_c40_vid/` |
-| Protocol changed absolute performance ~18 pts but not the FAD-vs-Xception conclusion | **moderate** — shown for one contrast, 3 configs | same |
-| No *detectable* FAD benefit at c23 or c40 | **bounded, not established** — video-level CI [−0.048, +0.038] still admits +3.8 pts | `results/in_domain_c40_vid/` |
-| Late fusion of independently-trained spatial + frequency scores adds nothing (4 dp, 3 seeds, regularised and not) | **strong** (frame-level; re-run queued) | `results/analysis/late_fusion/` |
-| Learned fusion gate never leaves 0.5; weight-decay confound tested and ruled out | **moderate** — needs α-sweep | `results/analysis/fusion_alpha.csv` |
-| Frequency branch is representationally *distinct* from spatial, not redundant | **suggestive only** — needs untrained-control matrix; likely supplementary | `results/analysis/cka/` |
-| Frequency-only best on the crudest manipulation, worst on the subtlest | **descriptive** — 4 methods is too few to generalise | `results/analysis/permanip/` |
-| Separate frequency branch costs +31% FLOPs / +44% latency; FAD only ~+3% | **solid** | `results/analysis/efficiency/` |
-| Real-vs-fake DCT gap exists but is small (d≈0.15) and survives JPEG-q30 | **solid**, though c40 (H.264) validation still owed | `results/analysis/spectra/` |
+| Crop-randomised splits inflate FF++ AUC 17.6–19.2 pts across 3 architectures | **solid** (c40 only; c23 running) | `results/in_domain_c40_vid/` |
+| Protocol shifted absolute performance ~18 pts without changing the FAD conclusion | **moderate** — one contrast, 3 configs | same |
+| No detectable FAD benefit **at c40** | **provisional** — seed-level CI is a diagnostic of optimisation variability, **not a valid population interval** | same |
+| Late fusion adds nothing over spatial alone | **suggestive** — must be repeated on video-grouped predictions | `results/analysis/late_fusion/` |
+| Fusion gate never leaves 0.5; weight-decay confound ruled out | **moderate** — needs α-sweep | `results/analysis/fusion_alpha.csv` |
+| Separate frequency branch +31% FLOPs / +44% latency; FAD ≈ +3% | **solid** | `results/analysis/efficiency/` |
+| Real-vs-fake DCT gap small (d≈0.15), survives JPEG-q30 | **descriptive only** — frame-pseudoreplicated; needs video-averaged effect size; c40/H.264 validation owed | `results/analysis/spectra/` |
+| Frequency branch representationally distinct from spatial | **suggestive** → **supplementary** | `results/analysis/cka/` |
+| Frequency-only best on crudest / worst on subtlest manipulation | **descriptive** → **supplementary** | `results/analysis/permanip/` |
 
-**Scale:** ~50 training runs, 10 configurations, ~32 GPU-hours
-(`docs/EXPERIMENTS.md`). **Three self-caught errors** documented and corrected
-(weight-decay confound; CKA falsifying our own redundancy hypothesis; split
-leakage) — `docs/progress-log.md`.
+Scale: ~50 training runs, 10 configurations, ~32 GPU-hours (`docs/EXPERIMENTS.md`).
 
-## 8. Validation still required
+## 9. Validation required
 
-**Essential before submission**
+**Essential**
 
 | # | test | why |
 |---|---|---|
-| V1 | Per-prediction dumps + three-unit cluster bootstrap (frame/video/identity) | Current intervals use the wrong unit. Infrastructure built (`src/cluster_boot.py`), not yet run. |
-| V2 | Seen-video vs unseen-video matched test sets, one trained model | Isolates the leakage effect without confounding it with two differently-trained models. ~1 h. |
-| V3 | Identity-disjoint (L3) splits | Video grouping keys on target only; source-side overlap remains (CADDM's leak). |
-| V4 | Video-level AUC *and* frame AUC on the same held-out videos | Separates aggregation effect from split effect; needed for comparability with published work. |
-| V5 | c23 and c40 under the same grouped splits and seeds | Tests architecture × compression as an interaction, not two descriptive numbers. |
-| V6 | Prespecified practical-effect margin + equivalence test | "Not significant" ≠ "no effect". |
+| V1 | Paired bootstrap comparing **naive frame resampling → video-cluster → identity-component** resampling, plus hierarchical seed variability | Not three equally legitimate units: one naive analysis vs progressively defensible ones |
+| V2 | Seen-video vs unseen-video matched test sets, one fixed trained model | Estimates the seen/unseen **generalisation gap** with the model held constant. Does *not* perfectly isolate leakage (different video content); match manipulation, compression, frame count, duration, sampling position, and repeat the matching |
+| V3 | Identity-disjoint splits — **define identity explicitly**: sequence ID, source-target components, or face-embedding clusters. Retain a manipulated video only when target and source identities share a partition | FF++ sequence IDs are not verified human-identity labels |
+| V4 | Video-level AUC **and** frame AUC on the same held-out videos | Separates aggregation effect from split effect |
+| V5 | c23 and c40 under identical grouped splits and seeds | Enables the **interaction interval**, not two descriptive numbers |
+| V6 | Thresholds above + sensitivity analysis | "Not significant" ≠ "no effect". Disclose that the practical margin was chosen after exploratory runs — **do not call it preregistration** |
+| V7 | CI width vs independent-video count | Establishes how many videos an ablation needs to support a +0.014 claim — contribution 2's core figure |
 
-**Strongly recommended**
+**Recommended:** α-sweep 0→1 (stronger than "α didn't move"); spectral survival under
+real H.264 c40; grouped learning curve (quantifies how performance and uncertainty
+improve with independent-video count — it does *not* by itself separate leakage from
+sample-size effects); prespecified early-stopping rule (epoch-3 peaks do **not**
+license post-hoc budget cuts).
 
-- V7 — learning curve over independent video count (60/120/180/240): disentangles
-  leakage from sample-size collapse, and tells us whether scaling the data is worth
-  the compute *before* spending it.
-- V8 — epoch audit: best val epoch was 3 at video level while we run 15. Fixing
-  this roughly halves the cost of everything downstream.
-- V9 — gate α-sweep from 0 to 1 (post-hoc): far stronger than "α didn't move".
-- V10 — spectral survival under real H.264 c40 rather than simulated JPEG-q30.
+**Out of scope:** full FF++, multiple external datasets, many architectures, full
+F3-Net with LFS+MixBlock, 10+ seeds.
 
-**Explicitly out of scope** (this is not a benchmark paper): full FF++ (~1000
-pairs), multiple external datasets, many architectures, reproducing full F3-Net
-with LFS + MixBlock, 10+ seeds.
+## 10. Interpretation, precommitted
 
-## 9. Claim-strength discipline
+The compression statistic is the **interaction**, with its own interval:
 
-Wording that survives review, and what it replaces:
+$$(\mathrm{FAD}-\mathrm{Xception})_{c40} - (\mathrm{FAD}-\mathrm{Xception})_{c23}$$
+
+Never infer an interaction because one level is significant and the other isn't.
+
+| outcome | reading |
+|---|---|
+| Both intervals exclude the practical margin | No practically meaningful benefit at either compression, under tested conditions |
+| Both centred near zero but wide | Inconclusive — report the resolution achieved |
+| c23 positive, c40 near zero, **interaction excludes zero** | FAD benefit *decreases* under heavier compression — contrary to the expected direction |
+| c23 positive, interaction includes zero | Insufficient evidence of compression-specific behaviour |
+| Both exceed the practical margin | FAD earns its cost under both compressions |
+| Frequency-only loses more L1→L2 than spatial | Possible greater sensitivity to seen-video leakage — requires a protocol × representation interaction to claim |
+
+## 11. Claim discipline
 
 | don't say | say |
 |---|---|
-| "FAD provides no benefit" | "We observed no detectable FAD benefit; our interval excludes effects larger than X." |
-| "The comparison is unanswerable" | "Ceiling compression severely limits resolution." |
-| "Relative comparisons are robust" | "The FAD-vs-Xception conclusion was unchanged in this experiment." |
-| "Frame-level splitting is a competing protocol" | "FF++ prescribes video-level splits; we quantify the cost of the crop-level shortcut." |
-| "F3-Net" (for our config) | "Xception + FAD" |
+| "FAD provides no benefit" | "No detectable benefit; our interval excludes effects larger than X" |
+| "leakage-free evaluation" | "video-disjoint evaluation" |
+| "the comparison is unanswerable" | "ceiling compression may limit resolution" (then demonstrate it) |
+| "protocol changes the conclusion" | "protocol changes performance and warrant; the conclusion was stable" |
+| "F3-Net" (our config) | "Xception + FAD" |
+| "replication failure" | "not compatible with the reported FAD-ablation magnitude under our conditions" |
 | "matched inference cost" | "cost-accounted" |
-| "inverse of the premise" | "contrary to the expectation that frequency cues aid subtle manipulations" |
+| "we quantify identity leakage" | "we quantify video-level leakage; identity effects under evaluation" |
 
-## 10. Target
+## 12. Target
 
-4–5 page IEEE workshop / short-paper venue (media forensics workshop, WIFS,
-IH&MMSec, ICASSP/ICIP-style). Structure: protocol result as opening motivation,
-paired cluster-aware frequency result as the central scientific test, mechanistic
-evidence compressed into one multi-panel figure. **Not** seven equal
-contributions.
+4–5 page IEEE workshop / short paper. Structure: protocol result as motivation,
+cluster-aware paired FAD result as the central test, **one** complementarity figure.
+Main paper carries: protocol shift, cluster-aware uncertainty comparison, Xception ±
+FAD at c23/c40, video-level metric, thresholds, efficiency, late fusion + α-sweep.
+CKA, per-manipulation, gate training history and spectral inference → supplementary.
