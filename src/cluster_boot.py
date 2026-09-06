@@ -166,7 +166,11 @@ def run(path_a: Path, path_b: Path, aggregate: bool = True, n_boot: int = 2000,
 
     if out_dir:
         out_dir = Path(out_dir); out_dir.mkdir(parents=True, exist_ok=True)
-        out = out_dir / f"boot_{Path(path_a).stem}_vs_{Path(path_b).stem}.csv"
+        # the aggregation mode MUST be in the filename: a --frame-level run and a
+        # default run on the same pair are different analyses, and without this
+        # the second silently overwrites the first.
+        mode = "video" if aggregate else "frame"
+        out = out_dir / f"boot_{mode}_{Path(path_a).stem}_vs_{Path(path_b).stem}.csv"
         with out.open("w", newline="") as fh:
             w = csv.DictWriter(fh, fieldnames=list(results[0].keys()))
             w.writeheader()
