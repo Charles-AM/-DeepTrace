@@ -36,7 +36,14 @@ def parse_args(argv=None) -> argparse.Namespace:
     p.add_argument("--lr", type=float, default=3e-4)
     p.add_argument("--weight-decay", type=float, default=0.05)
     p.add_argument("--image-size", type=int, default=128)
-    p.add_argument("--seed", type=int, default=0)
+    p.add_argument("--seed", type=int, default=0,
+                   help="training seed: weight init, data order, augmentation")
+    p.add_argument("--split-seed", type=int, default=None,
+                   help="seed for the train/val/test partition. Defaults to --seed "
+                        "(historical behaviour). Set it explicitly to DECOUPLE the "
+                        "split from the training seed: holding --split-seed fixed "
+                        "while varying --seed isolates optimisation variability, "
+                        "which is otherwise confounded with split composition.")
     p.add_argument("--num-workers", type=int, default=2)
     p.add_argument("--focal-gamma", type=float, default=2.0)
     p.add_argument("--focal-alpha", type=float, default=None, help="default: from train class balance")
@@ -58,17 +65,25 @@ def main(argv=None) -> dict:
     seed_everything(args.seed)
     device = get_device(args.device)
 
+    # split_seed defaults to seed, preserving every run made before this flag
+    # existed. Passing it explicitly decouples the partition from training
+    # randomness so the two variance sources can be estimated separately.
+    split_seed = args.split_seed if args.split_seed is not None else args.seed
+    decoupled = args.split_seed is not None and args.split_seed != args.seed
+
     run_name = f"{args.dataset_name}_{args.config}{'_sas' if args.sas else ''}_seed{args.seed}"
+    if decoupled:
+        run_name += f"_split{split_seed}"
     out_dir = Path(args.out_root) / run_name
     out_dir.mkdir(parents=True, exist_ok=True)
-    manifest = Path(args.out_root) / "manifests" / f"{args.dataset_name}_seed{args.seed}_sz{args.image_size}.csv"
+    manifest = Path(args.out_root) / "manifests" / f"{args.dataset_name}_seed{split_seed}_sz{args.image_size}.csv"
 
     loaders, datasets = build_dataloaders(
         args.data_root,
         image_size=args.image_size,
         batch_size=args.batch_size,
         num_workers=args.num_workers,
-        seed=args.seed,
+        seed=split_seed,
         group_by=args.group_by,
         manifest=manifest,
         limit=args.limit,
@@ -163,13 +178,18 @@ def _append_summary(path: Path, run_name: str, args, metrics: dict) -> None:
     import csv
 
     path.parent.mkdir(parents=True, exist_ok=True)
-    fields = ["run", "config", "sas", "dataset", "seed", "image_size", "epochs", *METRIC_KEYS]
+    fields = ["run", "config", "sas", "dataset", "seed", "split_seed", "image_size",
+              "epochs", *METRIC_KEYS]
     row = {
         "run": run_name,
         "config": args.config,
         "sas": int(bool(getattr(args, "sas", False))),
         "dataset": args.dataset_name,
         "seed": args.seed,
+        # recorded explicitly so a row always states which partition it used,
+        # even for runs made before --split-seed existed (where it equals seed)
+        "split_seed": (args.split_seed if getattr(args, "split_seed", None) is not None
+                       else args.seed),
         "image_size": args.image_size,
         "epochs": args.epochs,
         **{k: round(metrics.get(k, float("nan")), 5) for k in METRIC_KEYS},

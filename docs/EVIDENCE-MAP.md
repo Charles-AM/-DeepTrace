@@ -1,0 +1,85 @@
+# Evidence map — every claim traced to code, data, and commit
+
+If asked *"prove it"*, this is the document to hand over. Each row links a claim to
+the script that produced it, the committed file holding the numbers, and the commit
+that introduced them. Nothing in the paper should make a claim absent from this
+table.
+
+Repository: `github.com/Charles-AM/-DeepTrace`. All paths are repo-relative.
+Last updated 2026-09-06.
+
+---
+
+## Primary findings
+
+| # | claim | produced by | committed evidence | commit |
+|---|---|---|---|---|
+| E1 | Crop-randomised splits inflate FF++ AUC by 17.6–19.2 points across three architectures (c40) | `src/run_ablation.py` (L1 vs L2 runs) | `results/in_domain_c40/summary.csv`, `results/in_domain_c40_vid/summary.csv` | `4075973`, `e68b559` |
+| E2 | At n=5, FAD − Xception = +0.0049, 95% CI [−0.0185, +0.0283]; excludes neither zero, +0.010, nor +0.014 | `src/paired_summary.py` | `results/in_domain_c40_vid/paired_summary.csv` | `f46d104` |
+| E3 | Point estimate sign flips between seed subsets (sensitivity, **not** a frequency) | `src/paired_summary.py` | same | `9e53b05` |
+| E4 | Simulated independent 3-seed studies: ~32% report opposite sign, ~20% exceed +0.014 | `src/paired_summary.py` (parametric simulation) | same | `9e53b05` |
+| E5 | Backbone comparison is equally unstable (`baseline_spatial − xception`, 9/10 subsets negative) | `src/paired_summary.py` | same | `9e53b05` |
+| E6 | FF++ pair graph: 300 sequences → 150 identity components, all size 2 → ~15 identity clusters in test | `src/clusters.py` | ⚠️ verification run, not a stored artifact — see *Gaps* | `2234a17` |
+
+## Supporting analyses
+
+| # | claim | produced by | committed evidence | commit |
+|---|---|---|---|---|
+| E7 | Late fusion of spatial + frequency-only scores equals spatial alone to 4 dp, 3 seeds, regularised **and** unregularised | `src/late_fusion.py` | `results/analysis/late_fusion/seed_results.csv` | `d5446eb` |
+| E8 | CKA(spatial, frequency) ≈ CKA(spatial, random) across 3 seeds | `src/cka.py` | `results/analysis/cka/seed_results.csv` | `d5446eb` |
+| E9 | Gated fusion α = 0.496 ± 0.001, never leaves initialisation | `src/gate_readout.py` | `results/analysis/fusion_alpha.csv`, `fusion_alpha_raw.csv` | `c9aefb6` |
+| E10 | The α result is not a weight-decay artifact (retrained with the scalar excluded from decay; α unchanged) | `src/utils.py::no_decay_param_groups` + retrain | `results/in_domain/per_run/ffppfix_*.json` | `9deb97f`, `c9aefb6` |
+| E11 | Separate frequency branch costs +31% FLOPs / +44% latency; FAD ≈ +3% | `eff_table.py` (listed in `docs/c40-runbook.md`) | `results/analysis/efficiency/params_flops_latency.csv` | `18279e9` |
+| E12 | Real-vs-fake DCT gap small (d≈0.15), largely survives JPEG-q30 | `src/spectra.py` | `results/analysis/spectra/summary.csv`, `radial.csv` | `a5bd9fa` |
+| E13 | Frequency-only ranks best on the crudest manipulation, worst on the subtlest | `src/permanip.py` | `results/analysis/permanip/` | `a5bd9fa` |
+| E14 | Robustness sweep (JPEG/blur/noise/resize/contrast) | `src/robustness.py` | `results/robustness/` | `ca268bc` |
+| E15 | In-domain c23 matrix, 10 configs × 3 seeds | `src/run_ablation.py` | `results/in_domain/summary.csv` + 30 `per_run/*.json` | `ca268bc` |
+
+## Methods and environment
+
+| item | location | commit |
+|---|---|---|
+| Full method, hyperparameters, dataset acquisition, experiment registry | `docs/REPRODUCIBILITY.md` | `4be5338` |
+| Exact package versions (torch 2.10.0+cu128 etc.), captured on Kaggle | `docs/pip_freeze_2026-09-05.txt` | `4075973` |
+| Experiment counts and compute (~50 runs, ~32 GPU-h) | `docs/EXPERIMENTS.md` | `de83432` |
+| Chronological record incl. corrections | `docs/progress-log.md` | multiple |
+| Frozen framing, claim-strength discipline | `docs/ESSENCE.md` | `2e92091` |
+
+## Tests
+
+| module | test | verified |
+|---|---|---|
+| `src/clusters.py` | `tests/test_clusters.py` — reverse-pair merge, transitivity, disjointness, component-id stability, disjoint-vs-cyclic structure | ✅ run locally |
+| `src/predict.py` (name parsing) | `tests/test_clusters.py` — `video_id` agrees with the `--group-by` regex capture | ⚠️ needs torch, unrun |
+| `src/utils.py` | `tests/test_utils.py` — scalar gates excluded from weight decay; optimiser step leaves `alpha_logit` untouched | ⚠️ needs torch, unrun |
+| `src/cluster_boot.py` | exercised end-to-end on synthetic data with sklearn stubbed; **frame-unit CI 2.3× narrower than video-unit** (0.0201 vs 0.0464), degenerate-bootstrap guard raises | ✅ run locally |
+| `src/paired_summary.py` | run on real committed data | ✅ |
+
+---
+
+## ⚠️ Gaps — assertions not yet backed by a committed artifact
+
+Every item below is disclosed rather than buried. **None may appear in the paper
+without first being closed or explicitly caveated.**
+
+| gap | why it matters | to close |
+|---|---|---|
+| **G1** — `results/analysis/efficiency/params_flops_latency.csv` was **transcribed by hand** from console output, not written by a script | It is the only numeric artifact in the repo not machine-generated | Re-run `eff_table.py` with file output; ~10 min |
+| **G2** — The F3-Net **+0.014** FAD threshold is unverified | Every threshold comparison (E2) depends on it, and it may be **accuracy rather than AUC** | Read the ablation table in the paper; confirm value, metric, and that their FAD matches ours |
+| **G3** — `src/predict.py` and `src/band_ablation.py` have **never been executed** | They are the substrate for all cluster-aware inference | Smoke-test on Kaggle before trusting any output |
+| **G4** — E6's component structure was computed in an ad-hoc verification run | The number is right but not reproducible from a committed script | Add a small script writing `results/analysis/clusters/component_stats.csv` |
+| **G5** — Optimisation variability **cannot be separated** from split composition in any existing run | `--seed` drove both the partition and training until `--split-seed` was added; the thesis word "separate"/"quantify" is not yet literally true for this component | Run V8: fixed `--split-seed`, varying `--seed`, 3–5 runs (~2–3 h) |
+| **G6** — Test-content uncertainty not yet measured | The inferential interval does not exist yet; current CIs are seed-level diagnostics | Run V1 (`src/cluster_boot.py`) once predictions are dumped |
+
+## Artifacts held outside git
+
+Checkpoints are excluded by `.gitignore` (size). Locations of record:
+
+| artifact | location |
+|---|---|
+| c23 30-run checkpoints | Kaggle notebook output `deeptrace3` — **only copy, no local backup** |
+| c40 checkpoints + metrics | `~/Downloads/c40_results.tar.gz` (595 MB) + Kaggle version output |
+| c40 video-level checkpoints | Kaggle version output |
+| Gate-fix checkpoints | `~/Downloads/gatefix_artifacts.tar.gz` (85 MB) |
+| FF++ c23 crops | `~/Downloads/ffpp_crops_160.tar.gz` (239 MB) + private Kaggle dataset |
+| FF++ c40 crops | Kaggle notebook output `c40-run` |

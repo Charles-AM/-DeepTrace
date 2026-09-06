@@ -340,3 +340,36 @@ Have: ResNet-18 (hybrid family), Xception (baseline + F3-Net). Add: **EfficientN
 - **Week 2** — acquire DF40 + DeeperForensics + FaceShifter; C6 cross-dataset seed 0 on all targets.
 - **Week 3** — C6 seeds 1–2; C5 full robustness (3 seeds + DeeperForensics); C1 +2 seeds.
 - **Week 4** — C2 frozen-gate control; C4 CKA + band-ablation + c40 spectra; C1 EfficientNet-B4; start the draft.
+
+---
+
+## V8 — Separate optimisation variability from split composition (added 2026-09-06)
+
+**The gap.** Until commit `<this>`, `--seed` drove *both* the train/val/test
+partition and training randomness (weight init, data order, augmentation). Every
+"seed" therefore changed the split *and* the optimisation, so the observed
+seed-level sd (0.0188 at c40 video-level) is an unseparable mixture. Direct
+evidence: seed 1 ran high for **both** Xception and FAD — that is the split
+talking, not the run.
+
+Consequence: the thesis phrase *"we separate seen-video leakage, test-content
+uncertainty, and optimisation variability"* is **not literally true** for the third
+component with any run made to date.
+
+**The fix, now implemented.** `src/train.py` gained `--split-seed`, defaulting to
+`--seed` so every historical run is reproduced exactly. Passing it explicitly
+decouples the partition from training randomness. `split_seed` is now recorded in
+`summary.csv` for every row, so any run states which partition it used. Runs with
+decoupled seeds get `_split<N>` appended to the run name to avoid collisions.
+
+| | |
+|---|---|
+| Experiment | Fix `--split-seed 0`; run `--seed 0..4` for `xception` and `xception+FAD` at c40 video-level. |
+| Isolates | Pure optimisation variability — same data, same partition, different training randomness. |
+| Completes the decomposition | leakage (L1 vs L2, done) · test-content (cluster bootstrap, V1) · optimisation (**this**) |
+| Cost | 3–5 runs × ~40 min ≈ 2–3 h |
+| Confirms if | The fixed-split seed sd is materially smaller than the current mixed sd (0.0188), quantifying how much of it was split composition |
+| Status | ⬜ queued — run after Notebook A (c23 video-level) completes |
+
+Only after V8 and V1 may the thesis verb become **"quantify"**; until then use
+**"separate"**, or state precisely which components are measured.
