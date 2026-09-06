@@ -56,3 +56,12 @@ n_real_videos, n_fake_videos, auc).
 ```
 python -m src.permanip_preds --preds results/predictions --out-dir results/analysis/permanip_l2
 ```
+
+
+## Scope note
+
+Of the four analyses in `results/analysis/` that predate the protocol fix, only
+those that **reload a checkpoint** are invalidated by it: `late_fusion/` and
+`cka/` (and this one, now redone). `spectra/` takes a manifest and no model — it
+describes the data, so leaky checkpoints do not touch it. Its separate limitation
+is frame-level pseudoreplication, recorded in ESSENCE §8.
