@@ -1,0 +1,23 @@
+source_file,degenerate,diff_median,extrapolated_0.005,extrapolated_0.01,extrapolated_0.014,extrapolated_0.02,halfwidth_median,halfwidth_q25,halfwidth_q75,intercept,n_draws_used,n_for_halfwidth_0.005,n_for_halfwidth_0.01,n_for_halfwidth_0.014,n_for_halfwidth_0.02,n_max_observed,n_points_fitted,n_units,r2,sizes_excluded_degenerate,slope,slope_note,zero_width_frac
+curve_component_ffpp_c40_vid_xception_seed0_test_vs_ffpp_c40_vid_f3net_seed0_test.csv,False,-0.02,,,,,0.065,0.045,0.09404,,200,,,,,,,5,,,,,0.03
+curve_component_ffpp_c40_vid_xception_seed0_test_vs_ffpp_c40_vid_f3net_seed0_test.csv,False,-0.02778,,,,,0.06836,0.04883,0.09233,,200,,,,,,,8,,,,,0.0
+curve_component_ffpp_c40_vid_xception_seed0_test_vs_ffpp_c40_vid_f3net_seed0_test.csv,False,-0.02593,,,,,0.05628,0.04509,0.07876,,200,,,,,,,10,,,,,0.0
+curve_component_ffpp_c40_vid_xception_seed0_test_vs_ffpp_c40_vid_f3net_seed0_test.csv,False,-0.02889,,,,,0.05105,0.04027,0.06146,,200,,,,,,,15,,,,,0.0
+curve_component_ffpp_c40_vid_xception_seed0_test_vs_ffpp_c40_vid_f3net_seed0_test.csv,False,-0.03061,,,,,0.04655,0.03972,0.04946,,200,,,,,,,20,,,,,0.0
+curve_component_ffpp_c40_vid_xception_seed0_test_vs_ffpp_c40_vid_f3net_seed0_test.csv,False,-0.03051,,,,,0.03981,0.0378,0.04132,,200,,,,,,,25,,,,,0.0
+curve_component_ffpp_c40_vid_xception_seed0_test_vs_ffpp_c40_vid_f3net_seed0_test.csv,False,-0.03028,,,,,0.03612,0.03462,0.03739,,200,,,,,,,29,,,,,0.0
+curve_video_ffpp_c40_vid_xception_seed0_test_vs_ffpp_c40_vid_f3net_seed0_test.csv,True,0.0,,,,,0.0,0.0,0.375,,200,,,,,,,5,,,,,0.69
+curve_video_ffpp_c40_vid_xception_seed0_test_vs_ffpp_c40_vid_f3net_seed0_test.csv,False,0.0,,,,,0.16667,0.0,0.25,,200,,,,,,,8,,,,,0.47
+curve_video_ffpp_c40_vid_xception_seed0_test_vs_ffpp_c40_vid_f3net_seed0_test.csv,False,0.0,,,,,0.16637,0.0,0.22222,,200,,,,,,,10,,,,,0.3
+curve_video_ffpp_c40_vid_xception_seed0_test_vs_ffpp_c40_vid_f3net_seed0_test.csv,False,-0.02778,,,,,0.14286,0.08333,0.18805,,200,,,,,,,15,,,,,0.1
+curve_video_ffpp_c40_vid_xception_seed0_test_vs_ffpp_c40_vid_f3net_seed0_test.csv,False,-0.03125,,,,,0.12926,0.089,0.16689,,200,,,,,,,20,,,,,0.03
+curve_video_ffpp_c40_vid_xception_seed0_test_vs_ffpp_c40_vid_f3net_seed0_test.csv,False,-0.02,,,,,0.11084,0.08354,0.13822,,200,,,,,,,25,,,,,0.015
+curve_video_ffpp_c40_vid_xception_seed0_test_vs_ffpp_c40_vid_f3net_seed0_test.csv,False,-0.02083,,,,,0.09729,0.07447,0.12211,,200,,,,,,,30,,,,,0.0
+curve_video_ffpp_c40_vid_xception_seed0_test_vs_ffpp_c40_vid_f3net_seed0_test.csv,False,-0.02344,,,,,0.0809,0.06501,0.10888,,200,,,,,,,40,,,,,0.0
+curve_video_ffpp_c40_vid_xception_seed0_test_vs_ffpp_c40_vid_f3net_seed0_test.csv,False,-0.0225,,,,,0.07011,0.05761,0.0913,,200,,,,,,,50,,,,,0.0
+curve_video_ffpp_c40_vid_xception_seed0_test_vs_ffpp_c40_vid_f3net_seed0_test.csv,False,-0.02889,,,,,0.06182,0.04921,0.07018,,200,,,,,,,75,,,,,0.0
+curve_video_ffpp_c40_vid_xception_seed0_test_vs_ffpp_c40_vid_f3net_seed0_test.csv,False,-0.03,,,,,0.05238,0.04486,0.05721,,200,,,,,,,100,,,,,0.0
+curve_video_ffpp_c40_vid_xception_seed0_test_vs_ffpp_c40_vid_f3net_seed0_test.csv,False,-0.0312,,,,,0.04552,0.04193,0.04738,,200,,,,,,,125,,,,,0.0
+curve_video_ffpp_c40_vid_xception_seed0_test_vs_ffpp_c40_vid_f3net_seed0_test.csv,False,-0.03028,,,,,0.04025,0.03885,0.04177,,200,,,,,,,150,,,,,0.0
+fit_component_ffpp_c40_vid_xception_seed0_test_vs_ffpp_c40_vid_f3net_seed0_test.csv,,,True,True,True,True,,,,-2.0608,,9600,1348,520,190,29,7,,0.902,none,-0.3531,-0.5 == independent-sampling rate,
+fit_video_ffpp_c40_vid_xception_seed0_test_vs_ffpp_c40_vid_f3net_seed0_test.csv,,,True,True,True,True,,,,-0.6128,,9791,2515,1300,646,150,12,,0.9874,5,-0.5099,-0.5 == independent-sampling rate,

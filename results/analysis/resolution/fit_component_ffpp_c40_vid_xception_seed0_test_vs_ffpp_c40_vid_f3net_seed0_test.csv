@@ -1,0 +1,2 @@
+slope,intercept,r2,n_max_observed,n_points_fitted,sizes_excluded_degenerate,slope_note,n_for_halfwidth_0.02,extrapolated_0.02,n_for_halfwidth_0.014,extrapolated_0.014,n_for_halfwidth_0.01,extrapolated_0.01,n_for_halfwidth_0.005,extrapolated_0.005
+-0.3531,-2.0608,0.902,29,7,none,-0.5 == independent-sampling rate,190,True,520,True,1348,True,9600,True
