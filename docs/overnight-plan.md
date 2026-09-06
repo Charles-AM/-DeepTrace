@@ -1,11 +1,16 @@
 # Overnight validation plan (~15 h budget, 2 parallel GPU slots)
 
-**Context:** C0 revealed frame-level split leakage inflating FF++ AUC by ~20 points
-(f3net c40: 0.995 frame-level → 0.794 video-level). Every result in the project was
-measured at that ceiling and needs re-verification on video-level (L2) splits.
+**Context:** C0 revealed frame-level split leakage inflating FF++ AUC by ~18 points.
+The video-level c40 run (`results/in_domain_c40_vid/`) confirmed the central claim
+survives with headroom restored (`f3net − xception` = −0.005, p = 0.659), **but
+shifted the bottleneck from ceiling to variance**: xception seed sd went 0.0012 →
+0.0342, CI half-width ±0.043 vs F3-Net's claimed +0.035 advantage. At n=3 we are
+marginally underpowered to rule their effect out; n=5 gives ±0.022.
 
-Kaggle allows 2 concurrent GPU sessions, so run **A and B in parallel** — ~6 h wall
-clock, ~11 h quota, leaving margin.
+**→ Revised priority (2026-09-05): more seeds beats more configs.**
+
+Kaggle allows 2 concurrent GPU sessions, so run **A and B in parallel** — ~5.5 h
+wall clock, well inside a 15 h budget.
 
 ---
 
@@ -31,26 +36,30 @@ Settings: GPU T4 x2, Internet ON, attach `ffpp-crops-160`. Delete the starter ce
 !cd /kaggle/working && cp -r ./-DeepTrace/results ./c23vid_results && mv c23vid_results/ablation_table.md c23vid_results/ablation_c23_vid.md && tar czf c23vid_metrics.tar.gz --exclude="*.pt" --exclude="*/tb/*" c23vid_results && du -h c23vid_metrics.tar.gz
 ```
 
-## Notebook B — c40 video-level, remaining configs (~4–5 h)
+## Notebook B — c40 video-level, seeds 3 & 4 (~3 h) — **now the higher priority**
 
-**Why:** the in-flight c40 run covers only `baseline_spatial`/`xception`/`f3net`.
-Adding `full` and `frequency_only` completes the config set so c23 and c40 are
-symmetric and the mechanistic analyses can run at both compression levels.
+**Why:** takes the headline comparison to **n = 5**, dropping the CI half-width from
+±0.043 to ≈ ±0.022 — below F3-Net's claimed +0.035 advantage, which converts "not
+significant" into "we would have detected an effect of the size they report." That
+is the difference between a weak null and a defensible one.
 
-**Start this only after the current c40-vid run finishes** (it holds a GPU slot).
+Attach the c40 notebook output. Note `--dataset-name ffpp_c40_vid` is **reused
+deliberately here** so the manifests match seeds 0–2 exactly (each seed builds its
+own manifest, so seeds 3–4 get fresh ones under the same naming scheme).
 
 ```bash
 !cd /kaggle/working && rm -rf ./-DeepTrace && git clone -q https://github.com/Charles-AM/-DeepTrace.git ./-DeepTrace && cd ./-DeepTrace && git log --oneline -1
 ```
 ```bash
-!cd /kaggle/working/-DeepTrace && python -m src.run_ablation --data-root /kaggle/input/notebooks/charlesappiahmanu/c40-run/ffpp_c40_crops --dataset-name ffpp_c40_vid2 --configs full frequency_only --seeds 0 1 2 --epochs 15 --image-size 128 --batch-size 64 --reference full --extra --group-by 'videos-([0-9]+)'
+!cd /kaggle/working/-DeepTrace && python -m src.run_ablation --data-root /kaggle/input/notebooks/charlesappiahmanu/c40-run/ffpp_c40_crops --dataset-name ffpp_c40_vid --configs baseline_spatial xception f3net --seeds 3 4 --epochs 15 --image-size 128 --batch-size 64 --reference xception --extra --group-by 'videos-([0-9]+)'
 ```
 ```bash
-!cd /kaggle/working && cp -r ./-DeepTrace/results ./c40vid2_results && tar czf c40vid2_metrics.tar.gz --exclude="*.pt" --exclude="*/tb/*" c40vid2_results && du -h c40vid2_metrics.tar.gz
+!cd /kaggle/working && cp -r ./-DeepTrace/results ./c40vid_s34_results && tar czf c40vid_s34_metrics.tar.gz --exclude="*.pt" --exclude="*/tb/*" c40vid_s34_results && du -h c40vid_s34_metrics.tar.gz
 ```
 
-⚠️ `--dataset-name ffpp_c40_vid2` is deliberately distinct so it builds a fresh
-manifest rather than reusing a cached one. `--extra` must stay last.
+Deferred to a later session: `full` and `frequency_only` at c40 video-level (needed
+eventually for symmetry with c23 and for the mechanistic re-runs at both compression
+levels, but less urgent than tightening the headline CI).
 
 ---
 
