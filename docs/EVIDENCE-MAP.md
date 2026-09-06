@@ -21,6 +21,8 @@ Last updated 2026-09-06.
 | E5 | Backbone comparison is equally unstable (`baseline_spatial − xception`, 9/10 subsets negative) | `src/paired_summary.py` | same | `9e53b05` |
 | E6 | FF++ pair graph: 300 sequences → 150 identity components, all size 2 (histogram `2:150`, no singletons, not degenerate). Identity-level bootstrapping has **50% of the units** video-level grouping does | `src/cluster_stats_report.py` | `results/analysis/clusters/component_stats.csv` | `2234a17` |
 
+| E16 | F3-Net's published FAD gain is **+0.014 AUC** (Xception 0.893 → Xception+FAD 0.907) on FF++ LQ/c40; full F3-Net is +0.040. Their FAD is the *learnable* variant (`f_base + f_w`, 3 bands) — fixed filters give only 0.901 — matching our `1[r∈B]+tanh(w)` 3-band implementation | manual verification of the paper | `docs/f3net-ablation-verified.md` | this commit |
+
 ## Supporting analyses
 
 | # | claim | produced by | committed evidence | commit |
@@ -65,7 +67,7 @@ without first being closed or explicitly caveated.**
 | gap | why it matters | to close |
 |---|---|---|
 | **G1** — `results/analysis/efficiency/params_flops_latency.csv` was **transcribed by hand** from console output, not written by a script | It is the only numeric artifact in the repo not machine-generated | Re-run `eff_table.py` with file output; ~10 min |
-| **G2** — The F3-Net **+0.014** FAD threshold is unverified | Every threshold comparison (E2) depends on it, and it may be **accuracy rather than AUC** | Read the ablation table in the paper; confirm value, metric, and that their FAD matches ours |
+| ~~**G2**~~ — **CLOSED 2026-09-06** | — | Verified against arXiv 2007.09355v2: Fig. 7(a) p.12 and Table 3 p.14. Both Acc and AUC reported; +0.014 is **AUC**. See E16. |
 | **G3** — `src/predict.py` and `src/band_ablation.py` have **never been executed** | They are the substrate for all cluster-aware inference | Smoke-test on Kaggle before trusting any output |
 | ~~**G4**~~ — **CLOSED 2026-09-06** | — | `src/cluster_stats_report.py` now generates `results/analysis/clusters/component_stats.csv` from a crop listing |
 | **G5** — Optimisation variability **cannot be separated** from split composition in any existing run | `--seed` drove both the partition and training until `--split-seed` was added; the thesis word "separate"/"quantify" is not yet literally true for this component | Run V8: fixed `--split-seed`, varying `--seed`, 3–5 runs (~2–3 h) |

@@ -171,8 +171,8 @@ Set from the literature, never from our own pilots.
 
 | threshold | value | basis |
 |---|---|---|
-| Published FAD-specific gain | **≈ +0.014 AUC** | F3-Net's *FAD ablation* row (Xception ≈ 89.3 → +FAD ≈ 90.7) — ⚠️ **VERIFY against the actual table before use** |
-| Full-system gain (**do not use**) | ≈ +0.040 | full F3-Net; we don't implement LFS/MixBlock |
+| Published FAD-specific gain | **+0.014 AUC** | ✅ **VERIFIED** — arXiv 2007.09355v2, Fig. 7(a) p.12 / Table 3 p.14: Xception 0.893 → Xception+FAD (learnable) 0.907 on FF++ LQ. Both Acc and AUC are reported; this is the AUC column. |
+| Full-system gain (**do not use**) | +0.040 | full F3-Net (0.933); we implement neither LFS nor MixBlock |
 | Practical threshold | 0.010, with sensitivity at 0.005 / 0.010 / 0.020 | a **stakeholder judgement**, not a principled constant — present it as such |
 
 **Sobering implication.** Our seed-level CI half-width was ±0.043; a cluster-aware

@@ -118,6 +118,9 @@ Disclose each of these explicitly in the paper's Experimental Setup, or fix it.
 | epochs / budget | 15 epochs, fixed | varies | disclose — matched across all our configs, which is the point |
 | test set size | 3,000 crops from ~150 videos | larger | report CIs; small-n is a real limitation |
 | F3-Net variant | FAD only | FAD + LFS + MixBlock | disclose — already noted as Tier-3 item #12 |
+| frames per video | ≤20 (every 12th) | **270** (F3-Net p.10) | disclose — 13x fewer frames per video |
+| optimiser / budget | AdamW lr 3e-4, 15 epochs, batch 64 | SGD lr 0.002 cosine, ~150k iters, batch 128 | disclose |
+| metric aggregation | frame-pooled AUC | "average the AUC scores of each frame in a video" (F3-Net p.10, ambiguous) | **fix** (C0b) — hedge comparability until matched |
 
 ---
 
