@@ -79,11 +79,35 @@ each would have concluded. Numbers are script-generated
 | 0,2,3 | +0.0067 | | 1,3,4 | +0.0099 |
 | 0,2,4 | +0.0030 | | **2,3,4** | **+0.0180** |
 
-**7 of 10 positive, 3 of 10 negative — the sign is unstable.** And the range spans
-the decision boundary in both directions: seeds {0,1,2} support *"FAD slightly
-hurts"*, while seeds {2,3,4} give **+0.0180, which exceeds FAD's own published
-+0.014 gain.** A researcher running three seeds and stopping — entirely standard
-practice — could have published either conclusion in good faith.
+⚠️ **This is a SENSITIVITY analysis, not ten experiments.** The ten subsets are
+overlapping C(5,3) draws from the same five runs, sharing one or two seeds each.
+The counts are **not frequencies** — do not report them as "70% of studies would
+find a positive effect."
+
+What it legitimately shows: **the sign of the point estimate depends on which
+seeds are included.** Seeds {0,1,2} support *"FAD slightly hurts"*; seeds {2,3,4}
+give **+0.0180, exceeding FAD's own published +0.014 gain** — from the same five
+runs.
+
+### The frequency claim, made properly
+
+For an actual rate we simulate **independent** studies from the estimated
+seed-level distribution (normal, mean +0.0049, sd 0.0188, 10,000 reps —
+`src/paired_summary.py`):
+
+| study size | concludes positive | concludes negative | would exceed +0.014 |
+|---|---|---|---|
+| **k=3 seeds** | 67.7% | **32.3%** | **19.9%** |
+| k=5 seeds | 72.8% | 27.2% | 14.0% |
+| k=10 seeds | 79.4% | 20.6% | 6.4% |
+
+**Roughly one in three 3-seed studies would report the opposite sign, and one in
+five would report an effect exceeding the published FAD gain** — all drawing from
+the same underlying distribution. Standard practice is three seeds.
+
+⚠️ Caveat: this is a parametric normal simulation whose sd is itself estimated
+from only five points, so the percentages carry their own uncertainty. It
+establishes the order of magnitude of the problem, not precise rates.
 
 **The same instability affects the backbone comparison.** `baseline_spatial −
 Xception`: mean −0.0128, CI [−0.0441, +0.0186], **9/10 subsets negative, 1/10

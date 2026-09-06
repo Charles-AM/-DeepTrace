@@ -99,9 +99,32 @@ def run(summary: Path, reference: str, prefix: str | None = None,
         for t in thresholds:
             print(f"  excludes +{t:.3f}: {row[f'excludes_{t}']}")
 
-        # --- seed-subset instability -------------------------------------
+        # --- parametric simulation: what would a k-seed study conclude? ----
+        # The subset enumeration below is a SENSITIVITY analysis over overlapping
+        # draws from the same runs -- its counts are not frequencies. To make a
+        # defensible frequency statement, simulate independent studies from the
+        # estimated seed-level distribution instead.
+        if c["sd"] is not None and c["sd"] > 0:
+            import random
+            rnd = random.Random(0)
+            print(f"  --- simulated independent k-seed studies "
+                  f"(normal, mean={c['mean']:+.4f}, sd={c['sd']:.4f}, 10000 reps) ---")
+            for k in (3, 5, 10):
+                pos = neg = exceed = 0
+                for _ in range(10000):
+                    draw = [rnd.gauss(c["mean"], c["sd"]) for _ in range(k)]
+                    m = sum(draw) / k
+                    pos += m > 0
+                    neg += m < 0
+                    exceed += m > 0.014
+                print(f"    k={k:2d}: {pos/100:5.1f}% positive, {neg/100:5.1f}% negative, "
+                      f"{exceed/100:5.1f}% would exceed the +0.014 published gain")
+            row["sim_note"] = "parametric normal simulation from observed seed mean/sd"
+
+        # --- seed-subset instability (SENSITIVITY, not a frequency) --------
         if len(diffs) >= 4:
-            print(f"  --- what each 3-seed subset would have concluded ---")
+            print(f"  --- sensitivity: each 3-seed subset of the SAME runs "
+                  f"(overlapping draws -- counts are NOT frequencies) ---")
             signs = []
             for combo in combinations(range(len(diffs)), 3):
                 sub = [diffs[i] for i in combo]
