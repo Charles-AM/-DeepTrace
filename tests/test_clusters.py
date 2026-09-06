@@ -132,3 +132,17 @@ def test_no_crop_name_yields_an_empty_video_id():
         "original-sequences-youtube-c40-videos-602_00036.jpg",
     ]:
         assert parse_crop_name(path)["video_id"] != ""
+
+
+def test_predict_records_training_seed_and_split_seed_separately():
+    """V8 varies the training seed against one frozen split. The manifest is
+    named by the split seed, so conflating the two would either miss the file or
+    stamp the wrong training seed onto every prediction row."""
+    from src.predict import FIELDS, parse_args
+    assert "seed" in FIELDS and "split_seed" in FIELDS
+
+    a = parse_args(["--run", "r", "--seed", "3", "--split-seed", "0"])
+    assert (a.seed, a.split_seed) == (3, 0)
+
+    b = parse_args(["--run", "r", "--seed", "3"])
+    assert b.split_seed is None          # falls back to --seed for legacy runs
