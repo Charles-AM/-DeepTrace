@@ -24,7 +24,46 @@ L2 absolute values (~0.79–0.82) now sit *below* F3-Net's published c40 range
 video groups vs full FF++ ~1000 pairs), 128 px inputs, 15 epochs, and frame-level
 rather than video-level metric aggregation (see C0b).
 
-## 2. The frequency question, now measured with headroom
+## 2a. n=5 UPDATE (2026-09-06) — the experiment cannot resolve the effect
+
+Seeds 3–4 added. **The paired point estimate changed sign.**
+
+| config | seed 0 | 1 | 2 | 3 | 4 | mean | sd |
+|---|---|---|---|---|---|---|---|
+| baseline_spatial | 0.7971 | 0.7977 | 0.7925 | 0.7827 | 0.7727 | 0.7885 | 0.0107 |
+| xception | 0.8135 | 0.8527 | 0.7845 | 0.7838 | 0.7720 | 0.8013 | 0.0326 |
+| f3net (Xception+FAD) | 0.7939 | 0.8426 | 0.7987 | 0.8091 | 0.7865 | 0.8062 | 0.0220 |
+
+**`FAD − Xception`, paired:** −0.0196, −0.0101, **+0.0142, +0.0253, +0.0145**
+→ mean **+0.0049**, sd 0.0188, SE 0.0084, **95% CI [−0.0185, +0.0283]**.
+
+| comparison | verdict |
+|---|---|
+| Excludes zero? | **No** |
+| Excludes the published FAD gain (+0.014)? | **No** |
+| Excludes the practical threshold (+0.010)? | **No** |
+
+**This is the finding, not a failure.** At n=3 the estimate was −0.0052; at n=5 it is
++0.0049. Two additional seeds flipped the sign. The per-seed spread (−0.020 to
++0.025) is **~3× the effect being tested**. The interval is consistent with *"FAD
+delivers its published benefit"*, *"FAD does nothing"*, and *"FAD slightly hurts"*
+simultaneously.
+
+The same instability affects the backbone comparison: `xception −
+baseline_spatial` = +0.0128 mean, but per-seed +0.016, +0.055, −0.008, +0.001,
+−0.001. It is not FAD specifically that is unresolvable — it is architectural
+comparison at this evaluation scale.
+
+⚠️ Note this is still the **seed-level** interval, which conflates optimisation
+noise with split composition (each seed draws a different split) and ignores
+test-content clustering entirely. It is reported as a diagnostic. The
+cluster-aware interval (V1) is the inferential one and has not yet been computed.
+
+**Direct support for contribution 2:** an evaluation that looks like 3,000 test
+samples, at n=5 seeds, cannot distinguish a published +1.4-point architectural
+effect from zero.
+
+## 2. The frequency question at n=3 (superseded by 2a, retained for the record)
 
 Per-seed ROC-AUC:
 

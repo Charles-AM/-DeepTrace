@@ -8,3 +8,9 @@ ffpp_c40_vid_xception_seed2,xception,0,ffpp_c40_vid,2,128,15,0.79533,0.8727,0.87
 ffpp_c40_vid_f3net_seed0,f3net,0,ffpp_c40_vid,0,128,15,0.77033,0.89625,0.80625,0.84887,0.79391,0.28854
 ffpp_c40_vid_f3net_seed1,f3net,0,ffpp_c40_vid,1,128,15,0.816,0.89896,0.8675,0.88295,0.8426,0.24896
 ffpp_c40_vid_f3net_seed2,f3net,0,ffpp_c40_vid,2,128,15,0.76367,0.89565,0.7975,0.84373,0.79869,0.27021
+ffpp_c40_vid_baseline_spatial_seed3,baseline_spatial,0,ffpp_c40_vid,3,128,15,0.789,0.87935,0.85333,0.86615,0.78272,0.29313
+ffpp_c40_vid_baseline_spatial_seed4,baseline_spatial,0,ffpp_c40_vid,4,128,15,0.78333,0.89593,0.825,0.859,0.77266,0.29125
+ffpp_c40_vid_xception_seed3,xception,0,ffpp_c40_vid,3,128,15,0.79533,0.88692,0.85292,0.86958,0.78376,0.28937
+ffpp_c40_vid_xception_seed4,xception,0,ffpp_c40_vid,4,128,15,0.78667,0.88462,0.84333,0.86348,0.77203,0.305
+ffpp_c40_vid_f3net_seed3,f3net,0,ffpp_c40_vid,3,128,15,0.78233,0.89941,0.81958,0.85764,0.8091,0.26583
+ffpp_c40_vid_f3net_seed4,f3net,0,ffpp_c40_vid,4,128,15,0.79933,0.89673,0.84667,0.87098,0.78649,0.28729
