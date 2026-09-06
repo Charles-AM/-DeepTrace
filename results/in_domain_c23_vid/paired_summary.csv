@@ -1,0 +1,5 @@
+ci_hi,ci_lo,config,excludes_0.01,excludes_0.014,excludes_zero,mean_diff,metric,n_seeds,per_seed,reference,sd,se,sim_note
+0.03558,-0.0694,baseline_spatial,False,False,False,-0.01691,roc_auc,3,-0.0299;-0.0282;+0.0075,xception,0.02113,0.0122,parametric normal simulation from observed seed mean/sd
+0.02496,-0.01935,f3net,False,False,False,0.00281,roc_auc,3,-0.0004;-0.0041;+0.0129,xception,0.00892,0.00515,parametric normal simulation from observed seed mean/sd
+-0.17823,-0.26791,frequency_only,True,True,True,-0.22307,roc_auc,3,-0.2037;-0.2394;-0.2262,xception,0.01805,0.01042,parametric normal simulation from observed seed mean/sd
+0.03364,-0.06561,full,False,False,False,-0.01598,roc_auc,3,-0.0344;-0.0188;+0.0052,xception,0.01997,0.01153,parametric normal simulation from observed seed mean/sd

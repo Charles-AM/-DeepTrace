@@ -1,0 +1,16 @@
+run,config,sas,dataset,seed,image_size,epochs,accuracy,precision,recall,f1,roc_auc,eer
+ffpp_c23_vid_baseline_spatial_seed0,baseline_spatial,0,ffpp_c23_vid,0,128,15,0.876,0.91489,0.93167,0.9232,0.90232,0.16813
+ffpp_c23_vid_baseline_spatial_seed1,baseline_spatial,0,ffpp_c23_vid,1,128,15,0.855,0.91264,0.90542,0.90901,0.88402,0.19458
+ffpp_c23_vid_baseline_spatial_seed2,baseline_spatial,0,ffpp_c23_vid,2,128,15,0.839,0.94273,0.85042,0.89419,0.91169,0.17292
+ffpp_c23_vid_xception_seed0,xception,0,ffpp_c23_vid,0,128,15,0.89167,0.91483,0.95333,0.93369,0.93226,0.15125
+ffpp_c23_vid_xception_seed1,xception,0,ffpp_c23_vid,1,128,15,0.88633,0.92878,0.92917,0.92897,0.91227,0.15625
+ffpp_c23_vid_xception_seed2,xception,0,ffpp_c23_vid,2,128,15,0.82867,0.94565,0.83375,0.88618,0.90422,0.18042
+ffpp_c23_vid_f3net_seed0,f3net,0,ffpp_c23_vid,0,128,15,0.88967,0.93339,0.92833,0.93085,0.93188,0.14229
+ffpp_c23_vid_f3net_seed1,f3net,0,ffpp_c23_vid,1,128,15,0.894,0.92664,0.94208,0.9343,0.90819,0.16313
+ffpp_c23_vid_f3net_seed2,f3net,0,ffpp_c23_vid,2,128,15,0.86867,0.93533,0.89792,0.91624,0.9171,0.15083
+ffpp_c23_vid_full_seed0,full,0,ffpp_c23_vid,0,128,15,0.874,0.91434,0.92958,0.9219,0.89786,0.16875
+ffpp_c23_vid_full_seed1,full,0,ffpp_c23_vid,1,128,15,0.868,0.9175,0.9175,0.9175,0.89347,0.19417
+ffpp_c23_vid_full_seed2,full,0,ffpp_c23_vid,2,128,15,0.84233,0.94503,0.8525,0.89639,0.90947,0.16979
+ffpp_c23_vid_frequency_only_seed0,frequency_only,0,ffpp_c23_vid,0,128,15,0.65633,0.8839,0.65667,0.75353,0.72859,0.34333
+ffpp_c23_vid_frequency_only_seed1,frequency_only,0,ffpp_c23_vid,1,128,15,0.65867,0.85066,0.69542,0.76525,0.67291,0.38667
+ffpp_c23_vid_frequency_only_seed2,frequency_only,0,ffpp_c23_vid,2,128,15,0.61533,0.87216,0.60833,0.71674,0.67804,0.37583
