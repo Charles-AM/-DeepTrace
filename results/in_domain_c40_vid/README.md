@@ -62,14 +62,10 @@ V1. Note also that seed-level and cluster-aware intervals capture *different*
 variance sources — neither nests inside the other — so it is a hypothesis, not a
 deduction, that the cluster-aware interval will be wider.
 
-⚠️ Note this is still the **seed-level** interval, which conflates optimisation
-noise with split composition (each seed draws a different split) and ignores
-test-content clustering entirely. It is reported as a diagnostic. The
-cluster-aware interval (V1) is the inferential one and has not yet been computed.
-
-**Direct support for contribution 2:** an evaluation that looks like 3,000 test
-samples, at n=5 seeds, cannot distinguish a published +1.4-point architectural
-effect from zero.
+**Relevance to contribution 2:** at n=5 seeds, an evaluation presenting as 3,000
+test samples yields a seed-level interval that does not exclude the published
++1.4-point effect. Whether it is resolvable with respect to independent test
+content is pending V1.
 
 ### Seed-subset instability — the most legible evidence we have
 
@@ -155,12 +151,13 @@ seed effect, meaning the split itself (which videos land in test) drives more
 variance than the architecture does. With only 30 test groups, split luck swamps
 architectural differences.
 
-Consequence: the 95% CI half-width is ±0.043. F3-Net's published c40 advantage over
-Xception is ≈ +0.035, so **at n=3 we are marginally underpowered to rule out their
-claimed effect.** At n=5, t(4)=2.776 gives a half-width of ≈ ±0.022 — comfortably
-below their claimed effect, which would let us state that we would have detected it.
+Consequence: the 95% CI half-width is ±0.043. The **verified** published
+FAD-specific gain is **+0.014** (`docs/f3net-ablation-verified.md`; the +0.035–0.040
+figure is the *full* F3-Net system, which we do not implement). At n=5 the
+half-width is ≈ ±0.022 — still wider than +0.014, so even five seeds do not
+exclude it at the seed level.
 
-**→ 5 seeds on the headline pair is now the top priority, ahead of adding configs.**
+**→ Resolution is now the open question, and it is V1's to answer.**
 
 Note also `baseline_spatial` has tiny variance (sd 0.0029) while the Xception-family
 models are ~10× noisier — consistent with 20.8M parameters overfitting harder on 240
