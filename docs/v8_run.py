@@ -14,6 +14,11 @@ DS, SPLIT_SEED, SEEDS = "ffpp_c40_vid", 0, [0, 1, 2, 3, 4]
 CONFIGS = ["xception", "xception_fad"]
 EPOCHS, IMG = 15, 128
 BUDGET_S = 10.5 * 3600          # stop launching new runs after this
+# Seed 0 doubles as a reproducibility control: split_seed=0/seed=0 is nominally
+# the same configuration as the varying-split seed-0 run, so its AUCs should
+# reproduce (xception 0.81347, +FAD 0.79391). If they do, cross-session
+# environment drift is negligible and the sd comparison is sound; if they do
+# not, the decomposition cannot be done across sessions and we report that.
 T0 = time.time()
 
 def log(*a):
@@ -105,7 +110,12 @@ for seed in SEEDS:                      # interleaved: both configs per seed
                     "--dataset-name", DS, "--epochs", str(EPOCHS),
                     "--image-size", str(IMG), "--seed", str(seed),
                     "--split-seed", str(SPLIT_SEED),
-                    "--group-by", "videos-([0-9]+)", "--amp",
+                    # NO --amp. run_ablation.py never passed it, so every
+                    # varying-split c40 run is fp32. V8's sd is subtracted from
+                    # that sd, so the training procedure must match exactly --
+                    # mixed precision changes the optimisation trajectory and
+                    # would confound precision mode with split policy.
+                    "--group-by", "videos-([0-9]+)",
                     "--num-workers", "2", "--out-root", str(OUT)], stream=True)
         (done if ok else failed).append(run_name)
 

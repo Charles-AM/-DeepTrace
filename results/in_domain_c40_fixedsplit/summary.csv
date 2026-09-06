@@ -1,0 +1,11 @@
+run,config,sas,dataset,seed,split_seed,image_size,epochs,accuracy,precision,recall,f1,roc_auc,eer
+ffpp_c40_vid_xception_seed0,xception,0,ffpp_c40_vid,0,0,128,15,0.81433,0.86322,0.9125,0.88718,0.78158,0.28625
+ffpp_c40_vid_xception_fad_seed0,xception_fad,0,ffpp_c40_vid,0,0,128,15,0.817,0.86337,0.91625,0.88902,0.82113,0.25354
+ffpp_c40_vid_xception_seed1_split0,xception,0,ffpp_c40_vid,1,0,128,15,0.81567,0.86373,0.91375,0.88803,0.78461,0.28958
+ffpp_c40_vid_xception_fad_seed1_split0,xception_fad,0,ffpp_c40_vid,1,0,128,15,0.80333,0.85658,0.90583,0.88052,0.77971,0.27479
+ffpp_c40_vid_xception_seed2_split0,xception,0,ffpp_c40_vid,2,0,128,15,0.83433,0.84994,0.96292,0.90291,0.79507,0.27875
+ffpp_c40_vid_xception_fad_seed2_split0,xception_fad,0,ffpp_c40_vid,2,0,128,15,0.79867,0.86683,0.88417,0.87541,0.79045,0.27229
+ffpp_c40_vid_xception_seed3_split0,xception,0,ffpp_c40_vid,3,0,128,15,0.81433,0.85982,0.9175,0.88772,0.803,0.27479
+ffpp_c40_vid_xception_fad_seed3_split0,xception_fad,0,ffpp_c40_vid,3,0,128,15,0.81533,0.85364,0.92833,0.88942,0.79343,0.27708
+ffpp_c40_vid_xception_seed4_split0,xception,0,ffpp_c40_vid,4,0,128,15,0.80933,0.86531,0.90208,0.88331,0.7971,0.26813
+ffpp_c40_vid_xception_fad_seed4_split0,xception_fad,0,ffpp_c40_vid,4,0,128,15,0.81867,0.85019,0.93875,0.89228,0.78575,0.28083
