@@ -37,7 +37,16 @@ name needs the `./` prefix on every `cd`, `rm` and `cp`.
 !ls /kaggle/input/<V1_OUTPUT>/preds/*.csv | head -20 && ls /kaggle/input/<V1_OUTPUT>/preds/*.csv | wc -l
 ```
 
-Expect 17 files. Set `PREDS=/kaggle/input/<V1_OUTPUT>/preds` below.
+Expect 17 files.
+
+⚠️ Set `PREDS` from **Python**, not a shell line: a variable assigned in a `!`
+cell dies with that cell's shell and `$PREDS` is empty in the next one.
+
+```python
+import os; os.environ["PREDS"] = "/kaggle/input/<V1_OUTPUT>/preds"
+```
+
+Paste-ready cells that discover this path automatically: `docs/tier0-cells.md`.
 
 ## Cell 2b — ONLY if the dumps are missing (needs GPU, ~15 min)
 
