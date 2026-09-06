@@ -7,16 +7,19 @@ L1↔L2 protocol comparison on identical data.
 Split verified in the run's own log before training: **300 video groups, 0 spanning
 more than one split**, train/val/test = 24000/3000/3000, real:fake exactly 4800:19200.
 
-## 1. The leakage finding
+## 1. The protocol gap
 
-| config | L1 (frame) | L2 (video) | inflation |
+| config | L1 (crop-randomised) | L2 (video-disjoint) | protocol gap |
 |---|---|---|---|
 | baseline_spatial | 0.9878 | 0.7957 | **+19.2 AUC points** |
 | xception | 0.9933 | 0.8169 | **+17.6 AUC points** |
-| f3net | 0.9935 | 0.8117 | **+18.2 AUC points** |
+| Xception + FAD | 0.9935 | 0.8117 | **+18.2 AUC points** |
 
-**Frame-level splits inflate FaceForensics++ AUC by ~18 points**, remarkably
-consistently across three different architectures. Every number this project
+**Crop-randomised evaluation reports ~18 AUC points more than video-disjoint
+evaluation at c40**, consistently across three architectures.
+
+⚠️ This is a **protocol gap**, not an isolated leakage measurement — the two
+protocols also induce different partitions. V2 separates the two. Every number this project
 produced before 2026-09-05 sits on that inflation.
 
 L2 absolute values (~0.79–0.82) now sit *below* F3-Net's published c40 range

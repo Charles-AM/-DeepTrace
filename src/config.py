@@ -27,6 +27,25 @@ MODEL_CONFIGS: dict[str, dict] = {
 }
 
 
+# Report names. The repo's internal config identifiers are historical; these are
+# what may appear in a table or figure. In particular `f3net` builds FAD alone and
+# must never be presented as the full F3-Net system.
+DISPLAY_NAMES = {
+    "f3net": "Xception + FAD",
+    "xception_fad": "Xception + FAD",
+    "xception": "Xception",
+    "baseline_spatial": "ResNet-18 (spatial)",
+    "full": "ResNet-18 + freq branch",
+    "frequency_only": "Frequency branch only",
+    "efficientnet_b0": "EfficientNet-B0",
+}
+
+
+def display_name(config: str) -> str:
+    """Publication-safe label for a config identifier."""
+    return DISPLAY_NAMES.get(config, config)
+
+
 def build_model(name: str, image_size: int = 128, pretrained: bool = True, **overrides):
     """Instantiate a named config.
 
@@ -49,7 +68,11 @@ def build_model(name: str, image_size: int = 128, pretrained: bool = True, **ove
             TIMM_BASELINES[name], pretrained=pretrained, image_size=image_size, **overrides
         )
 
-    if name == "f3net":
+    if name in ("f3net", "xception_fad"):
+        # NOTE: this builds F3-Net's FAD component ONLY -- no LFS, no MixBlock.
+        # "xception_fad" is the canonical name; "f3net" is retained as an alias
+        # because it is embedded in every artifact filename produced before
+        # 2026-09-06. Never report either as "F3-Net" -- see DISPLAY_NAMES.
         from .models.f3net import F3NetFAD
 
         return F3NetFAD(image_size=image_size, pretrained=pretrained, **overrides)

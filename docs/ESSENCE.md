@@ -254,6 +254,9 @@ Never infer an interaction because one level is significant and the other isn't.
 | "replication failure" | "not compatible with the reported FAD-ablation magnitude under our conditions" |
 | "matched inference cost" | "cost-accounted" |
 | "we quantify identity leakage" | "we quantify video-level leakage; identity effects under evaluation" |
+| "leakage inflates AUC by 18 points" | "the **protocol gap** is ~18 points" — L1 vs L2 confounds leakage with partition difficulty until V2 isolates it |
+| "the gap is 2.0–2.3× larger at c40" | "compression enlarged the gap by **9.5–10.4 AUC points**" — the difference-in-differences is tighter (9% spread) than the ratio (15%) |
+| `f3net` in any table | **"Xception + FAD"** — use `config.display_name()` |
 
 ## 12. Target
 
