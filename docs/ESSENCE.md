@@ -37,8 +37,8 @@ result contradicts something below.
    matched detectors (~18 AUC points in our subset).
 2. **Inference effect** — separating crop, test-content, and optimisation
    randomness, and reporting what resolution the design actually achieves.
-3. **FAD case study** — whether FAD's benefit exceeds externally-anchored
-   thresholds at c23 and c40, cost-accounted.
+3. **FAD case study** — consistently small point estimates across compression
+   levels and protocols; **resolution pending cluster-aware inference (V1)**.
 
 Everything below is supporting detail for these four boxes.
 
@@ -159,8 +159,9 @@ Antecedents: Frank et al. ICML 2020; Zhang et al. WIFS 2019; Durall et al. CVPR
    across matched detectors.
 2. **Inference effect** — separate crop, test-content, and training randomness via
    paired cluster-aware evaluation; report what resolution the design actually has.
-3. **FAD case study** — determine whether FAD's benefit exceeds prespecified
-   thresholds at c23 and c40, accounting for computational cost.
+3. **FAD case study** — consistently small point estimates across compression
+   levels and protocols, cost-accounted; whether they exceed prespecified
+   thresholds is **pending cluster-aware inference (V1)**.
 
 Complementarity (late fusion, α-sweep) is **explanatory evidence**, not a fourth
 contribution.
@@ -243,6 +244,9 @@ Never infer an interaction because one level is significant and the other isn't.
 | don't say | say |
 |---|---|
 | "FAD provides no benefit" | "No detectable benefit; our interval excludes effects larger than X" |
+| "five independent measurements" | "five **related** estimates across compression levels, protocols and seed counts" — c40 n=3 is nested in n=5, frame/video share videos, c23/c40 are the same source content |
+| "every estimate is null" | "no consistent directional advantage across the five conditions" — a null is a test result, not an observation |
+| "the effect is unresolvable" | "resolution pending cluster-aware inference" — seed-level intervals measure optimisation variability only |
 | "leakage-free evaluation" | "video-disjoint evaluation" |
 | "the comparison is unanswerable" | "ceiling compression may limit resolution" (then demonstrate it) |
 | "protocol changes the conclusion" | "protocol changes performance and warrant; the conclusion was stable" |

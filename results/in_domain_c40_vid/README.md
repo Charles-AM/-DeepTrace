@@ -24,7 +24,7 @@ L2 absolute values (~0.79–0.82) now sit *below* F3-Net's published c40 range
 video groups vs full FF++ ~1000 pairs), 128 px inputs, 15 epochs, and frame-level
 rather than video-level metric aggregation (see C0b).
 
-## 2a. n=5 UPDATE (2026-09-06) — the experiment cannot resolve the effect
+## 2a. n=5 UPDATE (2026-09-06) — the point estimate is unstable
 
 Seeds 3–4 added. **The paired point estimate changed sign.**
 
@@ -51,8 +51,16 @@ simultaneously.
 
 The same instability affects the backbone comparison: `xception −
 baseline_spatial` = +0.0128 mean, but per-seed +0.016, +0.055, −0.008, +0.001,
-−0.001. It is not FAD specifically that is unresolvable — it is architectural
-comparison at this evaluation scale.
+−0.001. The instability is not specific to FAD — it affects architectural
+comparison generally at this evaluation scale.
+
+⚠️ **Wording discipline:** these are *seed-level* intervals, which capture
+optimisation variability confounded with split composition. They do **not**
+measure test-content uncertainty, so they cannot establish that the effect is
+"unresolvable" with respect to independent test content. That statement requires
+V1. Note also that seed-level and cluster-aware intervals capture *different*
+variance sources — neither nests inside the other — so it is a hypothesis, not a
+deduction, that the cluster-aware interval will be wider.
 
 ⚠️ Note this is still the **seed-level** interval, which conflates optimisation
 noise with split composition (each seed draws a different split) and ignores
