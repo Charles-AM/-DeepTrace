@@ -49,7 +49,7 @@ _REAL_RE = re.compile(
 def parse_crop_name(path: str) -> dict:
     """Metadata from a crop filename. `video_id` is the grouping key used by
     `--group-by 'videos-([0-9]+)'`; `source_seq` is populated for fakes only and is
-    what identity-level clustering needs (see src/clusters.py)."""
+    what component-level clustering needs (see src/clusters.py)."""
     name = Path(path).name
     m = _FAKE_RE.search(name)
     if m:

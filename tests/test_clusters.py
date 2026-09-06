@@ -1,47 +1,47 @@
-"""Identity clustering over the FF++ pair graph, and crop-name parsing.
+"""Source-target component clustering over the FF++ pair graph, and crop-name parsing.
 
 These underpin every cluster-aware confidence interval, so a silent bug here
 would quietly invalidate the paper's inference rather than crash.
 """
 
-from src.clusters import build_identity_clusters, cluster_stats
+from src.clusters import build_component_clusters, cluster_stats
 from src.predict import parse_crop_name
 
 
 def test_reverse_pair_lands_in_one_component():
     """The exact leak video-level grouping misses: 004_982 and 982_004 group
     separately by target, but share both identities."""
-    clusters = build_identity_clusters([("004", "982"), ("982", "004")])
+    clusters = build_component_clusters([("004", "982"), ("982", "004")])
     assert clusters["004"] == clusters["982"]
 
 
 def test_transitive_identities_merge():
     # 1-2, 2-3 => {1,2,3} one component even though 1 and 3 never co-occur
-    clusters = build_identity_clusters([("1", "2"), ("2", "3")])
+    clusters = build_component_clusters([("1", "2"), ("2", "3")])
     assert clusters["1"] == clusters["2"] == clusters["3"]
 
 
 def test_disjoint_pairs_stay_separate():
-    clusters = build_identity_clusters([("1", "2"), ("3", "4")])
+    clusters = build_component_clusters([("1", "2"), ("3", "4")])
     assert clusters["1"] == clusters["2"]
     assert clusters["3"] == clusters["4"]
     assert clusters["1"] != clusters["3"]
 
 
 def test_original_with_no_source_is_a_singleton():
-    clusters = build_identity_clusters([("7", "")])
+    clusters = build_component_clusters([("7", "")])
     assert clusters["7"] == "7"
     assert cluster_stats(clusters)["n_components"] == 1
 
 
 def test_component_id_is_stable_regardless_of_input_order():
-    a = build_identity_clusters([("004", "982"), ("982", "004")])
-    b = build_identity_clusters([("982", "004"), ("004", "982")])
+    a = build_component_clusters([("004", "982"), ("982", "004")])
+    b = build_component_clusters([("982", "004"), ("004", "982")])
     assert a == b
 
 
 def test_stats_counts():
-    clusters = build_identity_clusters([("1", "2"), ("3", "4"), ("5", "")])
+    clusters = build_component_clusters([("1", "2"), ("3", "4"), ("5", "")])
     s = cluster_stats(clusters)
     assert s["n_sequences"] == 5
     assert s["n_components"] == 3
@@ -82,26 +82,26 @@ def test_video_id_matches_the_group_by_regex_capture():
 
 
 def test_ffpp_pair_graph_gives_size_two_components_not_one_giant():
-    """Real FF++ pairs are disjoint couples, so identity clustering yields many
+    """Real FF++ pairs are disjoint couples, so component clustering yields many
     small components. A cyclic pair set (a->b->c->a) would instead collapse
-    everything into one component and make the identity bootstrap degenerate —
+    everything into one component and make the component bootstrap degenerate —
     this test pins the distinction."""
     disjoint = [("004", "982"), ("982", "004"), ("111", "222"), ("222", "111")]
-    c = build_identity_clusters(disjoint)
+    c = build_component_clusters(disjoint)
     assert cluster_stats(c)["n_components"] == 2
     assert cluster_stats(c)["largest"] == 2
 
     cyclic = [("1", "2"), ("2", "3"), ("3", "1")]
-    assert cluster_stats(build_identity_clusters(cyclic))["n_components"] == 1
+    assert cluster_stats(build_component_clusters(cyclic))["n_components"] == 1
 
 
-def test_identity_clustering_halves_units_relative_to_video_grouping():
+def test_component_clustering_halves_units_relative_to_video_grouping():
     """Each FF++ couple contributes two target sequences (a_b and b_a), so
-    grouping by identity yields half as many independent units as grouping by
+    grouping by component yields half as many independent units as grouping by
     target video. This is why intervals widen at the stricter unit."""
     pairs = [("004", "982"), ("982", "004"), ("111", "222"), ("222", "111")]
     targets = {t for t, _ in pairs}
-    comps = set(build_identity_clusters(pairs).values())
+    comps = set(build_component_clusters(pairs).values())
     assert len(targets) == 4
     assert len(comps) == 2
 

@@ -1,18 +1,22 @@
-"""Identity clustering over the FaceForensics++ pair graph.
+"""Source-target component clustering over the FaceForensics++ pair graph.
 
 FF++ manipulated videos are named ``<target>_<source>``: the video pairs two
 sequences. Grouping only on the target (what ``--group-by 'videos-([0-9]+)'``
-does) therefore still lets an identity cross a split boundary — sequence 982 can
+does) therefore still lets a sequence cross a split boundary — sequence 982 can
 be the *source* of `004_982` and the *target* of `982_004`, and those land in
 different groups. CADDM (CVPR 2023) shows detectors latch onto identity as a
 shortcut, so this residual overlap is a real leak, not a technicality.
 
 The fix: treat each sequence id as a graph node and each manipulated video as an
-edge between its target and source. Connected components are then identity
-clusters that share no sequence, and assigning whole components to a split
-guarantees no sequence appears on both sides.
+edge between its target and source. Connected components then share no
+sequence, and assigning whole components to a split guarantees no sequence
+appears on both sides.
 
-Used for (a) identity-disjoint splits and (b) the resampling unit in
+NOTE ON NAMING: these are **source-target components**, not verified human
+identities. FF++ sequence ids are not identity labels — two sequences may show
+the same person, and we do not check. Call the unit `component` everywhere.
+
+Used for (a) component-disjoint splits and (b) the resampling unit in
 `src/cluster_boot.py` — resampling individual videos is optimistic when several
 manipulations share a target.
 """
@@ -39,7 +43,7 @@ class _UnionFind:
             self.parent[rb] = ra
 
 
-def build_identity_clusters(pairs: list[tuple[str, str]]) -> dict[str, str]:
+def build_component_clusters(pairs: list[tuple[str, str]]) -> dict[str, str]:
     """``pairs`` = (target_seq, source_seq) for every manipulated video; source may
     be "" for originals. Returns ``sequence_id -> component_id`` (component id is
     the lexicographically smallest sequence in the component, so it is stable
@@ -77,4 +81,4 @@ def cluster_stats(clusters: dict[str, str]) -> dict:
 def clusters_from_prediction_rows(rows: list[dict]) -> dict[str, str]:
     """Convenience: build clusters directly from `src.predict` output rows."""
     pairs = {(r.get("target_seq", ""), r.get("source_seq", "")) for r in rows}
-    return build_identity_clusters(sorted(pairs))
+    return build_component_clusters(sorted(pairs))

@@ -15,8 +15,9 @@ directly:
                    to be over-optimistic and to keep shrinking as frames/video
                    grows, without ever reflecting real test-content uncertainty)
   * **video**    — resample whole videos
-  * **identity** — resample connected components of the FF++ pair graph
-                   (`src/clusters.py`), the safest unit
+  * **component** — resample connected components of the FF++ pair graph
+                    (`src/clusters.py`), the safest unit. These are
+                    source-target components, NOT verified human identities.
 
 Reporting all three is the point: the gap between them *is* the methodological
 finding.
@@ -34,9 +35,9 @@ from pathlib import Path
 import numpy as np
 from sklearn.metrics import roc_auc_score
 
-from .clusters import build_identity_clusters
+from .clusters import build_component_clusters
 
-UNITS = ("frame", "video", "identity")
+UNITS = ("frame", "video", "component")
 
 
 def _load(path: Path) -> list[dict]:
@@ -64,7 +65,7 @@ def _prepare(rows_a: list[dict], rows_b: list[dict], aggregate: bool):
               f"(a={len(rows_a)}, b={len(rows_b)})")
 
     seq_pairs = sorted({(by_a[p]["target_seq"], by_a[p]["source_seq"]) for p in shared})
-    ident = build_identity_clusters(seq_pairs)
+    ident = build_component_clusters(seq_pairs)
 
     if not aggregate:
         labels = np.array([int(by_a[p]["label"]) for p in shared])
@@ -90,14 +91,14 @@ def _prepare(rows_a: list[dict], rows_b: list[dict], aggregate: bool):
     return labels, sa, sb, keys, idents
 
 
-def paired_bootstrap(labels, sa, sb, vids, idents, unit: str = "identity",
+def paired_bootstrap(labels, sa, sb, vids, idents, unit: str = "component",
                      n_boot: int = 2000, seed: int = 0) -> dict:
     rng = np.random.default_rng(seed)
     if unit == "frame":
         groups = [str(i) for i in range(len(labels))]
     elif unit == "video":
         groups = vids
-    elif unit == "identity":
+    elif unit == "component":
         groups = idents
     else:
         raise ValueError(f"unit must be one of {UNITS}")

@@ -1,8 +1,8 @@
-"""Report the FF++ identity-component structure of a crop set.
+"""Report the FF++ source-target component structure of a crop set.
 
 Closes an evidence gap: the finding that our 300 sequences form 150 disjoint
 size-2 components was originally computed in an ad-hoc shell pipeline. That number
-matters — it determines whether identity-level bootstrapping is even possible (a
+matters — it determines whether component-level bootstrapping is even possible (a
 cyclic pair graph collapses everything into one component and makes the bootstrap
 degenerate) and how many independent units survive at the strictest level.
 
@@ -21,7 +21,7 @@ import re
 from collections import defaultdict
 from pathlib import Path
 
-from .clusters import build_identity_clusters, cluster_stats
+from .clusters import build_component_clusters, cluster_stats
 
 _PAIR_RE = re.compile(r"videos-(\d+)-(\d+)_")
 _REAL_RE = re.compile(r"original-sequences-\w+-(?:c\d+|raw)-videos-(\d+)_")
@@ -44,7 +44,7 @@ def collect_pairs(lines) -> tuple[set[tuple[str, str]], set[str]]:
 
 def run(lines, out_dir: Path | None = None) -> dict:
     pairs, reals = collect_pairs(lines)
-    clusters = build_identity_clusters(sorted(pairs) + [(r, "") for r in sorted(reals)])
+    clusters = build_component_clusters(sorted(pairs) + [(r, "") for r in sorted(reals)])
     stats = cluster_stats(clusters)
 
     sizes: dict[str, int] = defaultdict(int)
@@ -61,7 +61,7 @@ def run(lines, out_dir: Path | None = None) -> dict:
         "unique_source_sequences": len({s for _, s in pairs if s}),
         "original_sequences": len(reals),
         "total_sequences": stats["n_sequences"],
-        "identity_components": stats["n_components"],
+        "source_target_components": stats["n_components"],
         "largest_component": stats["largest"],
         "singleton_components": stats["singletons"],
         "component_size_histogram": ";".join(f"{k}:{v}" for k, v in sorted(hist.items())),
@@ -71,10 +71,10 @@ def run(lines, out_dir: Path | None = None) -> dict:
         print(f"  {k:28s} {v}")
 
     # the number that actually matters downstream
-    ratio = (report["unique_target_sequences"] / report["identity_components"]
-             if report["identity_components"] else float("nan"))
-    print(f"\n  video-groups per identity component: {ratio:.2f}")
-    print(f"  -> identity-level bootstrapping has ~{1/ratio:.0%} of the units that "
+    ratio = (report["unique_target_sequences"] / report["source_target_components"]
+             if report["source_target_components"] else float("nan"))
+    print(f"\n  video-groups per source-target component: {ratio:.2f}")
+    print(f"  -> component-level bootstrapping has ~{1/ratio:.0%} of the units that "
           f"video-level grouping does")
     report["video_groups_per_component"] = round(ratio, 3)
 
