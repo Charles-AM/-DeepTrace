@@ -17,10 +17,23 @@ the split-composition contribution — the last of the paper's four rungs.
 
 ## Inputs to attach
 
-1. The **c40 video-level** notebook output — supplies `results/manifests/ffpp_c40_vid_seed0_sz128.csv`
-2. The **c40 crops** dataset — manifests store absolute paths, so crops must mount where they did originally
+**Required — one input:** the notebook output **`c40-run`** (under
+`charlesappiahmanu`). It contains `ffpp_c40_crops/`, which is where every c40
+result's crops actually live. Add Input → Notebook Output → search `c40-run`.
 
-Cell 1 verifies both and aborts immediately if either is missing.
+**Optional:** the c40 video-level notebook output, if you can find it. It supplies
+`results/manifests/ffpp_c40_vid_seed0_sz128.csv` and the script will copy that
+verbatim. Without it the script regenerates the split from the same crops —
+`make_splits` is deterministic given (items, seed, group_by), so the result is the
+same partition.
+
+**Either way the split is verified, not assumed.** The seed-0 test membership is
+recorded in `results/reference/ffpp_c40_vid_seed0_test_split.json` (30 target
+sequences, extracted from the committed prediction dumps). The script compares the
+manifest it ends up with against that list and aborts on any difference. A split
+that quietly differed would make V8 incomparable with the varying-split runs it is
+subtracted from — the one failure that would invalidate the experiment while
+raising no error at all.
 
 ## Design decisions worth knowing
 
