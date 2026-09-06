@@ -19,7 +19,7 @@ Last updated 2026-09-06.
 | E3 | Point estimate sign flips between seed subsets (sensitivity, **not** a frequency) | `src/paired_summary.py` | same | `9e53b05` |
 | E4 | Simulated independent 3-seed studies: ~32% report opposite sign, ~20% exceed +0.014 | `src/paired_summary.py` (parametric simulation) | same | `9e53b05` |
 | E5 | Backbone comparison is equally unstable (`baseline_spatial − xception`, 9/10 subsets negative) | `src/paired_summary.py` | same | `9e53b05` |
-| E6 | FF++ pair graph: 300 sequences → 150 identity components, all size 2 → ~15 identity clusters in test | `src/clusters.py` | ⚠️ verification run, not a stored artifact — see *Gaps* | `2234a17` |
+| E6 | FF++ pair graph: 300 sequences → 150 identity components, all size 2 (histogram `2:150`, no singletons, not degenerate). Identity-level bootstrapping has **50% of the units** video-level grouping does | `src/cluster_stats_report.py` | `results/analysis/clusters/component_stats.csv` | `2234a17` |
 
 ## Supporting analyses
 
@@ -67,7 +67,7 @@ without first being closed or explicitly caveated.**
 | **G1** — `results/analysis/efficiency/params_flops_latency.csv` was **transcribed by hand** from console output, not written by a script | It is the only numeric artifact in the repo not machine-generated | Re-run `eff_table.py` with file output; ~10 min |
 | **G2** — The F3-Net **+0.014** FAD threshold is unverified | Every threshold comparison (E2) depends on it, and it may be **accuracy rather than AUC** | Read the ablation table in the paper; confirm value, metric, and that their FAD matches ours |
 | **G3** — `src/predict.py` and `src/band_ablation.py` have **never been executed** | They are the substrate for all cluster-aware inference | Smoke-test on Kaggle before trusting any output |
-| **G4** — E6's component structure was computed in an ad-hoc verification run | The number is right but not reproducible from a committed script | Add a small script writing `results/analysis/clusters/component_stats.csv` |
+| ~~**G4**~~ — **CLOSED 2026-09-06** | — | `src/cluster_stats_report.py` now generates `results/analysis/clusters/component_stats.csv` from a crop listing |
 | **G5** — Optimisation variability **cannot be separated** from split composition in any existing run | `--seed` drove both the partition and training until `--split-seed` was added; the thesis word "separate"/"quantify" is not yet literally true for this component | Run V8: fixed `--split-seed`, varying `--seed`, 3–5 runs (~2–3 h) |
 | **G6** — Test-content uncertainty not yet measured | The inferential interval does not exist yet; current CIs are seed-level diagnostics | Run V1 (`src/cluster_boot.py`) once predictions are dumped |
 

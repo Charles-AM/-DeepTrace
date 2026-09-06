@@ -1,0 +1,2 @@
+manipulated_pairs,unique_target_sequences,unique_source_sequences,original_sequences,total_sequences,identity_components,largest_component,singleton_components,component_size_histogram,degenerate_for_bootstrap,video_groups_per_component
+300,300,300,300,300,150,2,0,2:150,False,2.0
