@@ -74,10 +74,6 @@ log(f"split VERIFIED against reference: {len(test_targets)} test targets match")
 counts = {s: sum(1 for r in rows if r["split"] == s) for s in ("train", "val", "test")}
 log(f"crops OK  splits={counts}  data_root={data_root}")
 
-# Copy rather than regenerate: byte-identical to the split the comparison runs used.
-shutil.copy(src_manifest, OUT / "manifests" / Path(src_manifest).name)
-log("manifest copied — split is frozen and identical to the c40 seed-0 runs")
-
 # ---------------------------------------------------------------- run loop
 def sh(cmd, stream=False):
     """stream=True for training: a 6-hour batch log that prints nothing until each
