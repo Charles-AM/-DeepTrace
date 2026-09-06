@@ -63,6 +63,37 @@ cluster-aware interval (V1) is the inferential one and has not yet been computed
 samples, at n=5 seeds, cannot distinguish a published +1.4-point architectural
 effect from zero.
 
+### Seed-subset instability — the most legible evidence we have
+
+`src/paired_summary.py` enumerates every 3-seed subset of our 5 and reports what
+each would have concluded. Numbers are script-generated
+(`paired_summary.csv`), not hand-computed.
+
+**FAD − Xception, all ten 3-seed subsets:**
+
+| seeds | mean diff | | seeds | mean diff |
+|---|---|---|---|---|
+| 0,1,2 | −0.0052 | | 0,3,4 | +0.0067 |
+| 0,1,3 | −0.0014 | | 1,2,3 | +0.0098 |
+| 0,1,4 | −0.0051 | | 1,2,4 | +0.0062 |
+| 0,2,3 | +0.0067 | | 1,3,4 | +0.0099 |
+| 0,2,4 | +0.0030 | | **2,3,4** | **+0.0180** |
+
+**7 of 10 positive, 3 of 10 negative — the sign is unstable.** And the range spans
+the decision boundary in both directions: seeds {0,1,2} support *"FAD slightly
+hurts"*, while seeds {2,3,4} give **+0.0180, which exceeds FAD's own published
++0.014 gain.** A researcher running three seeds and stopping — entirely standard
+practice — could have published either conclusion in good faith.
+
+**The same instability affects the backbone comparison.** `baseline_spatial −
+Xception`: mean −0.0128, CI [−0.0441, +0.0186], **9/10 subsets negative, 1/10
+positive**, with per-seed values from −0.0550 to +0.0080. Even "Xception beats
+ResNet-18" is not resolvable at this scale.
+
+This is not a statement about frequency features. It is a statement about what an
+FF++ ablation of this size can support, and it applies to any architectural
+comparison run on it.
+
 ## 2. The frequency question at n=3 (superseded by 2a, retained for the record)
 
 Per-seed ROC-AUC:
