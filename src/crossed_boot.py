@@ -100,7 +100,8 @@ def load_matched(a_paths, b_paths, aggregate: bool = True):
     return labels, A, B, groups, seeds
 
 
-def crossed_bootstrap(labels, A, B, groups, n_boot: int = 4000, seed: int = 0) -> dict:
+def crossed_bootstrap(labels, A, B, groups, n_boot: int = 4000, seed: int = 0,
+                      margins=(0.014,), seed_subset=None) -> dict:
     """Resample components and seeds together.
 
     Returns the crossed interval plus the two conditional ones — components only
@@ -108,6 +109,8 @@ def crossed_bootstrap(labels, A, B, groups, n_boot: int = 4000, seed: int = 0) -
     between them is what shows the crossed interval is doing something.
     """
     rng = np.random.default_rng(seed)
+    if seed_subset is not None:
+        A, B = A[list(seed_subset)], B[list(seed_subset)]
     n_seeds = A.shape[0]
     index_of: dict[str, list[int]] = {}
     for i, g in enumerate(groups):
@@ -152,6 +155,25 @@ def crossed_bootstrap(labels, A, B, groups, n_boot: int = 4000, seed: int = 0) -
                 continue
             reps.append(float(np.mean(vals)))
         d = np.asarray(reps)
+        # A proportion, not a binary endpoint test. The two are equivalent
+        # (P>0.025 <=> the 97.5th percentile clears the margin) but a proportion
+        # has closed-form binomial Monte Carlo error and does not depend on the
+        # density near a quantile -- which matters when the endpoint sits 0.0043
+        # from the reference.
+        props = {"p_above_0": round(float((d > 0).mean()), 5)}
+        for m in margins:
+            props[f"p_above_{m:g}"] = round(float((d > m).mean()), 5)
+            props[f"p_below_neg_{m:g}"] = round(float((d < -m).mean()), 5)
+            props[f"p_above_{m:g}_mc2se"] = round(
+                float(2 * np.sqrt(max((d > m).mean() * (1 - (d > m).mean()), 1e-12) / len(d))), 5)
+        # Order-statistic Monte Carlo band for the 97.5th percentile: its rank
+        # among B draws is ~Binomial(B, 0.975), so +-2 sd of rank converts to a
+        # value by lookup in the sorted replicates.
+        ds = np.sort(d); B_ = len(ds)
+        k = 0.975 * B_
+        sd_rank = np.sqrt(B_ * 0.975 * 0.025)
+        lo_r = int(max(0, np.floor(k - 2 * sd_rank)))
+        hi_r = int(min(B_ - 1, np.ceil(k + 2 * sd_rank)))
         out[name] = {"ci_lo": round(float(np.percentile(d, 2.5)), 4),
                      "ci_hi": round(float(np.percentile(d, 97.5)), 4),
                      # 6 dp: this SE gets SQUARED for the non-additivity ratio in
@@ -159,9 +181,16 @@ def crossed_bootstrap(labels, A, B, groups, n_boot: int = 4000, seed: int = 0) -
                      "se": round(float(d.std(ddof=1)), 6),
                      "halfwidth": round(float(np.percentile(d, 97.5)
                                               - np.percentile(d, 2.5)) / 2, 5),
-                     "n_used": len(d), "n_skipped": skipped}
+                     "n_used": len(d), "n_skipped": skipped,
+                     "ci_hi_mc_lo": round(float(ds[lo_r]), 5),
+                     "ci_hi_mc_hi": round(float(ds[hi_r]), 5),
+                     **props}
+        m0 = margins[0]
         print(f"  {name:<15} 95% CI [{out[name]['ci_lo']:+.4f}, {out[name]['ci_hi']:+.4f}]"
-              f"  half-width {out[name]['halfwidth']:.4f}  se {out[name]['se']:.6f}")
+              f"  hw {out[name]['halfwidth']:.4f}  se {out[name]['se']:.6f}"
+              f"  P(>{m0:g})={out[name][f'p_above_{m0:g}']:.4f}"
+              f"±{out[name][f'p_above_{m0:g}_mc2se']:.4f}"
+              f"  upper MC[{out[name]['ci_hi_mc_lo']:+.4f},{out[name]['ci_hi_mc_hi']:+.4f}]")
 
     vc, vs, vx = (out[k]["se"] ** 2 for k in ("component_only", "seed_only", "crossed"))
     out["nonadditivity_ratio"] = round(vx / (vc + vs), 4)
@@ -172,15 +201,18 @@ def crossed_bootstrap(labels, A, B, groups, n_boot: int = 4000, seed: int = 0) -
 
 
 def run(a_glob: str, b_glob: str, aggregate: bool = True, n_boot: int = 4000,
-        margins=(0.014,), out_dir: Path | None = None) -> dict:
+        margins=(0.014,), boot_seed: int = 0, out_dir: Path | None = None) -> dict:
     a_paths, b_paths = sorted(glob.glob(a_glob)), sorted(glob.glob(b_glob))
     if not a_paths or not b_paths:
         raise SystemExit(f"no files matched:\n  a: {a_glob}\n  b: {b_glob}")
     labels, A, B, groups, seeds = load_matched(a_paths, b_paths, aggregate)
     print(f"seeds={seeds}  items={len(labels)}  components={len(set(groups))}  "
           f"aggregate={'video' if aggregate else 'frame'}")
-    res = crossed_bootstrap(labels, A, B, groups, n_boot=n_boot)
+    res = crossed_bootstrap(labels, A, B, groups, n_boot=n_boot, seed=boot_seed,
+                            margins=tuple(margins))
     res["seeds"] = seeds
+    res["boot_seed"] = boot_seed
+    res["n_boot"] = n_boot
     res["aggregate"] = "video" if aggregate else "frame"
     for m in margins:
         c = res["crossed"]
@@ -194,7 +226,8 @@ def run(a_glob: str, b_glob: str, aggregate: bool = True, n_boot: int = 4000,
         for name in ("crossed", "component_only", "seed_only"):
             flat.update({f"{name}_{k}": v for k, v in res[name].items()})
         flat["seeds"] = ";".join(map(str, seeds))
-        p = out_dir / f"crossed_{res['aggregate']}.csv"
+        tag = f"{res['aggregate']}_b{n_boot}_s{boot_seed}"
+        p = out_dir / f"crossed_{tag}.csv"
         with p.open("w", newline="") as fh:
             w = csv.DictWriter(fh, fieldnames=list(flat)); w.writeheader(); w.writerow(flat)
         print(f"wrote {p}")
@@ -207,6 +240,7 @@ def parse_args(argv=None):
     p.add_argument("--b-glob", required=True, help="comparison config prediction CSVs")
     p.add_argument("--frame-level", action="store_true")
     p.add_argument("--n-boot", type=int, default=4000)
+    p.add_argument("--boot-seed", type=int, default=0)
     p.add_argument("--margins", type=float, nargs="*", default=[0.014])
     p.add_argument("--out-dir", default=None)
     return p.parse_args(argv)
@@ -215,7 +249,8 @@ def parse_args(argv=None):
 def main(argv=None):
     a = parse_args(argv)
     run(a.a_glob, a.b_glob, aggregate=not a.frame_level, n_boot=a.n_boot,
-        margins=tuple(a.margins), out_dir=Path(a.out_dir) if a.out_dir else None)
+        margins=tuple(a.margins), boot_seed=a.boot_seed,
+        out_dir=Path(a.out_dir) if a.out_dir else None)
 
 
 if __name__ == "__main__":
