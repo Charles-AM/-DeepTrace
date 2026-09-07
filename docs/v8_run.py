@@ -87,6 +87,9 @@ counts = {s: sum(1 for r in rows if r["split"] == s) for s in ("train", "val", "
 log(f"crops OK  splits={counts}  data_root={data_root}")
 
 # ---------------------------------------------------------------- command build
+# NOTE: the canonical builder now lives in src/reference_cmd.py and is shared with
+# docs/repeat_audit.py. This copy is retained only because this script has already
+# been executed and its provenance should not change after the fact.
 def train_cmd(cfg, seed, data_root):
     """Build the training command entirely from ARGS.
 
