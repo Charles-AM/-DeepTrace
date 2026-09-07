@@ -15,11 +15,15 @@ Last updated 2026-09-05.
 | c40 in-domain | frame-level (L1) | 3 | 3 | **9** | `results/in_domain_c40/summary.csv` |
 | c40 in-domain | **video-level (L2)** | 3 | 3 | **9** | `results/in_domain_c40_vid/summary.csv` |
 | gate weight-decay control | frame-level (L1) | 2 | 1 | **2** | `results/in_domain/per_run/ffppfix_*.json` |
-| **total to 2026-09-05** | | | | **50** | 50 `per_run/*.json` files |
-| *queued 2026-09-05 overnight* | | | | | |
-| c23 in-domain | video-level (L2) | 5 | 3 | *15* | pending |
-| c40 in-domain seeds 3–4 | video-level (L2) | 3 | 2 | *6* | pending |
-| **projected total** | | | | **71** | |
+| **subtotal 2026-09-05** | | | | **50** | 50 `per_run/*.json` files |
+| c23 in-domain | video-level (L2) | 5 | 3 | **15** | `results/in_domain_c23_vid/summary.csv` |
+| c40 in-domain seeds 3–4 | video-level (L2) | 3 | 2 | **6** | `results/in_domain_c40_vid/summary.csv` |
+| **V8** fixed split, varying train seed | video-level (L2), `--split-seed 0` | 2 | 5 | **10** | `results/in_domain_c40_fixedsplit/summary.csv` |
+| ~~V8 attempt 1~~ (AMP, invalid) | video-level (L2) | 2 | 5 | *10* | discarded — see `c131486`; DO NOT CITE |
+| **total to 2026-09-06** | | | | **81** | (plus 10 discarded) |
+| *queued, quota permitting* | | | | | |
+| V2 seen/unseen | one fixed model, matched sets | 1 | 1–3 | *1–3* | `docs/post-v8-queue.md` |
+| Repeatability audit | 2 in-session repeats of seed 0 | 2 | 1 | *4* | `docs/repeat_audit.py` |
 
 **Configurations exercised** (`src/config.py`): `baseline_spatial`, `xception`,
 `efficientnet_b0`, `f3net`, `full`, `full_banddrop`, `full_banddrop+sas`,
@@ -30,13 +34,21 @@ Last updated 2026-09-05.
 | experiment | scale | evidence |
 |---|---|---|
 | Robustness sweep | 7 models × 5 perturbations × 4 severities + clean (seed 0); 4 models × JPEG × 4 severities (seeds 1–2) ≈ **170+ evaluations** | `results/robustness/` |
-| Per-manipulation breakdown | 6 configs × 3 seeds × 4 forgery methods = **72 evaluations** | `results/analysis/permanip/` |
+| ~~Per-manipulation (L1)~~ | 6 configs × 3 seeds × 4 methods | `results/analysis/permanip/` — **DO NOT CITE**, leaky checkpoints |
+| **Per-manipulation (L2)** | 22 runs × 4 methods = **88 evaluations**, video-level | `results/analysis/permanip_l2/` |
 | CKA (representation similarity) | 3 seeds, spatial vs frequency branch + random null | `results/analysis/cka/` |
 | Late-fusion complementarity | 3 seeds × 2 combiners (L2-regularised + unregularised) | `results/analysis/late_fusion/` |
 | Fusion-gate readout | 14 checkpoints | `results/analysis/fusion_alpha.csv` |
 | Spectral analysis | 3,000 crops/class × 2 compression conditions, DCT t-maps + radial PSD | `results/analysis/spectra/` |
 | Efficiency profiling | 4 architectures (params / FLOPs / latency) | `results/analysis/efficiency/` |
 | Cross-dataset (preliminary) | 2 targets × 1 seed — **superseded**, non-official Celeb-DF sample | see `docs/REPRODUCIBILITY.md` |
+| **V1** cluster-aware paired bootstrap | 8 comparisons × 3 units × 2000 replicates | `results/analysis/cluster_boot/` |
+| **V7** resolution curve | 3 curves (c40 video/component, c23 video) × 13 sizes × 200 draws × 400 replicates, + 4 c40 seeds | `results/analysis/resolution/` |
+| **V6** threshold sensitivity | 8 runs × 2 units × 4 margins | `results/analysis/thresholds/` |
+| **V4** aggregation effect | 5 seeds × 2 aggregations | `results/analysis/aggregation/` |
+| Stratified-bootstrap sensitivity | 5 seeds × 2 units × 2 procedures = 20 | `results/analysis/sensitivity/` |
+| Component-structure report | 300 sequences → 150 components | `results/analysis/clusters/` |
+| Prediction dumps (substrate for all of the above) | 22 runs × 3,000 crops = **66,000 predictions**, committed | `results/predictions/` |
 
 ## Approximate compute
 

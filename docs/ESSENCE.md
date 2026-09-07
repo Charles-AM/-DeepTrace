@@ -209,19 +209,29 @@ than optional**.
 
 ## 8. Status of findings
 
+Updated 2026-09-06 after Tier 0 and V8.
+
 | finding | status | evidence |
 |---|---|---|
-| Crop-randomised splits inflate FF++ AUC 17.6–19.2 pts across 3 architectures | **solid** (c40 only; c23 running) | `results/in_domain_c40_vid/` |
-| Protocol shifted absolute performance ~18 pts without changing the FAD conclusion | **moderate** — one contrast, 3 configs | same |
-| No detectable FAD benefit **at c40** | **provisional** — seed-level CI is a diagnostic of optimisation variability, **not a valid population interval** | same |
-| Late fusion adds nothing over spatial alone | **suggestive** — must be repeated on video-grouped predictions | `results/analysis/late_fusion/` |
-| Fusion gate never leaves 0.5; weight-decay confound ruled out | **moderate** — needs α-sweep | `results/analysis/fusion_alpha.csv` |
+| Crop-randomised splits inflate FF++ AUC 17.6–19.2 pts across 3 architectures | **solid**, both compressions | `results/in_domain_c40_vid/`, `_c23_vid/` |
+| Compression enlarges the protocol gap by 9.5–10.4 pts | **solid** — difference-in-differences | `results/in_domain_c23_vid/` §1 |
+| One estimate, three uncertainty models, **two** conclusions (frame excludes zero; both clustered units include it) | **solid** | `results/analysis/cluster_boot/` |
+| Component half-widths 0.037–0.062 = **2.6–4.5× the +0.014 reference effect**, five runs | **solid** | `results/analysis/resolution/` §1 |
+| 4 of 5 intervals include +0.014; one excludes via its upper endpoint | **solid**, descriptive tally | `results/analysis/thresholds/` |
+| c40 intervals 1.5–2.5× wider than c23 on **hash-verified identical test content** | **moderate** — 3 matched runs | `results/analysis/resolution/` §2 |
+| Video-level aggregation moves the estimate in all 5 seeds, preserving sign | **solid** | `results/analysis/aggregation/` |
+| Conclusions unchanged under a class-stratified bootstrap (0/10 verdict flips) | **solid** | `results/analysis/sensitivity/` |
+| Fixed-split training-run sd 0.0145 vs complete-pipeline 0.0188 | **point estimate only** — not distinguishable (F=1.70, df 4,4); component changes sign between attempts | `results/in_domain_c40_fixedsplit/` §1 |
+| A nominally identical seed-0 configuration did not repeat across sessions (Δ moved 0.0336 = 2.4× the reference effect) | **audit, n=1** — no causal attribution | `results/in_domain_c40_fixedsplit/` §2 |
+| frequency_only strongest on Deepfakes, weakest on NeuralTextures (0.246 spread) | **descriptive** → supplementary; **replicates at L2** | `results/analysis/permanip_l2/` |
 | Separate frequency branch +31% FLOPs / +44% latency; FAD ≈ +3% | **solid** | `results/analysis/efficiency/` |
-| Real-vs-fake DCT gap small (d≈0.15), survives JPEG-q30 | **descriptive only** — frame-pseudoreplicated; needs video-averaged effect size; c40/H.264 validation owed | `results/analysis/spectra/` |
-| Frequency branch representationally distinct from spatial | **suggestive** → **supplementary** | `results/analysis/cka/` |
-| Frequency-only best on crudest / worst on subtlest manipulation | **descriptive** → **supplementary** | `results/analysis/permanip/` |
+| Fusion gate never leaves 0.5; weight-decay confound ruled out | **moderate** — needs α-sweep | `results/analysis/fusion_alpha.csv` |
+| Real-vs-fake DCT gap small (d≈0.15), survives JPEG-q30 | **descriptive** — frame-pseudoreplicated; not affected by the L1 checkpoints | `results/analysis/spectra/` |
+| ~~Late fusion adds nothing over spatial alone~~ | ⛔ **computed on L1 checkpoints — DO NOT CITE**; redo at c23 (G7) | `results/analysis/late_fusion/` |
+| ~~Frequency branch representationally distinct~~ | ⛔ **L1 checkpoints — DO NOT CITE**; redo (G7) | `results/analysis/cka/` |
 
-Scale: ~50 training runs, 10 configurations, ~32 GPU-hours (`docs/EXPERIMENTS.md`).
+Scale: **81 training runs** (plus 10 discarded), 10 configurations, 66,000
+committed predictions, ~45 GPU-hours (`docs/EXPERIMENTS.md`).
 
 ## 9. Validation required
 
