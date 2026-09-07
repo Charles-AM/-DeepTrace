@@ -19,10 +19,22 @@ result contradicts something below.
 > Deepfake Detection**
 
 ### Thesis
-> Evaluation design changes both apparent detector performance and the **evidential
-> warrant** of architectural comparisons. On FaceForensics++ we separate seen-video
-> leakage, test-content uncertainty, and optimisation variability, using F3-Net's
-> FAD component as a controlled case study.
+> Evaluation design changes both what deepfake detectors appear to achieve and how
+> much **evidential weight** an architectural comparison can carry. Using F3-Net's
+> FAD component as a controlled case study, we quantify the crop-randomised versus
+> video-disjoint protocol gap, separate clustered test-content uncertainty, and
+> compare **fixed-split training-run variability** with **complete-pipeline
+> variability** on FaceForensics++.
+>
+> *(After V2 isolates the seen-video effect, the first clause becomes "we isolate
+> seen-video leakage".)*
+>
+> ⚠️ Revised 2026-09-06 under the §0 clause permitting re-opening when a result
+> contradicts the framing. V8 showed the promised separation of "optimisation
+> variability" is not supported at n=5: the two variances are not distinguishable,
+> and the implied component changes sign between attempts. "Optimisation
+> variability" was also the wrong category name — the measured quantity includes
+> initialisation, data order, augmentation and runtime nondeterminism.
 
 ### The line the paper is built around
 > **The conclusion was stable; its warrant was not.**
@@ -46,10 +58,22 @@ Everything below is supporting detail for these four boxes.
 
 ## 1. The thesis (expanded)
 
-> Evaluation design changes both apparent detector performance and the **evidential
-> warrant** of architectural comparisons. On FaceForensics++ we separate seen-video
-> leakage, test-content uncertainty, and optimisation variability, using F3-Net's
-> FAD component as a controlled case study.
+> Evaluation design changes both what deepfake detectors appear to achieve and how
+> much **evidential weight** an architectural comparison can carry. Using F3-Net's
+> FAD component as a controlled case study, we quantify the crop-randomised versus
+> video-disjoint protocol gap, separate clustered test-content uncertainty, and
+> compare **fixed-split training-run variability** with **complete-pipeline
+> variability** on FaceForensics++.
+>
+> *(After V2 isolates the seen-video effect, the first clause becomes "we isolate
+> seen-video leakage".)*
+>
+> ⚠️ Revised 2026-09-06 under the §0 clause permitting re-opening when a result
+> contradicts the framing. V8 showed the promised separation of "optimisation
+> variability" is not supported at n=5: the two variances are not distinguishable,
+> and the implied component changes sign between attempts. "Optimisation
+> variability" was also the wrong category name — the measured quantity includes
+> initialisation, data order, augmentation and runtime nondeterminism.
 
 Result-independent by construction — it holds whether FAD helps, doesn't, or stays
 inconclusive.

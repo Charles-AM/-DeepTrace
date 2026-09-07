@@ -27,16 +27,27 @@ FAD − Xception, frame-pooled test AUC:
 
 | quantity | value |
 |---|---|
-| varying-split sd (split composition + optimisation) | 0.0188 |
-| fixed-split sd (optimisation alone) | 0.0145 |
-| implied split-composition sd | **0.0121** |
-| optimisation share of total variance | **59%** |
+| complete-pipeline sd (varying split) | 0.0188 |
+| **fixed-split training-run sd** | **0.0145** |
+| implied additional split-related sd | 0.0121 |
+| illustrative allocation | 59% / 41% |
 
-⚠️ **The two sds are not statistically distinguishable at this sample size.**
-F = 1.70 on (4, 4) df against a two-sided 5% critical value of 9.60. The point
-estimate says roughly 59% optimisation / 41% split composition; the data cannot
-exclude 100% optimisation. Report the decomposition as an estimate with that
-caveat, never as a demonstrated split.
+**Naming.** 0.0145 is *fixed-split training-run variability*, not "optimisation
+variability". It contains initialisation, data order, augmentation and
+nondeterministic runtime operations, and possibly session-level effects. It is a
+point estimate, not a bound.
+
+⚠️ **Not an established variance partition.** Under an additive
+independent-variance model the observed sds imply an illustrative 59/41
+allocation, but the two variances are not statistically distinguishable at five
+runs per condition — F = 1.70 on (4, 4) df against a two-sided 5% critical value
+of 9.60.
+
+⚠️ **The component changes sign between attempts.** Computed from the AMP
+attempt (`c131486`) the same subtraction gives a *negative* variance component
+(−0.000098); from this fp32 run it gives +0.000146. A quantity whose sign depends
+on the precision mode of the run is not a measured partition. This is the
+strongest single reason to keep the 59/41 figure clearly secondary.
 
 Both components are **larger than the +0.014 effect being adjudicated**, which is
 the substantive point and does not depend on separating them.
@@ -55,13 +66,30 @@ seed, same code, same hyperparameters, both fp32.
 The paired difference moves by 0.034 and flips sign.
 
 **The two configurations moved in opposite directions**, so this is not a constant
-session offset — it is consistent with independent redraws from the run-to-run
-distribution. Setting a seed does not pin the outcome when cuDNN kernel selection
-and hardware differ between sessions.
+session offset.
 
-For the paper: *reporting a seed is not sufficient for reproducibility.* Our own
-attempt to reproduce a run from its recorded seed, split and hyperparameters moved
-the estimate by more than twice the effect under study.
+⚠️ **No causal attribution.** We have not isolated a cause — cuDNN kernel
+selection, hardware, and library versions are all candidates and none was tested.
+The empirical finding does not require an explanation, and offering an untested
+one would be a claim we cannot support.
+
+⚠️ **n = 1.** Only seed 0 is a repeated configuration: under the varying-split
+protocol seed *s* draws split *s*, so seeds 1–4 are not nominally identical across
+the two arms. This is a **reproducibility audit**, not an estimate of
+session-level variance. A second independent repeat (~36 min GPU) would show
+whether the movement is typical.
+
+Supporting texture, not a measurement — seed-0 Xception across three near-identical
+executions: 0.81347 (session A, fp32), 0.78158 (session B, AMP), 0.79705
+(session C, fp32); spread **0.0319**.
+
+**Manuscript wording.** *Repeating a nominally identical seed-0 configuration
+across execution sessions changed the FAD−Xception difference from −0.0196 to
++0.0140, a movement of 0.0336 — 2.4× the +0.014 reference effect. The recorded
+seed, split, code and hyperparameters did not guarantee exact repeatability in our
+execution environment. Because this comparison comprises one repeated
+configuration, we treat it as a reproducibility audit rather than an estimate of
+session-level variance.*
 
 ## 3. Does the control failure invalidate the decomposition?
 
