@@ -36,9 +36,13 @@ In priority order — `docs/post-v8-queue.md` has the cells.
 
 ## Blocked on nothing (CPU, can be done any time)
 
-- **Crossed-bootstrap / cluster-aware V8 analysis.** Needs the V8 `preds/` pulled
-  out of the Kaggle version output and committed, as was done for V1. The V8
-  numbers currently in the repo are frame-pooled only.
+- **Crossed seed × component interval — the highest-value item left, and CPU-only.**
+  Before V8 every seed drew a different split, so a crossed bootstrap was
+  impossible: the same component sample cannot be applied across seeds that do not
+  share a test set. V8's five models share one verified split, so it is computable
+  for the first time. Blocked *only* on pulling the V8 `preds/` out of the Kaggle
+  version output and committing them, as was done for V1. The V8 numbers in the
+  repo are frame-pooled only.
 - **Independent-samples cluster bootstrap** for V2 — one model on two different
   test sets is not the paired case `cluster_boot` handles. To write when V2 lands.
 - **Publication figures**: resolution curve, protocol gap, three-unit comparison.

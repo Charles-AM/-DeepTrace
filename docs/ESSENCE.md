@@ -56,6 +56,36 @@ Everything below is supporting detail for these four boxes.
 
 ---
 
+## 0b. 🔒 Variance vocabulary — use these names, not others
+
+Four uncertainty sources, each measured by a different design. Naming them
+loosely is how "we separated optimisation variability" got written before the
+data supported it.
+
+| name | what varies | measured by | status |
+|---|---|---|---|
+| **Test-content uncertainty** | which videos are in the test set | component bootstrap | measured — `analysis/cluster_boot/`, `resolution/` |
+| **Fixed-split training-run variability** | training seed only, split held fixed | V8 | sd **0.0145** — same magnitude as the +0.014 effect it must adjudicate |
+| **Complete-pipeline variability** | split *and* training seed | the varying-split runs | sd **0.0188** |
+| **Session-level repeatability** | execution environment, everything else nominally identical | seed-0 audit | **observed, n=1**; not estimated |
+
+⚠️ Never claim a clean separation of "optimisation variability" from the rest.
+The fixed-split figure contains initialisation, data order, augmentation and
+runtime nondeterminism. The implied split-composition component is a point
+estimate that is not statistically distinguishable and **changes sign** between
+procedural attempts.
+
+⚠️ **Estimand choice is not one of these.** Frame-pooled versus video-level
+aggregation changes the point estimate itself — in all five c40 seeds, preserving
+sign — not its uncertainty. Report it separately from the four categories above.
+
+### The sharpened message
+
+> Correct video splitting is **necessary but insufficient**. Architectural
+> conclusions also depend on the resampling unit, the number of independent test
+> units, the complete training pipeline, the compression condition, and execution
+> repeatability.
+
 ## 1. The thesis (expanded)
 
 > Evaluation design changes both what deepfake detectors appear to achieve and how
