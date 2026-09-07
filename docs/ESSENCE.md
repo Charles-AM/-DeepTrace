@@ -253,6 +253,8 @@ Updated 2026-09-06 after Tier 0 and V8.
 | Conclusions unchanged under a class-stratified bootstrap (0/10 verdict flips) | **solid** | `results/analysis/sensitivity/` |
 | Fixed-split training-run sd 0.0145 vs complete-pipeline 0.0188 | **point estimate only** — not distinguishable (F=1.70, df 4,4); component changes sign between attempts | `results/in_domain_c40_fixedsplit/` §1 |
 | A nominally identical seed-0 configuration did not repeat across sessions (Δ moved 0.0336 = 2.4× the reference effect) | **audit, n=1** — no causal attribution | `results/in_domain_c40_fixedsplit/` §2 |
+| Design resolves large effects and not small ones: |diff|>0.10 excludes zero 9/9, |diff|<0.03 does 0/8 | **solid** — 18 comparisons, 6 pairs | `results/analysis/generality/` |
+| Xception+FAD − spatial is **0.0136**, within 0.0004 of the published +0.014, and excludes zero in **0 of 3** runs | **solid** — the claim on a live example | same |
 | frequency_only strongest on Deepfakes, weakest on NeuralTextures (0.246 spread) | **descriptive** → supplementary; **replicates at L2** | `results/analysis/permanip_l2/` |
 | Separate frequency branch +31% FLOPs / +44% latency; FAD ≈ +3% | **solid** | `results/analysis/efficiency/` |
 | Fusion gate never leaves 0.5; weight-decay confound ruled out | **moderate** — needs α-sweep | `results/analysis/fusion_alpha.csv` |

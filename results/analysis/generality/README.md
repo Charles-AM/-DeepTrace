@@ -64,6 +64,10 @@ comparisons, not an estimated detection threshold.
 n_components, diff, ci_lo, ci_hi, halfwidth, excludes_zero).
 
 ```
-python -m src.cluster_boot --a results/predictions/ffpp_c23_vid_baseline_spatial_seed0_test.csv \
-    --b results/predictions/ffpp_c23_vid_f3net_seed0_test.csv --margins 0.014
+python -m src.pairwise_matrix --compression c23 --out-dir results/analysis/generality
 ```
+
+Verified: the module reproduces the committed CSV byte for byte. `--configs`
+order is explicit, not discovered — it fixes each pair's reference/model
+orientation and therefore the sign of every difference, and sorting would flip
+signs relative to these results.

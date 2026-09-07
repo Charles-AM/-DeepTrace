@@ -48,6 +48,7 @@ Last updated 2026-09-05.
 | **V4** aggregation effect | 5 seeds × 2 aggregations | `results/analysis/aggregation/` |
 | Stratified-bootstrap sensitivity | 5 seeds × 2 units × 2 procedures = 20 | `results/analysis/sensitivity/` |
 | Component-structure report | 300 sequences → 150 components | `results/analysis/clusters/` |
+| **Pairwise generality matrix** | 6 config pairs × 3 seeds = **18 cluster-aware comparisons** | `results/analysis/generality/` |
 | Prediction dumps (substrate for all of the above) | 22 runs × 3,000 crops = **66,000 predictions**, committed | `results/predictions/` |
 
 ## Approximate compute
