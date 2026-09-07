@@ -1,0 +1,38 @@
+{
+  "_what": "THE canonical primary result. Every table, figure and paragraph draws from this file. Generated from the source CSV, never typed by hand; tests/test_canonical.py fails if it drifts from that CSV.",
+  "contribution": 3,
+  "estimand": "video-aggregated AUC (frames averaged to one score per video)",
+  "comparison": "Xception + FAD  minus  Xception",
+  "compression": "c40",
+  "split": "fixed video-disjoint, split_seed 0, verified against results/reference/ffpp_c40_vid_seed0_test_split.json",
+  "n_training_runs": 5,
+  "training_seeds": "0;1;2;3;4",
+  "resampling_units": "source-target components x training runs (crossed)",
+  "n_components": 29,
+  "n_test_videos": 150,
+  "n_bootstrap_replicates": 50000,
+  "bootstrap_seed": 0,
+  "point_estimate": -0.0092,
+  "ci_lo": -0.0358,
+  "ci_hi": 0.018,
+  "ci_hi_mc_band": [
+    0.0176,
+    0.01843
+  ],
+  "reference_effect": 0.014,
+  "exceedance_rate_above_reference": 0.04074,
+  "exceedance_count_above_reference": 2037,
+  "exceedance_rate_2se": 0.00177,
+  "verdict": "reference remains included (prespecified case 1): U - MC = 0.0176 > 0.014",
+  "prespecification_commit": "86e6c98",
+  "source_csv": "results/analysis/crossed/crossed_video_b50000_s0.csv",
+  "source_csv_sha256": "639789ee7421af59cfcaef0dba159705553560300a925f6675a8b6c437405129",
+  "superseded": {
+    "interval": [
+      -0.0351,
+      0.0183
+    ],
+    "n_bootstrap_replicates": 4000,
+    "note": "preliminary; experimental history only, never the manuscript"
+  }
+}

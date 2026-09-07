@@ -18,10 +18,12 @@ Produced by `src/crossed_boot.py` from the V8 fixed-split prediction dumps
 |---|---|---|---|---|
 | test components only; five runs fixed | [−0.0224, +0.0042] | **no** | 0.0133 | 0.006824 |
 | training runs only; test content fixed | [−0.0257, +0.0041] | **no** | 0.0149 | 0.007781 |
-| **training runs and test components** | **[−0.0351, +0.0183]** | **yes** | 0.0267 | 0.012997 |
+| **training runs and test components** | **[−0.0358, +0.0180]** | **yes** | 0.0269 | 0.013255 |
 
 Point estimate **−0.0092**. 29 components, 150 videos, seeds 0–4, one verified
-split shared by all ten runs.
+split shared by all ten runs. **50,000 replicates** — all figures in this table are
+from the final run; see `../../results/canonical.json`, the single source every
+table and paragraph must draw from.
 
 ⚠️ **This is the fixed-split (V8) result.** The earlier c40 five-run mean of
 **+0.0049** came from the varying-split pipeline and answers a different
