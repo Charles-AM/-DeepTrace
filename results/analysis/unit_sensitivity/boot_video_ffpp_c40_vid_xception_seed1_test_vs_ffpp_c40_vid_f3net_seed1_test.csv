@@ -1,0 +1,4 @@
+unit,n_units,n_items,auc_a,auc_b,stratified,diff,ci_lo,ci_hi,se,n_boot_used,n_boot_skipped,aggregate,equivalent_0.014,excludes_0.014
+video,150,150,0.8947,0.8739,False,-0.0208,-0.0617,0.0202,0.0213,2000,0,video,False,False
+target,30,150,0.8947,0.8739,False,-0.0208,-0.0583,0.0239,0.0211,2000,0,video,False,False
+component,28,150,0.8947,0.8739,False,-0.0208,-0.0633,0.0252,0.0223,2000,0,video,False,False

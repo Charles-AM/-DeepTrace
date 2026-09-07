@@ -15,6 +15,10 @@ directly:
                    to be over-optimistic and to keep shrinking as frames/video
                    grows, without ever reflecting real test-content uncertainty)
   * **video**    — resample whole videos
+  * **target**    — resample target sequences (one real plus its manipulations).
+                    Included to measure what component clustering adds beyond it:
+                    the two differ only where a target's partner is also in the
+                    split, which in our fixed split is a single merge (29 vs 30).
   * **component** — resample connected components of the FF++ pair graph
                     (`src/clusters.py`), the safest unit. These are
                     source-target components, NOT verified human identities.
@@ -37,7 +41,7 @@ import numpy as np
 from .clusters import build_component_clusters
 from .resolution_curve import auc as roc_auc_score
 
-UNITS = ("frame", "video", "component")
+UNITS = ("frame", "video", "target", "component")
 
 
 def _load(path: Path) -> list[dict]:
@@ -135,6 +139,8 @@ def paired_bootstrap(labels, sa, sb, vids, idents, unit: str = "component",
         groups = [str(i) for i in range(len(labels))]
     elif unit == "video":
         groups = vids
+    elif unit == "target":
+        groups = [v.split("|")[1] for v in vids]      # manipulation|target|source
     elif unit == "component":
         groups = idents
     else:

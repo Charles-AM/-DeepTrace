@@ -48,7 +48,7 @@ def _seed_of(path: str) -> int:
     return int(m.group(1))
 
 
-def load_matched(a_paths, b_paths, aggregate: bool = True):
+def load_matched(a_paths, b_paths, aggregate: bool = True, unit: str = "component"):
     """Align every run on one identical set of test items.
 
     A crossed bootstrap is only defined if all models were scored on the SAME
@@ -82,7 +82,8 @@ def load_matched(a_paths, b_paths, aggregate: bool = True):
         for p in shared:
             r = meta[p]; i = idx_of[_video_key(r)]
             labels[i] = int(r["label"])
-            groups[i] = comp_of.get(r["target_seq"], r["target_seq"])
+            groups[i] = (r["target_seq"] if unit == "target"
+                         else comp_of.get(r["target_seq"], r["target_seq"]))
         def scores(rs):
             acc = {}
             for r in rs:
@@ -90,7 +91,9 @@ def load_matched(a_paths, b_paths, aggregate: bool = True):
             return np.array([float(np.mean(acc[k])) for k in keys])
     else:
         labels = np.array([int(meta[p]["label"]) for p in shared])
-        groups = [comp_of.get(meta[p]["target_seq"], meta[p]["target_seq"]) for p in shared]
+        groups = [meta[p]["target_seq"] if unit == "target"
+                  else comp_of.get(meta[p]["target_seq"], meta[p]["target_seq"])
+                  for p in shared]
         def scores(rs):
             by = {r["path"]: float(r["logit_margin"]) for r in rs}
             return np.array([by[p] for p in shared])
@@ -201,17 +204,19 @@ def crossed_bootstrap(labels, A, B, groups, n_boot: int = 4000, seed: int = 0,
 
 
 def run(a_glob: str, b_glob: str, aggregate: bool = True, n_boot: int = 4000,
-        margins=(0.014,), boot_seed: int = 0, out_dir: Path | None = None) -> dict:
+        margins=(0.014,), boot_seed: int = 0, unit: str = "component",
+        out_dir: Path | None = None) -> dict:
     a_paths, b_paths = sorted(glob.glob(a_glob)), sorted(glob.glob(b_glob))
     if not a_paths or not b_paths:
         raise SystemExit(f"no files matched:\n  a: {a_glob}\n  b: {b_glob}")
-    labels, A, B, groups, seeds = load_matched(a_paths, b_paths, aggregate)
-    print(f"seeds={seeds}  items={len(labels)}  components={len(set(groups))}  "
+    labels, A, B, groups, seeds = load_matched(a_paths, b_paths, aggregate, unit=unit)
+    print(f"seeds={seeds}  items={len(labels)}  {unit}s={len(set(groups))}  "
           f"aggregate={'video' if aggregate else 'frame'}")
     res = crossed_bootstrap(labels, A, B, groups, n_boot=n_boot, seed=boot_seed,
                             margins=tuple(margins))
     res["seeds"] = seeds
     res["boot_seed"] = boot_seed
+    res["unit"] = unit
     res["n_boot"] = n_boot
     res["aggregate"] = "video" if aggregate else "frame"
     for m in margins:
@@ -226,7 +231,8 @@ def run(a_glob: str, b_glob: str, aggregate: bool = True, n_boot: int = 4000,
         for name in ("crossed", "component_only", "seed_only"):
             flat.update({f"{name}_{k}": v for k, v in res[name].items()})
         flat["seeds"] = ";".join(map(str, seeds))
-        tag = f"{res['aggregate']}_b{n_boot}_s{boot_seed}"
+        tag = f"{res['aggregate']}_{unit}_b{n_boot}_s{boot_seed}" if unit != "component" \
+              else f"{res['aggregate']}_b{n_boot}_s{boot_seed}"
         p = out_dir / f"crossed_{tag}.csv"
         with p.open("w", newline="") as fh:
             w = csv.DictWriter(fh, fieldnames=list(flat)); w.writeheader(); w.writerow(flat)
@@ -241,6 +247,8 @@ def parse_args(argv=None):
     p.add_argument("--frame-level", action="store_true")
     p.add_argument("--n-boot", type=int, default=4000)
     p.add_argument("--boot-seed", type=int, default=0)
+    p.add_argument("--unit", default="component", choices=["component", "target"],
+                   help="content resampling unit; training runs are always crossed")
     p.add_argument("--margins", type=float, nargs="*", default=[0.014])
     p.add_argument("--out-dir", default=None)
     return p.parse_args(argv)
@@ -249,7 +257,7 @@ def parse_args(argv=None):
 def main(argv=None):
     a = parse_args(argv)
     run(a.a_glob, a.b_glob, aggregate=not a.frame_level, n_boot=a.n_boot,
-        margins=tuple(a.margins), boot_seed=a.boot_seed,
+        margins=tuple(a.margins), boot_seed=a.boot_seed, unit=a.unit,
         out_dir=Path(a.out_dir) if a.out_dir else None)
 
 
