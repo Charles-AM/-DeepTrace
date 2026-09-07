@@ -110,3 +110,32 @@ def test_degenerate_component_count_is_refused(tmp_path):
     labels, A, B, groups, _ = load_matched(a, b)
     with pytest.raises(ValueError, match="degenerate"):
         crossed_bootstrap(labels, A, B, groups, n_boot=50)
+
+
+def test_unit_option_changes_the_grouping_but_not_the_items(tmp_path):
+    """--unit target must regroup the same test items, never change which items
+    are scored. If it altered membership the two units would not be comparable."""
+    a, b = _pair(tmp_path, n_seeds=3, n_groups=12)
+    lc, Ac, Bc, gc, sc = load_matched(a, b, unit="component")
+    lt, At, Bt, gt, stt = load_matched(a, b, unit="target")
+    assert (lc == lt).all() and (Ac == At).all() and (Bc == Bt).all()
+    assert sc == stt
+    assert gc != gt or len(set(gc)) == len(set(gt))
+
+
+def test_target_grouping_recovers_one_unit_per_target(tmp_path):
+    a, b = _pair(tmp_path, n_seeds=2, n_groups=9)
+    _, _, _, groups, _ = load_matched(a, b, unit="target")
+    assert len(set(groups)) == 9, "synthetic pairs have no shared partners"
+
+
+def test_both_units_give_a_usable_interval(tmp_path):
+    a, b = _pair(tmp_path, n_seeds=4, n_groups=16)
+    out = {}
+    for unit in ("component", "target"):
+        labels, A, B, groups, _ = load_matched(a, b, unit=unit)
+        out[unit] = crossed_bootstrap(labels, A, B, groups, n_boot=400, seed=0)
+    for unit in out:
+        assert out[unit]["crossed"]["halfwidth"] > 0
+    assert out["component"]["diff"] == out["target"]["diff"], \
+        "the point estimate must not depend on the resampling unit"

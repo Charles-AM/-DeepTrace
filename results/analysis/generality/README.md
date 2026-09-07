@@ -1,4 +1,4 @@
-# Positive and negative controls: what this evaluation can and cannot resolve (2026-09-06)
+# Pairwise resolution calibration (2026-09-06)
 
 Every cluster-aware result elsewhere in this project comes from one comparison,
 Xception vs Xception + FAD. This runs **all six pairwise comparisons** among the
@@ -6,7 +6,8 @@ four c23 configurations, three seeds each, component unit, video-level
 aggregation. No GPU — computed from the committed prediction dumps by
 `src/pairwise_matrix.py`.
 
-Its job is to act as **empirical controls**, not as a power analysis.
+Its job is to **calibrate** the analysis pipeline empirically, not to act as a
+formal control and not as a power analysis.
 
 ---
 
@@ -26,11 +27,19 @@ Do not write "selectively powered".
 ⚠️ These are **related** comparisons — six pairs drawn from four models over three
 shared splits — not 18 independent experiments.
 
-What they do establish is a **positive control**: the machinery does produce
-zero-excluding intervals when differences are large. Without that, "nothing
-excluded zero" could not be distinguished from a broken pipeline. Together with
-the negative control at small differences, they locate the practical resolution
-boundary for these data somewhere near **0.03 AUC**.
+⚠️ **Not a control in the formal sense.** A control has a *known* effect. The true
+population difference for `frequency_only` is unknown, and the 0.03 / 0.10
+categories were formed from **observed** differences. Do not write "positive
+control", "negative control", or "true difference".
+
+> Component-aware intervals excluded zero in all nine run-level comparisons with
+> observed differences above 0.10 AUC, demonstrating that the procedure identified
+> large separations in these data; this post-hoc calibration does not establish a
+> universal detection threshold.
+
+`frequency_only` is best described as a **large-separation calibration model**. It
+is why "nothing excluded zero" elsewhere can be distinguished from a broken
+pipeline.
 
 **Defensible statement:** *the evaluation was informative for large architectural
 differences but had insufficient resolution for FAD-sized differences.*

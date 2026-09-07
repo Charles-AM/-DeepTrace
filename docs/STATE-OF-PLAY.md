@@ -41,6 +41,19 @@ caught by accident. All 63 pass under pytest.
 ⚠️ Re-run the suite on Kaggle after adding or modifying tests locally — pytest and
 sklearn are not installed on the dev machine, so local runs use the shim.
 
+## One validation run outstanding
+
+The `target` resampling unit and `crossed_boot --unit` were added after the last
+full pytest run, along with **5 new tests**. Re-run the suite on Kaggle
+(CPU-only, no inputs, ~30 s) before drafting:
+
+```
+!cd /kaggle/working && rm -rf ./-DeepTrace && git clone -q https://github.com/Charles-AM/-DeepTrace.git ./-DeepTrace
+!cd /kaggle/working/-DeepTrace && python -m pytest tests/ -q -p no:warnings 2>&1 | tail -5
+```
+
+Expect ~255, with the same 2 hardware-gated DCT skips.
+
 ## Blocked on GPU quota
 
 In priority order — `docs/post-v8-queue.md` has the cells.

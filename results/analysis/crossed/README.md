@@ -44,10 +44,22 @@ alone would have supported a stronger claim than the data permit: the
 component-only interval excludes +0.014, the seed-only interval excludes +0.014,
 and the crossed interval — the honest one — does not.
 
-The conditional analyses are **not mathematically wrong** — they answer restricted
-questions, and answer them correctly. Neither alone supports an unconditional
-architectural conclusion. Once both observed sources of variation are propagated,
-**the apparent exclusion no longer holds**: compatibility with +0.014 returns.
+Each analysis is valid for a different estimand:
+
+| analysis | legitimately answers |
+|---|---|
+| component-only | How does the average contrast for **these five realized model pairs** vary across new test content? |
+| training-run-only | How does the architectural contrast vary **across training runs on this fixed test set**? |
+| **crossed** | What contrast should we expect from **the architecture**, under this training procedure and represented content population? |
+
+> **Each conditional analysis is valid for its corresponding estimand; the error
+> occurs when its result is substituted for an architecture-level conclusion
+> requiring both sources of variation.**
+
+Conditioning is not inherently wrong. It becomes wrong when a conditional analysis
+of these five trained models is used to support a general claim about Xception
+versus FAD as architectures. Once both sources are propagated, **the apparent
+exclusion no longer holds**: compatibility with +0.014 returns.
 
 Note what does *not* change. The architectural estimate stays negative (−0.0092)
 under every treatment. What changes is the evidential interpretation, not the

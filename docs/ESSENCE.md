@@ -56,6 +56,22 @@ Everything below is supporting detail for these four boxes.
 
 ---
 
+## 0a. 🔒 Evaluation structure — nested and crossed axes
+
+Training runs do **not** sit at the bottom of the content hierarchy; they cross it.
+Keep the axes separate.
+
+| axis | unit | count |
+|---|---|---|
+| test content | crops | 3,000 |
+| test content | video files | 150 — 30 real, 120 manipulated |
+| test content | target groups | 30 |
+| test content | source-target components | 29 |
+| training replication | training runs | 5 |
+
+Abstract opening: *3,000 crops, 150 video files, 29 source-target components.*
+Full table belongs in Methods, not the abstract.
+
 ## 0b. 🔒 Variance vocabulary — use these names, not others
 
 Four uncertainty sources, each measured by a different design. Naming them
@@ -160,7 +176,7 @@ audit. We know it is easy to fall into because we fell into it.)*
 
 | audience | what changes |
 |---|---|
-| Practitioners | Evidence on whether a frequency branch earns its cost: +31% FLOPs / +44% latency for a separate branch, ~+3% for FAD |
+| Practitioners | FAD increased compute by ~3%, while the crossed interval could neither demonstrate a benefit nor exclude a published-sized gain. ⚠️ The implication is **not** that 3% is unjustified — it is that this experiment cannot establish whether the gain justifies even that modest cost. The separate-branch +31% FLOPs / +44% latency figures concern a different architecture and belong in background/supplement. |
 | Benchmarkers | Crop-randomised splits inflate ~18 points; grouped splits and cluster-aware intervals are necessary |
 | Researchers running ablations | **How much resolution an FF++ ablation actually has** — plausibly less than the effects routinely claimed from it |
 
@@ -243,7 +259,7 @@ Updated 2026-09-06 after Tier 0 and V8.
 
 | finding | status | evidence |
 |---|---|---|
-| Crop-randomised splits inflate FF++ AUC 17.6–19.2 pts across 3 architectures | **solid**, both compressions | `results/in_domain_c40_vid/`, `_c23_vid/` |
+| Crop-randomised splits inflate FF++ AUC 17.6–19.2 pts across 3 architectures | **solid**, both compressions — ⚠️ **frame-pooled estimand only** (see §8a) | `results/in_domain_c40_vid/`, `_c23_vid/` |
 | Compression enlarges the protocol gap by 9.5–10.4 pts | **solid** — difference-in-differences | `results/in_domain_c23_vid/` §1 |
 | One estimate, three uncertainty models, **two** conclusions (frame excludes zero; both clustered units include it) | **solid** | `results/analysis/cluster_boot/` |
 | Component half-widths 0.037–0.062 = **2.6–4.5× the +0.014 reference effect**, five runs | **solid** | `results/analysis/resolution/` §1 |
@@ -266,6 +282,44 @@ Updated 2026-09-06 after Tier 0 and V8.
 
 Scale: **81 training runs** (plus 10 discarded), 10 configurations, 66,000
 committed predictions, ~45 GPU-hours (`docs/EXPERIMENTS.md`).
+
+## 8a. 🔒 Limitations to state prominently
+
+1. **Video-disjoint, not human-identity-disjoint.** Source-target components used
+   for *inference* do not solve identity leakage in dataset *splitting*. No L3
+   splitting was run.
+2. **Scope.** One FF++ subset, one matched backbone comparison, one frequency
+   component, 28–29 test components, five training runs.
+3. **The crossed architecture-level interval exists only at c40.** c23 results are
+   conditional per-run analyses, because those runs did not share a fixed test
+   split — a crossed interval there is undefined, not merely absent.
+4. **Bootstrap coverage is unverified.** Percentile-bootstrap coverage was not
+   independently checked with only 29 components and five runs. The high-replicate
+   stability analysis addresses **Monte Carlo error in the estimated endpoints**,
+   not the **frequentist coverage of the bootstrap procedure itself**. Numerical
+   stability is demonstrated; small-sample coverage remains unknown.
+5. **Contribution 1's estimand.** The protocol gap is reported using frame-pooled
+   AUC for both protocols, making the reported comparison internally consistent.
+   Because crop-level predictions from the earlier crop-randomised runs were not
+   retained, we could not determine how video-level aggregation would affect its
+   magnitude **or direction**.
+
+## 8b. 🔒 Recommendations for architectural comparisons
+
+The paper's constructive outcome. Every item is backed by a measured result.
+
+1. Define the target estimand, including whether AUC is frame-pooled or
+   video-aggregated.
+2. Identify the relevant dependence structure **empirically**, rather than
+   assuming either crops or the strictest available grouping is automatically
+   appropriate.
+3. Use paired cluster-aware intervals when models share evaluation content.
+4. When making architecture-level claims, propagate **both** test-content and
+   training-run variation.
+5. Report uncertainty directly; thousands of correlated crops and a three-seed
+   mean do not by themselves imply high resolution.
+6. Prespecify decision and numerical-stability rules when conclusions depend on an
+   interval endpoint near a reference value.
 
 ## 9. Validation required
 
@@ -331,5 +385,16 @@ Never infer an interaction because one level is significant and the other isn't.
 4–5 page IEEE workshop / short paper. Structure: protocol result as motivation,
 cluster-aware paired FAD result as the central test, **one** complementarity figure.
 Main paper carries: protocol shift, cluster-aware uncertainty comparison, Xception ±
-FAD at c23/c40, video-level metric, thresholds, efficiency, late fusion + α-sweep.
-CKA, per-manipulation, gate training history and spectral inference → supplementary.
+FAD at c23/c40, video-level metric, thresholds, the crossed interval, efficiency
+(FAD's ~3% only), compression–resolution, and the recommendations block (§8b).
+
+⛔ **Late fusion and CKA are REMOVED from the paper**, not repaired. They belong to
+the older "why frequency features fail" framing; this paper asks how evaluation
+design affects architectural evidence. Repairing them would consume space and
+introduce partially disconnected hypotheses. Their directories stay marked
+DO-NOT-CITE.
+
+Supplementary: per-manipulation (L2), spectral inference, gate training history,
+the pairwise calibration matrix, the target-group sensitivity table, and the n=1
+repeatability audit — the last as a single scoped sentence, drawing no conclusion
+about frequency or cause.

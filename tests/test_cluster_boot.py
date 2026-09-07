@@ -70,3 +70,21 @@ def test_margin_key_does_not_depend_on_how_the_number_was_typed():
 def test_colliding_margins_are_rejected_not_silently_merged():
     with pytest.raises(ValueError, match="collide"):
         equivalence_flags(-0.005, 0.005, [0.010, 0.01])
+
+
+def test_target_is_a_recognised_unit():
+    """Added for the prespecified target-vs-component sensitivity analysis
+    (docs/target-group-prespecification.md)."""
+    from src.cluster_boot import UNITS
+    assert UNITS == ("frame", "video", "target", "component")
+
+
+def test_target_grouping_takes_the_target_sequence_from_the_video_key():
+    """`vids` entries are 'manipulation|target|source'. Target grouping must pull
+    the middle field: a real video and its four manipulations share a target and
+    must land in one unit, or the 1:4 class structure is broken apart."""
+    vids = ["real|033|", "Deepfakes|033|097", "Face2Face|033|097",
+            "FaceSwap|033|097", "NeuralTextures|033|097", "real|098|"]
+    targets = [v.split("|")[1] for v in vids]
+    assert targets == ["033"] * 5 + ["098"]
+    assert len(set(targets)) == 2
