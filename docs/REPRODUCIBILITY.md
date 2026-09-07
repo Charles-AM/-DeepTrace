@@ -121,6 +121,48 @@ type) are named-config-driven — see `src/config.py::MODEL_CONFIGS` and
 | c40 training run | `src.run_ablation` | **not yet run** | — | — |
 | Cross-dataset seeds 1-2 | `src.cross_dataset` | **not yet run** (seed 0 only, superseded crops) | — | — |
 
+## Statistical inference — modules, artifacts, provenance
+
+Added 2026-09-06. All CPU; none needs a GPU or a checkpoint.
+
+| module | produces | notes |
+|---|---|---|
+| `src/predict.py` | per-prediction dumps | records training seed **and** split seed separately |
+| `src/cropname.py` | FF++ filename parsing | single source of truth; torch-free so split tools can use it |
+| `src/clusters.py` | source-target components | union-find over the FF++ pair graph |
+| `src/cluster_boot.py` | paired cluster bootstrap | units: frame / video / target / component; `--margins`, `--stratified` |
+| `src/resolution_curve.py` | interval width vs unit count | rank-based AUC, pinned against sklearn |
+| `src/crossed_boot.py` | **crossed component × training-run interval** | the primary result; refuses to run unless all runs share test items |
+| `src/crossed_subsets.py` | all 3-of-5 and 4-of-5 seed subsets | sensitivity, not replication |
+| `src/pairwise_matrix.py` | all pairwise comparisons | resolution calibration |
+| `src/permanip_preds.py` | per-manipulation from dumps | replaces the checkpoint-based version |
+| `src/seen_unseen.py` | V2 matched split builder | built and tested; V2 not run |
+| `src/reference_cmd.py` | training command from the reference file | one implementation; prevents another `--amp` |
+| `src/runenv.py` | environment capture | git state, GPU, cuDNN/TF32, manifest hash, init probe |
+
+**Committed inputs.** `results/predictions/` (22 dumps, varying-split) and
+`results/predictions_v8/` (10 dumps, fixed-split, hashed in `SHA256SUMS.json`).
+Every interval in the paper is recomputable from these without a GPU.
+
+**Canonical result.** `results/canonical.json` — generated from its source CSV,
+never typed, verified by `tests/test_canonical.py` (16 tests). Every table and
+paragraph draws from it.
+
+**Prespecifications**, stated separately because their timing differs:
+`docs/crossed-prespecification.md` (`86e6c98`) — the video-aggregated rule was
+fixed after inspecting a preliminary result and before the confirmatory runs; the
+frame-pooled rule before any frame-pooled result existed.
+`docs/target-group-prespecification.md` (`0639ba0`) — before that analysis was
+implemented.
+
+**Tags.** `results-frozen-2026-09-06-orig`, `results-frozen-2026-09-06`,
+`results-frozen-v2` — all immutable; see `results/PROVENANCE.md`, which records
+that the middle tag was force-moved once and why that should not have happened.
+
+**Tests.** 253 passed, 2 skipped (hardware-gated DCT), 0 failed under pytest.
+⚠️ pytest and sklearn are absent on the dev machine, so local runs use a shim;
+re-run on Kaggle after touching tests.
+
 ## Known deviations / limitations to disclose
 
 - Celeb-DF/DFDC seed-0 cross-dataset numbers currently in the repo used a

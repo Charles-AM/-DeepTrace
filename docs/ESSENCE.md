@@ -273,6 +273,7 @@ Updated 2026-09-06 after Tier 0 and V8.
 | Crossed interval 1.8× wider than either conditional; both conditionals exclude +0.014 and the crossed one does not | **solid** | same |
 | Informative for large architectural differences, insufficient resolution for FAD-sized ones (>0.10: 9/9 exclude zero; <0.03: 0/8) | **solid as controls** — post-hoc stratified, **not** a power analysis; related comparisons | `results/analysis/generality/` |
 | Half-width floor 0.023–0.038 for matched spatial-family comparisons = **1.7–2.7× the +0.014**; ~2× wider whenever frequency_only is involved | **solid** | same |
+| Crossed conclusion robust to target-group vs component clustering **in this split** (half-width differs 0.0002; no verdict changes in 8 conditional comparisons) | **solid** — prespecified at `0639ba0` | `results/analysis/unit_sensitivity/` |
 | frequency_only strongest on Deepfakes, weakest on NeuralTextures (0.246 spread) | **descriptive** → supplementary; **replicates at L2** | `results/analysis/permanip_l2/` |
 | Separate frequency branch +31% FLOPs / +44% latency; FAD ≈ +3% | **solid** | `results/analysis/efficiency/` |
 | Fusion gate never leaves 0.5; weight-decay confound ruled out | **moderate** — needs α-sweep | `results/analysis/fusion_alpha.csv` |

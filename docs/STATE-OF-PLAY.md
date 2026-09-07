@@ -105,8 +105,18 @@ variability"**, never "optimisation variability" or "bound". The repeat finding 
 an **audit (n=1)** with no causal attribution. Until V2 lands it is a **protocol
 gap**, not leakage.
 
+## Key documents
+
+| file | what |
+|---|---|
+| `results/canonical.json` | the primary result — every table draws from it |
+| `results/analysis/crossed/STABILITY.md` | the high-replicate stability check and its verdict |
+| `results/PROVENANCE.md` | tag history, prespecification timing, superseded numbers |
+| `docs/crossed-prespecification.md` | decision rule, committed before the confirmatory runs |
+| `docs/target-group-prespecification.md` | committed before that analysis was implemented |
+
 ## Gap register
 
-Closed: G1, G2, G4, G6, permanip half of G7.
-Open: G3 (`band_ablation` smoke test), G5 (V8 point estimate only — not
-distinguishable at n=5), G7 (late fusion + CKA).
+Closed: G1, G2, G4, G5, G6, G7.
+**Open: G3 only** — `band_ablation.py` has never been executed (smoke test, ~5 min
+GPU). It supports no claim in the paper.
