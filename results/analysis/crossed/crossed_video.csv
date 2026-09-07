@@ -1,0 +1,2 @@
+n_seeds,n_components,n_items,diff,seeds,aggregate,excludes_0.014,equivalent_0.014,crossed_ci_lo,crossed_ci_hi,crossed_se,crossed_halfwidth,crossed_n_used,crossed_n_skipped,component_only_ci_lo,component_only_ci_hi,component_only_se,component_only_halfwidth,component_only_n_used,component_only_n_skipped,seed_only_ci_lo,seed_only_ci_hi,seed_only_se,seed_only_halfwidth,seed_only_n_used,seed_only_n_skipped
+5,29,150,-0.0092,0;1;2;3;4,video,False,False,-0.0351,0.0183,0.013,0.0267,4000,0,-0.0224,0.0042,0.0068,0.01332,4000,0,-0.0257,0.0041,0.0078,0.01486,4000,0

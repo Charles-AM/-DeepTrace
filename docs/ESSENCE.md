@@ -253,6 +253,8 @@ Updated 2026-09-06 after Tier 0 and V8.
 | Conclusions unchanged under a class-stratified bootstrap (0/10 verdict flips) | **solid** | `results/analysis/sensitivity/` |
 | Fixed-split training-run sd 0.0145 vs complete-pipeline 0.0188 | **point estimate only** — not distinguishable (F=1.70, df 4,4); component changes sign between attempts | `results/in_domain_c40_fixedsplit/` §1 |
 | A nominally identical seed-0 configuration did not repeat across sessions (Δ moved 0.0336 = 2.4× the reference effect) | **audit, n=1** — no causal attribution | `results/in_domain_c40_fixedsplit/` §2 |
+| **Crossed (component × seed) FAD − Xception at c40: −0.0092, 95% CI [−0.0351, +0.0183]** — contains both zero and +0.014 | **solid — the paper's primary FAD result** | `results/analysis/crossed/` |
+| Crossed interval 1.8× wider than either conditional; both conditionals exclude +0.014 and the crossed one does not | **solid** | same |
 | Informative for large architectural differences, insufficient resolution for FAD-sized ones (>0.10: 9/9 exclude zero; <0.03: 0/8) | **solid as controls** — post-hoc stratified, **not** a power analysis; related comparisons | `results/analysis/generality/` |
 | Half-width floor 0.023–0.038 for matched spatial-family comparisons = **1.7–2.7× the +0.014**; ~2× wider whenever frequency_only is involved | **solid** | same |
 | frequency_only strongest on Deepfakes, weakest on NeuralTextures (0.246 spread) | **descriptive** → supplementary; **replicates at L2** | `results/analysis/permanip_l2/` |
