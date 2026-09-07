@@ -5,7 +5,7 @@ claims; this is where the work actually stands.
 
 ## Where we are
 
-**Research ~90%. Manuscript 0%.** No `.tex`, no publication figures. The
+**Experimental programme CLOSED.** Manuscript 0%. No `.tex`, no publication figures. The
 experimental phase is nearly closed; what remains is mostly writing.
 
 81 training runs, 66,000 committed predictions, ~45 GPU-hours.
@@ -27,7 +27,7 @@ reference effect**, across five pipeline runs.
 Full suite run under **real pytest** at `166056b` (= tag
 `results-frozen-2026-09-06`), CPU-only Kaggle notebook, no inputs:
 
-**248 passed, 2 skipped, 0 failed.**
+**253 passed, 2 skipped, 0 failed** (re-run at `f430076`+ after the target unit was added; 248 at the earlier freeze commit).
 
 The two skips are hardware-gated DCT tests (`tests/test_dct.py`: no CUDA device,
 no MPS device) — device availability, not analysis code.
@@ -40,19 +40,6 @@ caught by accident. All 63 pass under pytest.
 
 ⚠️ Re-run the suite on Kaggle after adding or modifying tests locally — pytest and
 sklearn are not installed on the dev machine, so local runs use the shim.
-
-## One validation run outstanding
-
-The `target` resampling unit and `crossed_boot --unit` were added after the last
-full pytest run, along with **5 new tests**. Re-run the suite on Kaggle
-(CPU-only, no inputs, ~30 s) before drafting:
-
-```
-!cd /kaggle/working && rm -rf ./-DeepTrace && git clone -q https://github.com/Charles-AM/-DeepTrace.git ./-DeepTrace
-!cd /kaggle/working/-DeepTrace && python -m pytest tests/ -q -p no:warnings 2>&1 | tail -5
-```
-
-Expect ~255, with the same 2 hardware-gated DCT skips.
 
 ## Blocked on GPU quota
 
