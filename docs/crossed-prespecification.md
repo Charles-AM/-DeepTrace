@@ -1,8 +1,24 @@
 # Prespecification — crossed-bootstrap stability check
 
-**Written and committed BEFORE the runs.** Git history is the evidence. In a paper
-about evidential warrant, fixing the decision rule after seeing the numbers would
-be the exact failure being criticised.
+**Written and committed before the confirmatory runs.** Git history is the
+evidence. In a paper about evidential warrant, fixing the decision rule after
+seeing the numbers it governs would be the exact failure being criticised.
+
+⚠️ **Timing, stated precisely** (amendment, 2026-09-06). This is *not*
+preregistration before any result. A preliminary 4,000-replicate crossed interval
+had already been inspected — that is why this check was commissioned, and §2 below
+quotes its endpoint as the motivation. The accurate description is:
+
+> After observing that the preliminary endpoint lay near the reference effect, we
+> prospectively specified a three-case Monte Carlo stability rule before
+> conducting the confirmatory high-replicate analysis.
+
+One arm is stronger than that: **no frame-pooled crossed result existed when this
+was written**, and the frame-pooled analysis is where the rule actually bound,
+returning the borderline verdict rather than a forced one.
+
+Only this timing description was amended. The runs, quantities and interpretation
+rule below are unchanged from the original commit; see `git log -p` on this file.
 
 ## Why this check exists
 
