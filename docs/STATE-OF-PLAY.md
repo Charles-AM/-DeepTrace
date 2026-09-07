@@ -105,6 +105,21 @@ variability"**, never "optimisation variability" or "bound". The repeat finding 
 an **audit (n=1)** with no causal attribution. Until V2 lands it is a **protocol
 gap**, not leakage.
 
+## Writing order — agreed
+
+Build outward from the evidence, not from the introduction.
+
+1. Conditional-vs-crossed table and the central two-panel figure
+2. Results, written directly from `results/canonical.json`
+3. Methods, so every reported number has a traceable procedure
+4. Recommendations (ESSENCE §8b) and limitations (§8a) **immediately after** results
+5. Introduction and related work, around the three contributions
+6. Abstract and conclusion **last**
+
+⚠️ **No further experiments** unless peer review requests them. The approved
+primary-result sentence is in `results/canonical.json` under `manuscript_sentence`
+— quote it, do not paraphrase; a test checks its figures against the data.
+
 ## Key documents
 
 | file | what |

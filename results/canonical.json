@@ -34,5 +34,7 @@
     ],
     "n_bootstrap_replicates": 4000,
     "note": "preliminary; experimental history only, never the manuscript"
-  }
+  },
+  "manuscript_sentence": "On the fixed c40 split, the mean FAD - Xception difference across five training runs was -0.0092 AUC. A crossed bootstrap propagating training-run and source-target-component variation produced a 95% interval of [-0.0358, +0.0180]. The Monte Carlo uncertainty band for its upper endpoint was [0.0176, 0.0184], entirely above the +0.014 reference; 4.07% of crossed-bootstrap replicates exceeded that reference. This fixed-split c40 evaluation therefore neither demonstrated a FAD advantage nor excluded a gain of the published magnitude.",
+  "_sentence_note": "The approved wording, kept beside the numbers it quotes. tests/test_canonical.py checks every figure in it against the fields above, so the sentence and the data cannot drift apart. Quote it; do not paraphrase."
 }

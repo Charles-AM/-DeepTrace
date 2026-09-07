@@ -70,3 +70,22 @@ def test_superseded_interval_is_recorded_and_different():
     s = CANON["superseded"]
     assert s["n_bootstrap_replicates"] < CANON["n_bootstrap_replicates"]
     assert s["interval"] != [CANON["ci_lo"], CANON["ci_hi"]]
+
+
+def test_manuscript_sentence_quotes_the_canonical_numbers():
+    """The approved wording lives beside the data it quotes. If a number changes,
+    the sentence must fail rather than silently disagree with the tables."""
+    s = CANON["manuscript_sentence"]
+    lo, hi = CANON["ci_hi_mc_band"]
+    for value in (f"{CANON['point_estimate']}",
+                  f"{CANON['ci_lo']}", f"+{CANON['ci_hi']:.4f}".rstrip("0"),
+                  f"{lo}", f"{round(hi, 4)}",
+                  f"+{CANON['reference_effect']}",
+                  f"{CANON['exceedance_rate_above_reference'] * 100:.2f}%"):
+        assert value in s, f"{value!r} missing from the manuscript sentence"
+
+
+def test_manuscript_sentence_states_the_scope():
+    s = CANON["manuscript_sentence"].lower()
+    assert "fixed c40 split" in s and "five training runs" in s
+    assert "neither demonstrated" in s and "nor excluded" in s
