@@ -71,6 +71,26 @@ def main():
         sys.exit("FATAL: split does not match the recorded seed-0 split.")
     log(f"split VERIFIED: {len(tt)} test targets match")
 
+    # Freeze the conditions in an artifact, not in anyone's memory. A later diff
+    # of two of these answers "genuine nondeterminism or an unnoticed difference?"
+    # -- the question the --amp incident could not be answered from artifacts.
+    from src.runenv import capture
+    env = capture("repeat_audit", manifest=base, probe_config=CONFIGS[0],
+                  image_size=IMG, seed=SPLIT_SEED, repo=a.repo,
+                  extra={"repeats": a.repeats, "configs": CONFIGS,
+                         "split_seed": SPLIT_SEED, "train_seed": SPLIT_SEED,
+                         "reference_args": ARGS})
+    (Path(a.repo) / "results" / "reference" / "runenv_repeat_audit.json").write_text(
+        json.dumps(env, indent=2))
+    t = env["torch"]
+    log(f"env: {t.get('gpus')} torch={t.get('torch')} cuda={t.get('cuda')} "
+        f"cudnn={t.get('cudnn')}")
+    log(f"     deterministic={t.get('cudnn_deterministic')} "
+        f"benchmark={t.get('cudnn_benchmark')} "
+        f"tf32(cudnn/matmul)={t.get('cudnn_allow_tf32')}/{t.get('matmul_allow_tf32')}")
+    log(f"     manifest sha256 {env['manifest']['sha256'][:16]}")
+    log(f"     init probe sha256 {str(env['init_probe']['param_sha256'])[:16]}")
+
     for rep in range(1, a.repeats + 1):
         ds = f"{DS}_rep{rep}"
         shutil.copy(base, OUT / "manifests" / f"{ds}_seed{SPLIT_SEED}_sz{IMG}.csv")
@@ -91,6 +111,16 @@ def main():
                                 "--image-size", str(IMG), "--out-dir", str(PRED)],
                                capture_output=True)
                 log(f"   pred OK {run}")
+
+    # Hash the prediction dumps: identical hashes would mean identical outputs,
+    # which is the strongest possible evidence and has not been observed yet.
+    from src.runenv import hash_file
+    hashes = {Path(f).name: hash_file(f) for f in sorted(glob.glob(str(PRED / "*.csv")))}
+    (Path(a.repo) / "results" / "reference" / "runenv_repeat_pred_hashes.json").write_text(
+        json.dumps(hashes, indent=2))
+    log("prediction dump hashes:")
+    for k, v in hashes.items():
+        log(f"   {v[:16]}  {k}")
 
     if (OUT / "summary.csv").exists():
         print("\n=== summary.csv ===", flush=True)
