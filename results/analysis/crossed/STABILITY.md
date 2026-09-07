@@ -18,9 +18,12 @@ Executed against `docs/crossed-prespecification.md`, committed at `86e6c98`
 | rule: U − MC > +0.014? | **0.0176 > 0.014 ✓**, margin 0.0036 |
 | **P(replicate > +0.014)** | **0.0407 ± 0.0018** (2σ) |
 
-The upper endpoint is stably above the reference. This was not a foregone
-conclusion — the pre-check margin was 0.0043, comparable to plausible Monte Carlo
-error at 4,000 replicates.
+The upper endpoint is above the reference, and that inclusion is **robust to
+Monte Carlo error** — not "comfortable". The exceedance rate of 4.07% sits fairly
+close to the 2.5% percentile boundary; what has been demonstrated is that
+numerical bootstrap error cannot explain the inclusion, which was not a foregone
+conclusion: the pre-check margin was 0.0043, comparable to plausible MC error at
+4,000 replicates.
 
 ## 2. Monte Carlo error — two methods, agreeing
 
@@ -32,21 +35,26 @@ error at 4,000 replicates.
 
 Batch endpoints at B=4,000: 0.0183, 0.0172, 0.0171, 0.0173, 0.0182 (sd 0.00058).
 
-## 3. The proportion is the better statistic
+## 3. Bootstrap exceedance rate — the better statistic
 
-Reporting P(replicate > +0.014) instead of a binary endpoint test turns the
-conditional-vs-crossed contrast from a verdict into a magnitude:
+Reporting the **bootstrap exceedance rate** above +0.014 instead of a binary
+endpoint test turns the conditional-vs-crossed contrast from a verdict into a
+magnitude. B = 50,000 in every row.
 
-| variation propagated | P(replicate > +0.014) |
-|---|---|
-| test components only | **0.0004** |
-| training runs only | **0.0000** |
-| **both (crossed)** | **0.0407** |
+| variation propagated | replicates above +0.014 | exceedance rate |
+|---|---|---|
+| test components only | 20 of 50,000 | 0.0004 |
+| training runs only | **0 of 50,000** | < 0.00002 |
+| **both (crossed)** | **2,037 of 50,000** | **0.0407** |
 
-The conditional analyses put essentially **no** bootstrap mass above the reference;
-the crossed analysis puts 4%. That is a ~100× difference in compatibility, and it
-states the paper's argument far more informatively than "excludes / does not
-exclude".
+> The crossed-bootstrap exceedance rate above +0.014 was **4.07%**, against
+> **0.04%** when only test-component variation was propagated.
+
+⚠️ **Naming.** This is an exceedance rate of the bootstrap distribution, not a
+probability that FAD is compatible with the reference. The ~102× figure is a ratio
+of exceedance rates and nothing more. For the training-run-only row, report "0 of
+50,000 replicates" — the underlying probability is not exactly zero, it is merely
+below what 50,000 draws can resolve.
 
 ## 4. Frame-pooled estimand — BORDERLINE
 
@@ -61,14 +69,20 @@ instead of video-averaged scores.
 | 3 | [−0.0262, +0.0145] | [+0.0136, +0.0158] | 0.0285 ± 0.0053 |
 | 4 | [−0.0268, +0.0151] | [+0.0140, +0.0163] | 0.0293 ± 0.0053 |
 
-**Every MC band spans +0.014**, and the proportion's 2σ interval spans the 0.025
-threshold. By the prespecified rule this is **case 3: borderline /
+**Every MC band spans +0.014**, and the exceedance-rate 2σ interval spans the
+0.025 threshold. By the prespecified rule this is **case 3: borderline /
 bootstrap-sensitive**, and no binary verdict is forced.
 
-This is a finding, not a nuisance. Contribution 2 argues that aggregation defines
-the estimand; here the primary conclusion is comfortably included under
-video-level aggregation and borderline under frame-pooling. The estimand choice
-matters at exactly the margin under adjudication.
+> Under frame-pooled AUC, both the endpoint uncertainty band and the
+> exceedance-rate interval crossed their prespecified decision thresholds. The
+> result was therefore classified as **borderline** rather than forced into an
+> inclusion or exclusion verdict.
+
+⚠️ **This is sensitivity to the estimand, not a return to pseudoreplication.**
+Resampling remained component-aware throughout — components × training runs, as in
+every other row. Only the AUC estimand changed, from video-averaged scores to
+frame-pooled. That is what makes it evidence for contribution 2 rather than a
+methodological regression.
 
 ## 5. Seed-subset sensitivity
 
@@ -81,9 +95,13 @@ All ten 3-of-5 and all five 4-of-5 subsets, plus the full five
 | 4-of-5 (n=5) | −0.0144 to −0.0017 | 0.0127 |
 | full 5 | −0.0092 | — |
 
-**Dropping two of five training runs moves the point estimate by up to 0.021 —
-about 1.5× the effect being adjudicated.** Read positively, that is contribution 3
-appearing inside the primary analysis rather than beside it.
+> Across all prespecified three- and four-run subsets, omitting two runs shifted
+> the estimated effect by as much as **0.021 AUC — approximately 1.5× the +0.014
+> reference magnitude**.
+
+Read positively, that is contribution 3 appearing inside the primary analysis
+rather than beside it. Used to demonstrate **sensitivity to run selection**, never
+to estimate an exclusion probability.
 
 Two subsets do not contain the reference: the 4-run {1,2,3,4} and the 3-run
 {1,2,4}. Both omit seed 0, the run with the most positive difference.

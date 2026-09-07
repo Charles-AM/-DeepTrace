@@ -80,11 +80,17 @@ this model achieves — and is wider because it carries one run's noise in full.
 
 ## 5. What this licenses
 
-> On the fixed V8 split, the mean c40 effect across five training runs was
-> **−0.0092 AUC**. The crossed component-by-training-run bootstrap interval
-> **[−0.0351, +0.0183]** included both zero and FAD's published +0.014 reference
-> gain. This evaluation therefore neither demonstrated a FAD benefit nor excluded
-> a benefit of the reported magnitude.
+> On the fixed c40 split, the mean FAD−Xception difference across five training
+> runs was **−0.0092 AUC**. A crossed bootstrap propagating both training-run and
+> source-target-component variation produced a 95% interval of
+> **[−0.0358, +0.0180]**. Its upper endpoint remained above the +0.014 reference
+> effect after accounting for Monte Carlo uncertainty **[0.0176, 0.0184]**. The
+> evaluation therefore neither demonstrated a FAD advantage nor excluded a gain of
+> the published magnitude.
+
+**FROZEN** — 50,000 replicates, prespecified at `86e6c98`, stability check in
+`STABILITY.md`. Quote the interval as [−0.0358, +0.0180] (the 50k run), not the
+earlier 4,000-replicate [−0.0351, +0.0183].
 
 ❌ Not "FAD does not work."
 ❌ Not "FAD is equivalent to Xception" — equivalence fails too.
