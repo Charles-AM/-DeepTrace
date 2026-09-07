@@ -22,6 +22,25 @@ experimental phase is nearly closed; what remains is mostly writing.
 Primary number: **component half-widths 0.037–0.062 AUC = 2.6–4.5× the +0.014
 reference effect**, across five pipeline runs.
 
+## Test validation — closed 2026-09-06
+
+Full suite run under **real pytest** at `166056b` (= tag
+`results-frozen-2026-09-06`), CPU-only Kaggle notebook, no inputs:
+
+**248 passed, 2 skipped, 0 failed.**
+
+The two skips are hardware-gated DCT tests (`tests/test_dct.py`: no CUDA device,
+no MPS device) — device availability, not analysis code.
+
+This closed a real gap: 63 tests across seven files had only ever run under the
+local shim in the session scratchpad, including everything covering the crossed
+bootstrap and the canonical block. The shim had already diverged from pytest twice
+(`match` did substring rather than `re.search`; `tmp_path` was not provided), both
+caught by accident. All 63 pass under pytest.
+
+⚠️ Re-run the suite on Kaggle after adding or modifying tests locally — pytest and
+sklearn are not installed on the dev machine, so local runs use the shim.
+
 ## Blocked on GPU quota
 
 In priority order — `docs/post-v8-queue.md` has the cells.
