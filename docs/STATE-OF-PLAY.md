@@ -45,6 +45,21 @@ In priority order — `docs/post-v8-queue.md` has the cells.
   repo are frame-pooled only.
 - **Independent-samples cluster bootstrap** for V2 — one model on two different
   test sets is not the paired case `cluster_boot` handles. To write when V2 lands.
+
+`src/crossed_boot.py` is **written and tested** (7 tests, synthetic data). It runs
+the moment the V8 dumps are in `results/predictions/`:
+
+```
+python -m src.crossed_boot \
+  --a-glob 'results/predictions/ffpp_c40_vid_xception_seed*_test.csv' \
+  --b-glob 'results/predictions/ffpp_c40_vid_xception_fad_seed*_test.csv' \
+  --margins 0.014 --out-dir results/analysis/crossed
+```
+
+It refuses to run if the runs were not scored on identical test items — the
+condition V8's fixed split exists to provide — and reports the crossed interval
+beside the two conditional ones (components only, seeds only) so the cost of
+crossing is visible.
 - **Publication figures**: resolution curve, protocol gap, three-unit comparison.
 - **The manuscript.**
 
