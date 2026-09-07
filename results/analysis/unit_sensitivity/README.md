@@ -22,8 +22,18 @@ V8 fixed split, 5 training runs, video-level, 50,000 replicates, RNG seed 0:
 | target group | 30 | [−0.0361, +0.0182] | 0.0271 | 0.0442 ± 0.0018 | included |
 | **difference** | | | **+0.0002** (ratio 1.007) | +0.0035 | **unchanged** |
 
-The half-width difference is smaller than the endpoint's own Monte Carlo band
-(±0.0004). **The paper's primary result does not depend on this choice.**
+> **The crossed conclusion was robust to choosing target groups or source-target
+> components as the content-clustering unit in this split.**
+
+Deliberately narrower than "does not depend on the unit choice" — the paper's
+broader finding is that crop, video and component choices matter substantially,
+and this sentence must not appear to contradict it.
+
+⚠️ The 0.0002 half-width difference is smaller than one endpoint's own Monte Carlo
+band (±0.0004). That is **suggestive, not a formal statement** about the
+difference's own Monte Carlo uncertainty, which would require estimating that
+difference directly. Not pursued, because the substantive verdict is identical
+either way.
 
 ## B. The eight conditional per-seed comparisons
 
@@ -43,10 +53,11 @@ Video-level, 2,000 replicates, the same comparisons reported in `../thresholds/`
 Half-width difference −0.0032 to +0.0010 (median +0.0000); ratio 0.929–1.033.
 **No exclusion verdict at +0.014 changed, in any of the eight.**
 
-Note the difference is not signed consistently: target grouping gives a slightly
-wider interval in four comparisons and a slightly narrower one in four, despite
-always having one or two more units. That is what a difference within noise looks
-like, and it is worth more than the median being zero.
+The difference is not signed consistently: target grouping gives a slightly wider
+interval in four comparisons and a slightly narrower one in four, despite always
+having one or two more units. Across eight **related** comparisons that is
+**consistent with no systematic difference observed** — not proof that the
+differences are noise.
 
 ## Conclusion — as prespecified
 
@@ -76,3 +87,15 @@ and `../crossed/crossed_video_b50000_s0.csv`.
 python -m src.cluster_boot --a <preds_a> --b <preds_b> --margins 0.014 --out-dir results/analysis/unit_sensitivity
 python -m src.crossed_boot --a-glob '...' --b-glob '...' --unit target --n-boot 50000 --out-dir results/analysis/crossed
 ```
+
+
+## For the paper
+
+One main-text sentence; this table goes to supplementary:
+
+> As a prespecified sensitivity analysis, replacing 29 source-target components
+> with 30 target groups changed the crossed half-width by 0.0002 AUC and did not
+> alter compatibility with zero or +0.014.
+
+Component clustering remains primary because it represents the known source-target
+graph structure.
