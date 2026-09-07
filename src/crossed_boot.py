@@ -130,6 +130,10 @@ def crossed_bootstrap(labels, A, B, groups, n_boot: int = 4000, seed: int = 0) -
     out = {"n_seeds": n_seeds, "n_components": len(keys), "n_items": len(labels),
            "diff": round(point, 4)}
 
+    # Var_crossed / (Var_component_only + Var_seed_only). Under an additive
+    # independent-variance model this is 1; the departure is reported as an
+    # exploratory diagnostic, not as proof that independence fails -- AUC is
+    # nonlinear, the seed sample is five, and the bootstrap itself adds noise.
     for name, draw_comp, draw_seed in (("crossed", True, True),
                                        ("component_only", True, False),
                                        ("seed_only", False, True)):
@@ -150,12 +154,20 @@ def crossed_bootstrap(labels, A, B, groups, n_boot: int = 4000, seed: int = 0) -
         d = np.asarray(reps)
         out[name] = {"ci_lo": round(float(np.percentile(d, 2.5)), 4),
                      "ci_hi": round(float(np.percentile(d, 97.5)), 4),
-                     "se": round(float(d.std(ddof=1)), 4),
+                     # 6 dp: this SE gets SQUARED for the non-additivity ratio in
+                     # the README, and 4 dp loses meaningful precision there
+                     "se": round(float(d.std(ddof=1)), 6),
                      "halfwidth": round(float(np.percentile(d, 97.5)
                                               - np.percentile(d, 2.5)) / 2, 5),
                      "n_used": len(d), "n_skipped": skipped}
         print(f"  {name:<15} 95% CI [{out[name]['ci_lo']:+.4f}, {out[name]['ci_hi']:+.4f}]"
-              f"  half-width {out[name]['halfwidth']:.4f}")
+              f"  half-width {out[name]['halfwidth']:.4f}  se {out[name]['se']:.6f}")
+
+    vc, vs, vx = (out[k]["se"] ** 2 for k in ("component_only", "seed_only", "crossed"))
+    out["nonadditivity_ratio"] = round(vx / (vc + vs), 4)
+    out["nonadditivity_formula"] = "var(crossed) / (var(component_only) + var(seed_only))"
+    print(f"  non-additivity ratio {out['nonadditivity_ratio']:.3f}  "
+          f"[{out['nonadditivity_formula']}] — exploratory")
     return out
 
 
