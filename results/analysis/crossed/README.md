@@ -111,7 +111,22 @@ earlier 4,000-replicate [−0.0351, +0.0183].
 
 ## Files
 
-`crossed_video.csv`. Inputs: `results/predictions_v8/*.csv` (10 dumps).
+**Which file to quote.** Filenames encode replicate count and RNG seed:
+
+| file | use |
+|---|---|
+| `crossed_video_b50000_s0.csv` | **the primary result** — quote this |
+| `crossed_video_b4000_s{0..4}.csv` | stability batch |
+| `crossed_frame_b4000_s{0..4}.csv` | frame-pooled estimand (borderline) |
+| `crossed_video_target_b50000_s0.csv` | target-group sensitivity |
+| `seed_subsets_video.csv` | 3-of-5 and 4-of-5 subsets |
+
+A legacy `crossed_video.csv` was removed: it duplicated the 4,000-replicate run
+under an unqualified name, sitting beside the 50,000-replicate primary result.
+Anyone scanning the directory could reasonably have quoted the wrong one. Every
+remaining filename states its replicate count.
+
+Inputs: `results/predictions_v8/*.csv` (10 dumps, hashed in `SHA256SUMS.json`).
 
 ```
 python -m src.crossed_boot \
