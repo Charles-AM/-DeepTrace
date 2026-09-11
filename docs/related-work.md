@@ -272,21 +272,59 @@ Read from the within-domain columns of that table:
 Xception is 0.81347, a difference of 0.013 on a 300-sequence subset versus full
 FF++. Close enough to indicate our pipeline is sound.
 
-✅ **SCOPE CONFIRMED 2026-09-11.** DeepfakeBench's F3Net is **FAD only**, stated in
-the header comment of `training/detectors/f3net_detector.py`:
+⚠️ **SCOPE IS AMBIGUOUS — paper and code disagree. Checked 2026-09-11.**
 
-> "We replicate the results by solely utilizing the FAD branch, following the
-> reference GitHub implementation"
+**Their paper** describes F3Net as the two-branch system and states how it was
+built:
 
-No `LFS_Head`, no `MixBlock`, no branch-mode flag. So their **+0.0010 is directly
-comparable to the original's +0.014 FAD ablation** — the same component, the same
-contrast against an Xception baseline. A 14× discrepancy on a like-for-like
-comparison, not a full-system-versus-component mismatch.
+> "F3Net [32]: uses cross-attention two-stream networks to collaboratively learn
+> frequency-aware clues from two branches: FAD and LFS … **The code for this
+> detector is not publicly available, we re-implement it carefully following the
+> instructions and settings in the original paper**"
 
-**This makes it the single most useful external number we have**: an independent,
-standardised reimplementation of exactly the component we test, reporting an effect
-an order of magnitude smaller than the original, with no uncertainty attached to
-either figure.
+**Their released code**, `training/detectors/f3net_detector.py`, states the
+opposite on both counts:
+
+> "We replicate the results by solely utilizing the **FAD branch**, following the
+> **reference GitHub implementation**"
+
+and contains `FAD_Head` with no `LFS_Head`, no `MixBlock`, and no branch-mode flag.
+
+Two contradictions: **what was implemented** (two branches vs FAD alone) and
+**what it was built from** (the paper, because no code existed, vs a reference
+GitHub implementation).
+
+⚠️ Both readings come from a single source each, read through a summarising model.
+We cannot establish which corresponds to the code that produced the published
+table, and the repository may have changed since publication.
+
+### Why our use of the number survives the ambiguity
+
+The comparison does not depend on resolving it:
+
+| if their F3Net is… | original's claim | their measured effect | ratio |
+|---|---|---|---|
+| FAD only | +0.014 (FAD ablation) | +0.0010 | **14× smaller** |
+| the full two-branch system | +0.040 (full system) | +0.0010 | **40× smaller** |
+
+**Either way, an independent standardised reimplementation reports an effect an
+order of magnitude or more below the original**, with no uncertainty attached to
+either figure. That is the point we need, and it is robust to the ambiguity.
+
+### How to cite it
+
+Use the conservative form, and disclose the ambiguity in one clause rather than
+making it a finding:
+
+> An independent standardised benchmark reports F3Net at 0.8271 against an
+> Xception baseline of 0.8261 on FF-c40, a difference of +0.0010 — an order of
+> magnitude below the gain reported in the original ablation. (Their paper
+> describes the two-branch method while their released implementation states the
+> FAD branch alone; the comparison holds under either reading.)
+
+Do **not** frame the paper/code discrepancy as a criticism of DeepfakeBench. It is
+a disclosure that protects our comparison, not a result of ours, and treating it as
+a gotcha would be both unfair and a distraction from the argument.
 
 ⚠️ **One implementation difference, in our favour to disclose.** Their `FAD_Head`
 uses **four filters producing a 12-channel** input (bands at 0–1/16, 1/16–1/8,
