@@ -198,9 +198,51 @@ cell is a bare four-decimal point value.** No standard deviation, error bar,
 interval, or run count anywhere in the table or its caption. The positioning
 sentence may be used in its strong form.
 
-⚠️ **CHECK 2 STILL OWED.** Confirm from the paper body — not only the repository —
-that **frame-level AUC** is the primary reported metric, and whether the choice is
-justified.
+✅ **CHECK 2 CONFIRMED 2026-09-11** from the paper body, Evaluation and Analysis
+Module. Verbatim:
+
+> "we employ 4 widely used evaluation metrics: accuracy (ACC), the area under the
+> ROC curve (AUC), average precision (AP), and equal error rate (EER) … it is
+> notable that there is an inconsistency in the usage of these evaluation metrics
+> in the community, some are at the frame level, while others are at the video
+> level, leading to unfair comparisons. **Our benchmark currently adopts the frame
+> level evaluation to build a fair basis for comparison among detectors.**"
+
+Two things follow, and the second is the more important.
+
+**Uncertainty.** Four metrics are enumerated — ACC, AUC, AP, EER. **None is a
+measure of variability.** The gap is now confirmed from the paper body, not
+inferred from silence in an abstract.
+
+### The positioning this actually licenses — and it is better than the original one
+
+The naive framing ("the field ignores the frame/video distinction") is **wrong and
+would be unfair**. DeepfakeBench identifies the inconsistency explicitly, calls it
+a source of "unfair comparisons", and resolves it deliberately.
+
+What they do is standardise the choice **for comparability**. What our results show
+is that the same choice has two further consequences they do not address:
+
+1. **It changes the estimated contrast, not merely its comparability.** Our V4
+   result moves the architectural estimate in all five c40 seeds while preserving
+   sign (`results/analysis/aggregation/`). Frame-pooled and video-aggregated AUC
+   are different estimands, so standardising on one makes comparisons consistent
+   without making them equivalent to the other.
+2. **Frame-level pooling is precisely what makes the units non-independent.**
+   Reporting at the frame level is what licenses treating 3,000 correlated crops
+   as 3,000 observations — the pseudoreplication our contribution 2 measures.
+
+So the honest and much stronger claim:
+
+> The field's reference benchmark **recognises** the frame-versus-video
+> inconsistency and standardises on frame-level evaluation to make comparisons
+> fair. Standardising the choice resolves comparability, but the choice also
+> determines the estimand and the dependence structure of the evaluation units —
+> neither of which is addressed, and neither of which a consistent choice fixes.
+
+That framing credits them correctly, is verifiable from their own text, and leaves
+our contribution precisely delineated: **consistency is not the same as correct
+uncertainty modelling.**
 
 ### What the same table independently shows about frequency methods
 
