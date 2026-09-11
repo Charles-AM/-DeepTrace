@@ -272,12 +272,39 @@ Read from the within-domain columns of that table:
 Xception is 0.81347, a difference of 0.013 on a 300-sequence subset versus full
 FF++. Close enough to indicate our pipeline is sound.
 
-⚠️ **Caveats before citing.** DeepfakeBench's F3Net is *their* reimplementation and
-may differ from the original; confirm whether it includes LFS and MixBlock or FAD
-alone, since the original's full-system claim is +0.040. Their split and protocol
-may also differ from the original paper's. And their numbers carry no uncertainty
-at all, which is the point — with single values there is no way to tell whether
-+0.0010 is distinguishable from zero.
+✅ **SCOPE CONFIRMED 2026-09-11.** DeepfakeBench's F3Net is **FAD only**, stated in
+the header comment of `training/detectors/f3net_detector.py`:
+
+> "We replicate the results by solely utilizing the FAD branch, following the
+> reference GitHub implementation"
+
+No `LFS_Head`, no `MixBlock`, no branch-mode flag. So their **+0.0010 is directly
+comparable to the original's +0.014 FAD ablation** — the same component, the same
+contrast against an Xception baseline. A 14× discrepancy on a like-for-like
+comparison, not a full-system-versus-component mismatch.
+
+**This makes it the single most useful external number we have**: an independent,
+standardised reimplementation of exactly the component we test, reporting an effect
+an order of magnitude smaller than the original, with no uncertainty attached to
+either figure.
+
+⚠️ **One implementation difference, in our favour to disclose.** Their `FAD_Head`
+uses **four filters producing a 12-channel** input (bands at 0–1/16, 1/16–1/8,
+1/8–1). Ours (`src/models/f3net.py`) uses **three radial bands producing
+9 channels** (`_BANDS = ((0.0, 0.10), (0.10, 0.35), (0.35, 1.01))`, `in_chans=9`),
+with hand-designed edges and a small learnable perturbation.
+
+Both call themselves FAD. Neither is wrong — the original describes learnable
+band-pass filters without fixing the partition — but it means **three
+implementations of "the same component" differ in band count and edges**. Disclose
+this when citing their number; it is also a minor point in favour of the paper's
+thesis, since the component's definition is itself less determinate than a single
+reported gain suggests.
+
+⚠️ **Remaining caveats.** Their split and training protocol may differ from the
+original paper's. And their numbers carry no uncertainty at all — with single point
+values there is no way to tell whether +0.0010 is distinguishable from zero, or
+from +0.014.
 
 - **Yan et al. "DF40: Toward Next-Generation Deepfake Detection." NeurIPS 2024.**
   40 forgery methods incl. diffusion/editing — a modern cross-generator target.
