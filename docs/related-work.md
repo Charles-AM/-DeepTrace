@@ -357,6 +357,57 @@ from +0.014.
 
 ---
 
+## Citations this file was missing (added 2026-09-11)
+
+This document was written while the project was a **method** paper. The
+contributions are now statistical, and three categories of essential citation were
+absent entirely. ⚠️ **Everything in this section is UNVERIFIED** — written from
+memory, never checked against dblp/CVF/arXiv. Verify authors, venue, year and pages
+before the bibliography is final.
+
+### Infrastructure — cannot publish without these
+
+| citation | role |
+|---|---|
+| **Rössler, Cozzolino, Verdoliva, Riess, Thies, Nießner. "FaceForensics++: Learning to Detect Manipulated Facial Images." ICCV 2019.** | the dataset. Also the source of the `target_source` naming our component clustering exploits. Check their official split sizes and how sequence pairs were formed |
+| **Chollet. "Xception: Deep Learning with Depthwise Separable Convolutions." CVPR 2017.** | the backbone for both arms, and for F3-Net. Why the comparison is matched |
+| **Lin, Goyal, Girshick, He, Dollár. "Focal Loss for Dense Object Detection." ICCV 2017.** | our training objective, γ=2.0, α from train class balance |
+| **Loshchilov, Hutter. "Decoupled Weight Decay Regularization." ICLR 2019.** | AdamW. Also the citation that makes our `no_decay_param_groups` fix legible — decoupled decay was being applied to a scalar gate |
+| **Loshchilov, Hutter. "SGDR: Stochastic Gradient Descent with Warm Restarts." ICLR 2017.** | cosine schedule |
+
+### Statistical methodology — contribution 2 has no grounding without these
+
+| citation | role |
+|---|---|
+| **Hurlbert. "Pseudoreplication and the Design of Ecological Field Experiments." Ecological Monographs 54(2), 1984.** | **names the error** and gives it a forty-year pedigree. Framing improves: not "we invented something" but "a known error has a large measurable cost here". Ours is closest to his *simple pseudoreplication* |
+| **Efron, Tibshirani. "An Introduction to the Bootstrap." 1993.** / **Davison, Hinkley. "Bootstrap Methods and their Application." 1997.** | the percentile bootstrap. Davison & Hinkley is the better cite for **coverage**, which limitation 4 concerns |
+| **Field, Welsh. "Bootstrapping Clustered Data." JRSS-B 69(3), 2007.** / **Cameron, Gelbach, Miller. "Bootstrap-Based Improvements for Inference with Clustered Errors." REStat 90(3), 2008.** | cluster bootstrap. **Both discuss the few-clusters problem — we have 29.** Find what they conclude; limitation 4 should cite it rather than merely admit ignorance |
+| **DeLong, DeLong, Clarke-Pearson. Biometrics 44(3), 1988.** / **Hanley, McNeil. Radiology 143(1), 1982.** | the standard correlated-AUC comparison. **Needed to answer "why not DeLong?"** — its variance estimator assumes independent observations, which is the assumption the paper is about |
+| **Lakens. "Equivalence Tests: A Practical Primer." SPPS 8(4), 2017.** | why "not significant" ≠ "no effect", and why margins must be set externally. Ours is externally anchored to +0.014, which is stronger than the arbitrary margins he warns against |
+
+### ML evaluation, variance and leakage — where contributions 2 and 3 live
+
+**The most important gap.** If we do not engage this literature, a reviewer will
+say "already known" — and for parts of contribution 3 they would be partly right.
+
+| citation | role |
+|---|---|
+| **Bouthillier, Delaunay, Bronzi, et al. "Accounting for Variance in Machine Learning Benchmarks." MLSys 2021.** | **contribution 3 in a general-ML setting.** The single most important addition. Position carefully: *they* establish the principle; *we* show it reverses a published-effect comparison, crossed with test-content clustering their setting does not require. Check whether clustering is among their variance sources — if not, that is precisely our addition |
+| **Kapoor, Narayanan. "Leakage and the Reproducibility Crisis in ML-based Science." Patterns 4(9), 2023.** | **names and taxonomises contribution 1's error** across many fields. Find which category crop-randomised splitting falls into and use their term. Compare their documented leakage-induced inflations against our ~18 points |
+| **Henderson et al. "Deep Reinforcement Learning that Matters." AAAI 2018.** / **Melis, Dyer, Blunsom. ICLR 2018.** | seed variance overwhelming architectural differences, established in other subfields. **Cite two, not four** — Melis is closest to us (claimed architectural gains dissolving under careful evaluation) |
+| Reimers, Gurevych. EMNLP 2017. / Dodge et al. EMNLP 2019. | same point, NLP. Corroborative only |
+| **Pineau et al. JMLR 2021.** / **Gundersen, Kjensmo. AAAI 2018.** | reproducibility standards. Lets us frame our provenance apparatus as **meeting a standard** rather than as idiosyncratic diligence |
+| Bengio, Grandvalet. JMLR 5, 2004. | variance estimation with dependent resamples is genuinely hard. Cite only if pressed on the 59/41 allocation |
+
+### Two questions to settle while reading
+
+1. **Does Bouthillier et al. include test-content clustering among their variance
+   sources?** If not, that is our addition and should be stated. If so, our novelty
+   narrows to the domain demonstration and the measured reversal — still
+   publishable, but the wording must change.
+2. **Which of Kapoor & Narayanan's leakage categories does crop-randomised
+   splitting fall into?** Use their term rather than inventing one.
+
 ## One-paragraph positioning (for the intro)
 
 > F3-Net (ECCV 2020) established that injecting an explicit frequency-domain branch
