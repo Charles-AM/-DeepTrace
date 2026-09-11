@@ -160,6 +160,50 @@ discussion section.
   of Deepfake Detection." NeurIPS 2023 (Datasets & Benchmarks).** arXiv:2307.01426.
   Standardised preprocessing, splits, and backbones; our results should track its
   leaderboard for the detectors we re-implement.
+
+### DeepfakeBench — what it standardises, checked 2026-09-11
+
+**Why this matters more than a normal citation.** The paper's positioning rests on
+what the field's reference benchmark does and does not standardise. That sentence
+is load-bearing, so it is recorded here with its evidence level rather than
+asserted.
+
+**Standardises** (from the abstract, arXiv:2307.01426):
+
+- "a unified data management system to ensure consistent input across all detectors"
+- "an integrated framework for state-of-the-art methods implementation"
+- "standardized evaluation metrics and protocols"
+
+**Does not appear to standardise** (abstract silent; repository documentation
+consulted): multiple random seeds, standard deviations, confidence intervals,
+significance testing, or the statistical unit over which variance is computed.
+
+**The sharper finding.** The repository documentation states the primary reported
+metric is **frame-level AUC** (video-level AUC, ACC, EER, PR and AP are also
+computed). That is precisely the estimand our V4 result shows changes the
+architectural contrast in all five c40 seeds while preserving sign
+(`results/analysis/aggregation/`).
+
+So the positioning is a claim about a **concrete reported choice**, not merely
+about an absence:
+
+> The field's reference benchmark standardises data processing, implementations
+> and metrics, and reports frame-level AUC as its headline metric — the estimand
+> we show changes the estimated contrast — while specifying nothing about the unit
+> over which uncertainty is computed.
+
+⚠️ **EVIDENCE LEVEL — abstract and repository README only, read via a summarising
+model. NOT confirmed against the paper's results tables.** Two checks are owed
+before submission, both of which a reviewer could repeat independently:
+
+1. Do the results tables report **single point values only**, with no standard
+   deviation, error bar or interval on any number?
+2. Is **frame-level AUC** stated in the paper (not only the repo) as the primary
+   reported metric?
+
+Until both are confirmed, do not put the positioning sentence in an abstract or
+introduction in its strong form.
+
 - **Yan et al. "DF40: Toward Next-Generation Deepfake Detection." NeurIPS 2024.**
   40 forgery methods incl. diffusion/editing — a modern cross-generator target.
 
