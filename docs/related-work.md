@@ -192,17 +192,50 @@ about an absence:
 > we show changes the estimated contrast — while specifying nothing about the unit
 > over which uncertainty is computed.
 
-⚠️ **EVIDENCE LEVEL — abstract and repository README only, read via a summarising
-model. NOT confirmed against the paper's results tables.** Two checks are owed
-before submission, both of which a reviewer could repeat independently:
+✅ **CHECK 1 CONFIRMED 2026-09-11** from the paper's main results table
+(within-domain and cross-domain evaluation, 15 detectors × 15 columns). **Every
+cell is a bare four-decimal point value.** No standard deviation, error bar,
+interval, or run count anywhere in the table or its caption. The positioning
+sentence may be used in its strong form.
 
-1. Do the results tables report **single point values only**, with no standard
-   deviation, error bar or interval on any number?
-2. Is **frame-level AUC** stated in the paper (not only the repo) as the primary
-   reported metric?
+⚠️ **CHECK 2 STILL OWED.** Confirm from the paper body — not only the repository —
+that **frame-level AUC** is the primary reported metric, and whether the choice is
+justified.
 
-Until both are confirmed, do not put the positioning sentence in an abstract or
-introduction in its strong form.
+### What the same table independently shows about frequency methods
+
+Read from the within-domain columns of that table:
+
+| detector | type | FF-c23 | FF-c40 | Δ vs Xception c40 |
+|---|---|---|---|---|
+| Xception | naive baseline | 0.9637 | 0.8261 | — |
+| **F3Net** | frequency | 0.9635 | 0.8271 | **+0.0010** |
+| SPSL | frequency | 0.9610 | 0.8174 | −0.0087 |
+| SRM | frequency | 0.9576 | 0.8114 | −0.0147 |
+| UCF | spatial | 0.9705 | 0.8399 | +0.0138 |
+
+**Three findings, all directly relevant:**
+
+1. **An independent standardised reimplementation of F3Net beats the Xception
+   baseline by +0.0010 at c40** — about **14× smaller** than the +0.014 FAD
+   ablation gain reported in the original paper, and −0.0002 (negative) at c23.
+2. **Of three frequency detectors at c40, two are below the spatial baseline.**
+   The best performer in the table is UCF, a spatial method, at +0.0138.
+3. **Both +0.0010 and +0.014 lie inside our crossed interval [−0.0358, +0.0180].**
+   Our study cannot separate them — which is exactly the resolution argument, now
+   with two independent published estimates of the same quantity differing by an
+   order of magnitude and neither reported with uncertainty.
+
+**External validity.** Their Xception FF-c40 is 0.8261; our frame-pooled c40
+Xception is 0.81347, a difference of 0.013 on a 300-sequence subset versus full
+FF++. Close enough to indicate our pipeline is sound.
+
+⚠️ **Caveats before citing.** DeepfakeBench's F3Net is *their* reimplementation and
+may differ from the original; confirm whether it includes LFS and MixBlock or FAD
+alone, since the original's full-system claim is +0.040. Their split and protocol
+may also differ from the original paper's. And their numbers carry no uncertainty
+at all, which is the point — with single values there is no way to tell whether
++0.0010 is distinguishable from zero.
 
 - **Yan et al. "DF40: Toward Next-Generation Deepfake Detection." NeurIPS 2024.**
   40 forgery methods incl. diffusion/editing — a modern cross-generator target.
