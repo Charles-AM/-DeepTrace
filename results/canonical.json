@@ -26,7 +26,7 @@
   "verdict": "reference remains included (prespecified case 1): U - MC = 0.0176 > 0.014",
   "prespecification_commit": "86e6c98",
   "source_csv": "results/analysis/crossed/crossed_video_b50000_s0.csv",
-  "source_csv_sha256": "639789ee7421af59cfcaef0dba159705553560300a925f6675a8b6c437405129",
+  "source_csv_sha256": "c9cb422760a97d65ce3d57fa1014122403c7175299fed98c0e26e5bdc2cb244b",
   "superseded": {
     "interval": [
       -0.0351,
