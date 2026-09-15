@@ -2,6 +2,8 @@
 
 Last updated 2026-09-15. Read this first; everything else is detail.
 
+**Next session starts at `docs/EXPERIMENT-PLAN.md`.**
+
 ---
 
 ## 1. What the project is
@@ -80,6 +82,7 @@ established by full-text search, see `docs/VERIFICATION-LEDGER.md` §4.
 | analysis directories | 15, all with READMEs |
 | result CSVs | 74 |
 | tests | **253 passed, 2 skipped** under pytest |
+| citations verified | **15 of 22** in the previously-unverified section |
 | prespecifications | 2, committed before the analyses they govern |
 | tags | 3, immutable (`results/PROVENANCE.md`) |
 | manuscript | **not started** |
@@ -88,11 +91,16 @@ established by full-text search, see `docs/VERIFICATION-LEDGER.md` §4.
 
 ## 4. What to do next
 
-Full detail in **`docs/REMAINING-WORK.md`** — 20 items with compute times.
+**`docs/EXPERIMENT-PLAN.md`** is the execution view — where each experiment runs
+(local bash / Kaggle GPU / web), what it changes, and the paper it answers to.
+**`docs/REMAINING-WORK.md`** has the underlying reasoning.
 
-**Free (no quota):** A1 coverage simulation (~1.5 h, closes limitation 4) ·
-A2 verify ~20 citations (~1 h, **blocks submission**) · A3 three figures (~1 h) ·
-A4 per-manipulation intervals · A5 more resolution curves · A6 BCa sensitivity
+**Free (no quota), all runnable locally — numpy and scipy are present:**
+A2 verify the **remaining 7** citations (~1 h, **blocks submission**; was ~20
+before the 2026-09-15 pass) · A1 coverage simulation (~1.5 h, retires limitation 4,
+and Cameron et al. put 29 clusters inside the documented over-rejection regime) ·
+A3 three figures (~1 h, needs a matplotlib venv) · A4 per-manipulation intervals ·
+A5 more resolution curves · A6 BCa sensitivity
 
 **Cheap GPU:** B1 `band_ablation` smoke test (~5 min, closes G3) ·
 **B2 = V2 seen/unseen (~80 min — the best GPU spend, it changes what you can claim)**
@@ -140,6 +148,8 @@ cross-dataset, late fusion, capacity control, α-sweep. All old-framing.
 | "positive control" | **"large-separation calibration model"** |
 | "we beat / outperform" | **nothing** — no performance claim is made anywhere |
 | "three published measurements" | **two published, plus ours** |
+| "leakage" (unqualified, in related work) | **"[L3.2] nonindependence"** — Kapoor & Narayanan's own term |
+| "no one has accounted for this" | Bouthillier et al. **name** correlated errors and set them aside; we fill that gap |
 
 Full table: `ESSENCE.md` §11. Variance vocabulary: §0b. Limitations: §8a (six).
 
@@ -152,6 +162,7 @@ Full table: `ESSENCE.md` §11. Variance vocabulary: §0b. Limitations: §8a (six
 | `results/canonical.json` | the primary result + approved sentence |
 | `docs/ESSENCE.md` | frozen framing, contributions, limitations, recommendations |
 | `docs/VERIFICATION-LEDGER.md` | what is verified, assumed, or owed |
+| `docs/EXPERIMENT-PLAN.md` | **where each experiment runs, and its literature anchor** |
 | `docs/REMAINING-WORK.md` | every candidate experiment with compute time |
 | `docs/related-work.md` | reference papers + the citations still unverified |
 | `docs/REPRODUCIBILITY.md` | methods, hyperparameters, why no tuning |
