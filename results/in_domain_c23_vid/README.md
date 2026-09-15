@@ -91,6 +91,32 @@ F3-Net's LQ numbers as expected for our much smaller subset. Being *below*
 published SOTA on a scoped subset is a credible position; being above it was the
 red flag that started this whole investigation.
 
+## ⚠️ Epoch-budget caveat (recorded 2026-09-15)
+
+Checkpoint selection keeps the epoch with the best validation ROC-AUC. At c23 the
+selected epoch sits near the end of the 15-epoch budget for three configurations,
+so those runs **may still have been improving when training stopped**:
+
+| config | best epochs | mean | runs selecting epoch 13–14 |
+|---|---|---|---|
+| baseline_spatial | 5, 10, 12 | 9.0 | 0/3 |
+| Xception | 6, 10, 11 | 9.0 | 0/3 |
+| Xception + FAD | 10, 11, 13 | 11.3 | **1/3** |
+| frequency_only | 12, 12, 14 | 12.7 | **1/3** |
+| full | 11, 13, 14 | 12.7 | **2/3** |
+
+**c40 is unaffected** — every configuration peaks by epoch 11 with a mean near 5
+(`../in_domain_c40_vid/`), so the primary result does not carry this caveat.
+
+Implication: absolute c23 AUCs for `f3net`, `frequency_only` and `full` may be
+slight underestimates. The **protocol gap** is less affected, since both arms of
+that contrast share the budget, but the c23 side of the compression comparison
+should be read with this in mind.
+
+⚠️ This does **not** license extending the budget after the fact. Choosing a
+budget having seen which runs would benefit is the error this project criticises
+elsewhere; the fixed 15 epochs stand.
+
 ## Files
 
 `summary.csv` (15 rows), `ablation_c23_vid.md`, `ablation_table.csv`,

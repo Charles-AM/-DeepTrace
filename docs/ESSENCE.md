@@ -305,6 +305,12 @@ committed predictions, ~45 GPU-hours (`docs/EXPERIMENTS.md`).
    retained, we could not determine how video-level aggregation would affect its
    magnitude **or direction**.
 
+6. **c23 epoch budget.** Checkpoint selection at c23 chose epoch 13–14 of 15 for
+   one of three `f3net` runs, one of three `frequency_only`, and two of three
+   `full` — those runs may still have been improving. c40 is unaffected (all peak
+   by epoch 11, mean ~5), so the primary result is clear of this. See
+   `results/in_domain_c23_vid/README.md`.
+
 ## 8b. 🔒 Recommendations for architectural comparisons
 
 The paper's constructive outcome. Every item is backed by a measured result.
