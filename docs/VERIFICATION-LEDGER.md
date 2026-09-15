@@ -90,8 +90,76 @@ reports"*, never *"neither measured"*.
 
 | item | why it matters | cost |
 |---|---|---|
-| **~20 citations in Groups A, G, H of `related-work.md`** | written from memory, never checked against dblp/CVF/arXiv. **Includes the dataset paper and the backbone** — the paper cannot be submitted without these verified | a few hours |
-| Bouthillier et al.: do they include test-content clustering among variance sources? | if not, that is precisely our addition; if so, our novelty narrows to the domain demonstration | read one paper |
-| Kapoor & Narayanan: which leakage category covers crop-randomised splitting? | use their taxonomy term rather than inventing one | read one paper |
+| **7 citations in Groups A, G, H of `related-work.md`** | ~~20~~ → 7 after the 2026-09-15 pass (§6). Dataset paper and backbone now cleared; the rest still block submission | ~1 h |
+| **Replacement intro positioning paragraph** | the existing one is quarantined as old-framing (§6) | short |
 | DeepfakeBench F3Net numbers | read off a table image, then confirmed in extracted text — but worth one direct look at the PDF | minutes |
 | Re-verify Groups B–F | last checked 2026-09-03/04 | an hour |
+
+---
+
+## 6. Citation verification pass — 2026-09-15
+
+Checked against dblp, CVF open access, and publisher pages; the two papers with
+open reading questions were extracted in full with `pdftotext` and quoted verbatim.
+
+### Verified — 15
+
+| citation | confirmed as |
+|---|---|
+| FaceForensics++ | Rössler, Cozzolino, Verdoliva, Riess, Thies, Nießner. ICCV 2019 |
+| Xception | Chollet. CVPR 2017, pp. 1800–1807 |
+| AdamW | Loshchilov, Hutter. "Decoupled Weight Decay Regularization." ICLR 2019 |
+| SGDR | Loshchilov, Hutter. ICLR 2017 |
+| Pseudoreplication | Hurlbert. Ecological Monographs **54(2), 187–211**, 1984 |
+| Cluster bootstrap | Field, Welsh. JRSS-B **69(3), 369–390**, 2007 |
+| Cluster bootstrap-t | Cameron, Gelbach, Miller. REStat **90(3), 414–427**, 2008 |
+| Correlated AUC | DeLong, DeLong, Clarke-Pearson. Biometrics **44(3), 837–845**, 1988 |
+| AUC meaning | Hanley, McNeil. Radiology **143(1), 29–36**, 1982 |
+| Equivalence testing | Lakens. SPPS **8(4), 355–362**, 2017 |
+| Benchmark variance | Bouthillier, Delaunay, Bronzi, et al. MLSys 2021 |
+| Leakage taxonomy | Kapoor, Narayanan. Patterns **4(9), 100804**, 2023 |
+| Seed variance (RL) | Henderson et al. AAAI 2018, **pp. 3207–3214** |
+| Seed variance (LM) | Melis, Dyer, Blunsom. ICLR 2018 |
+| Repro standards | Pineau et al. JMLR **22, 1–20**, 2021 |
+
+### Still unverified — 7
+
+Focal Loss (Lin et al., ICCV 2017) · Efron & Tibshirani (1993) ·
+Davison & Hinkley (1997) · Gundersen & Kjensmo (AAAI 2018) ·
+Reimers & Gurevych (EMNLP 2017) · Dodge et al. (EMNLP 2019) ·
+Bengio & Grandvalet (JMLR 5, 2004)
+
+**Submission is still blocked until these are checked**, though the blocker is now
+much smaller — and the dataset paper and backbone, the two that mattered most, are
+cleared.
+
+### Three findings that change what we can write
+
+1. **Our 29 components sit inside a documented failure regime.** Cameron, Gelbach
+   & Miller state that standard asymptotic tests "can over-reject with few (five to
+   thirty) clusters". Limitation 4 stops being a vague admission of ignorance and
+   becomes a citation — and A1 (coverage simulation) and A6 (BCa) stop being
+   optional polish and become the natural response to a known problem.
+
+2. **Bouthillier et al. name our gap and leave it open.** They assume i.i.d. test
+   data, enumerate five variance sources, none of which is test-content clustering,
+   and note in passing that "if errors are correlated, not i.i.d., the degrees of
+   freedom are smaller and the distribution is wider" — then set it aside because
+   their binomial model matched their bootstrap on i.i.d. benchmarks. Contribution 3
+   is safe, and is now anchored to the paper that would otherwise pre-empt it.
+   They also state variance contributions are **not additive**, which is the
+   principle our measured `nonadditivity_ratio = 1.697` instantiates.
+
+3. **Kapoor & Narayanan's term is [L3.2] "Nonindependence between training and test
+   samples"**, and their prescribed remedy is **block cross-validation** — which is
+   what L2 video-disjoint and L3 component-disjoint splitting are. Their example,
+   "training and test samples come from the same people or units", is our case in
+   another domain.
+
+### One problem found
+
+`related-work.md` still carried a **one-paragraph intro positioning from the
+method-paper era** — it claimed "we find it does not", cited superseded and
+DO-NOT-CITE results, and treated FAD as the subject rather than the case study.
+Quarantined in place with a DO-NOT-USE banner rather than deleted. **A replacement
+intro paragraph is now owed.**
