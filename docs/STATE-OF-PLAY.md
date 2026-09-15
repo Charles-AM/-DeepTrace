@@ -1,137 +1,183 @@
-# State of play — 2026-09-06
+# State of play — resume here
 
-One page to resume from after a break. Read `ESSENCE.md` for what the paper
-claims; this is where the work actually stands.
+Last updated 2026-09-15. Read this first; everything else is detail.
 
-## Where we are
+---
 
-**Experimental programme CLOSED.** Manuscript 0%. No `.tex`, no publication figures. The
-experimental phase is nearly closed; what remains is mostly writing.
+## 1. What the project is
 
-81 training runs, 66,000 committed predictions, ~45 GPU-hours.
+An **evaluation-methodology study** of frequency-aware deepfake detection, using
+F3-Net's FAD component as a controlled case study on FaceForensics++.
 
-## The four rungs — all measured
+> Evaluation design changes both what deepfake detectors appear to achieve and how
+> much evidential weight an architectural comparison can carry.
 
-| # | claim | evidence |
-|---|---|---|
-| 1 | Protocol changes apparent performance (~18 pts; gap grows 9.5–10.4 pts under c40) | `results/in_domain_c40_vid/`, `_c23_vid/` |
-| 2 | Resampling unit changes the conclusion without changing the estimate | `results/analysis/cluster_boot/`, `resolution/` |
-| 3 | Complete pipeline runs move the estimated architectural effect | `results/in_domain_c40_fixedsplit/` |
-| 4 | Compression associated with wider intervals on identical test content | `results/analysis/resolution/` §2 |
+**FAD is the case study, not the subject. No method contribution is claimed.**
+Framing is frozen in `docs/ESSENCE.md` §0; claim discipline is §11.
 
-Primary number: **component half-widths 0.037–0.062 AUC = 2.6–4.5× the +0.014
-reference effect**, across five pipeline runs.
+### Three contributions
 
-## Test validation — closed 2026-09-06
+1. **Protocol and estimand** choices change apparent performance and architectural
+   contrasts
+2. **Dependence-aware evaluation** changes test-content uncertainty and statistical
+   verdicts
+3. **Architecture-level conclusions** require propagating training-run variation in
+   addition to test-content variation
 
-Full suite run under **real pytest** at `166056b` (= tag
-`results-frozen-2026-09-06`), CPU-only Kaggle notebook, no inputs:
+---
 
-**253 passed, 2 skipped, 0 failed** (re-run at `f430076`+ after the target unit was added; 248 at the earlier freeze commit).
+## 2. The primary result
 
-The two skips are hardware-gated DCT tests (`tests/test_dct.py`: no CUDA device,
-no MPS device) — device availability, not analysis code.
+Quote `results/canonical.json` → `manuscript_sentence`. Do not paraphrase; a test
+checks its figures against the data.
 
-This closed a real gap: 63 tests across seven files had only ever run under the
-local shim in the session scratchpad, including everything covering the crossed
-bootstrap and the canonical block. The shim had already diverged from pytest twice
-(`match` did substring rather than `re.search`; `tmp_path` was not provided), both
-caught by accident. All 63 pass under pytest.
+> On the fixed c40 split, the mean FAD − Xception difference across five training
+> runs was **−0.0092 AUC**. A crossed bootstrap propagating training-run and
+> source-target-component variation produced a 95% interval of
+> **[−0.0358, +0.0180]**. The Monte Carlo uncertainty band for its upper endpoint
+> was [0.0176, 0.0184], entirely above the +0.014 reference; **4.07%** of
+> crossed-bootstrap replicates exceeded that reference. This fixed-split c40
+> evaluation therefore neither demonstrated a FAD advantage nor excluded a gain of
+> the published magnitude.
 
-⚠️ Re-run the suite on Kaggle after adding or modifying tests locally — pytest and
-sklearn are not installed on the dev machine, so local runs use the shim.
+### The other headline numbers
 
-## Blocked on GPU quota
+| finding | value |
+|---|---|
+| Unit structure | 3,000 crops → 150 videos → 30 target groups → **29 components** |
+| Protocol gap | ~8.5 pts c23, ~18 pts c40; difference-in-differences +9.5 to +10.4 |
+| Three units, one estimate (−0.0196) | frame [−0.0325, −0.0079] **excludes zero**; video and component do not |
+| Conditional vs crossed | both conditionals exclude +0.014; crossed does not |
+| Resolution | component half-widths 0.037–0.062 = **2.6–4.5×** the effect |
+| Calibration | >0.10 excludes zero 9/9; <0.03 does 0/8 |
+| Compression | c40 intervals **1.5–2.5×** wider than c23 on hash-verified identical test content |
+| Run-to-run | range 0.034 with the split frozen = 2.4× the effect |
+| Repeatability audit | 0.0336 movement, **n = 1**, no cause isolated |
+| Cost | FAD ≈ **+3%** compute |
 
-In priority order — `docs/post-v8-queue.md` has the cells.
+### External comparison
 
-| # | item | cost | why |
-|---|---|---|---|
-| 1 | **V2** seen vs unseen, matched | ~80 min | turns "protocol gap" into a leakage measurement; code built and tested (`src/seen_unseen.py`, 8 tests) |
-| 2 | **G7a** late fusion at c23 on L2 checkpoints | ~15 min | **main-paper** figure currently computed on leaky checkpoints |
-| 3 | **Repeat audit** 2× seed-0 in one session | ~146 min | separates run-level from session-level; code built and dry-run (`docs/repeat_audit.py`) |
-| 4 | **G7b** CKA on L2 checkpoints | ~10 min | supplementary, same defect |
-| 5 | **G3** `band_ablation.py` smoke test | ~5 min | last register gap |
+| source | Xception | +FAD | difference | uncertainty |
+|---|---|---|---|---|
+| F3-Net (ECCV 2020) | 0.8930 | 0.9070 | +0.0140 | **none** |
+| DeepfakeBench (NeurIPS 2023) | 0.8261 | 0.8271 | +0.0010 | **none** |
+| ours (5 runs) | 0.8314 | 0.8223 | −0.0092 | [−0.0358, +0.0180] |
 
-## Blocked on nothing (CPU, can be done any time)
+Two published measurements differ by 14×; our interval contains both and zero.
+**Neither published paper reports any measure of variability anywhere** —
+established by full-text search, see `docs/VERIFICATION-LEDGER.md` §4.
 
-- **Crossed seed × component interval — the highest-value item left, and CPU-only.**
-  Before V8 every seed drew a different split, so a crossed bootstrap was
-  impossible: the same component sample cannot be applied across seeds that do not
-  share a test set. V8's five models share one verified split, so it is computable
-  for the first time. Blocked *only* on pulling the V8 `preds/` out of the Kaggle
-  version output and committing them, as was done for V1. The V8 numbers in the
-  repo are frame-pooled only.
-- **Independent-samples cluster bootstrap** for V2 — one model on two different
-  test sets is not the paired case `cluster_boot` handles. To write when V2 lands.
+---
 
-`src/crossed_boot.py` is **written and tested** (7 tests, synthetic data). It runs
-the moment the V8 dumps are in `results/predictions/`:
+## 3. Status
 
-```
-python -m src.crossed_boot \
-  --a-glob 'results/predictions/ffpp_c40_vid_xception_seed*_test.csv' \
-  --b-glob 'results/predictions/ffpp_c40_vid_xception_fad_seed*_test.csv' \
-  --margins 0.014 --out-dir results/analysis/crossed
-```
+**Experimental programme closed.** Frozen at tag `results-frozen-v2`.
 
-It refuses to run if the runs were not scored on identical test items — the
-condition V8's fixed split exists to provide — and reports the crossed interval
-beside the two conditional ones (components only, seeds only) so the cost of
-crossing is visible.
-- **Publication figures**: resolution curve, protocol gap, three-unit comparison.
-- **The manuscript.**
+| | |
+|---|---|
+| training runs | 81 (+10 discarded AMP, marked) |
+| committed predictions | 66,000 across 32 dumps |
+| analysis directories | 15, all with READMEs |
+| result CSVs | 74 |
+| tests | **253 passed, 2 skipped** under pytest |
+| prespecifications | 2, committed before the analyses they govern |
+| tags | 3, immutable (`results/PROVENANCE.md`) |
+| manuscript | **not started** |
 
-## Traps to remember
+---
+
+## 4. What to do next
+
+Full detail in **`docs/REMAINING-WORK.md`** — 20 items with compute times.
+
+**Free (no quota):** A1 coverage simulation (~1.5 h, closes limitation 4) ·
+A2 verify ~20 citations (~1 h, **blocks submission**) · A3 three figures (~1 h) ·
+A4 per-manipulation intervals · A5 more resolution curves · A6 BCa sensitivity
+
+**Cheap GPU:** B1 `band_ablation` smoke test (~5 min, closes G3) ·
+**B2 = V2 seen/unseen (~80 min — the best GPU spend, it changes what you can claim)**
+
+**Moderate GPU:** C1 lr sweep (~1.2 h at 5 epochs) · C2 repeat audit (~2.4 h) ·
+**C3 c23 fixed-split campaign (~6 h — highest ceiling, could remove limitation 3)** ·
+C4 L3 component-disjoint (~3.6 h)
+
+**Deliberately not doing:** band ablation beyond a smoke test, robustness,
+cross-dataset, late fusion, capacity control, α-sweep. All old-framing.
+
+⚠️ Everything in section C needs a prespecification **committed first**.
+
+---
+
+## 5. Traps that have already cost time
 
 - **No `--amp`.** `run_ablation.py` never passed it, so every comparison run is
   fp32. It cost a 155-minute run once. Commands now build from
-  `results/reference/train_args_c40_vid.json` (`src/reference_cmd.py`, 7 tests).
+  `results/reference/train_args_c40_vid.json`
 - **Kaggle outputs vanish.** The V1 dumps were lost and recovered only from a
-  `~/Downloads` tarball. Commit prediction CSVs to the repo every time.
-- **Save & Run All runs in its own container** — its `/kaggle/working` is not
-  visible from an interactive session. Results come from the version output.
-- **DO NOT CITE**: `results/analysis/late_fusion/`, `cka/`, `permanip/` (L1
-  checkpoints), and `results/in_domain_c40_fixedsplit/` history commit `c131486`
-  (AMP). `spectra/` is fine — it loads no checkpoint.
-- **pytest and sklearn are not installed locally.** Tests run through a shim in
-  the session scratchpad; the real suite runs on Kaggle. `cluster_boot` now uses
-  the internal rank AUC, verified bit-identical to sklearn on all 8 V1 outputs.
+  `~/Downloads` tarball. Commit prediction CSVs every time
+- **Save & Run All is container-isolated** — its `/kaggle/working` is invisible to
+  an interactive session. Results come from the version output
+- **DO NOT CITE**: `analysis/late_fusion/`, `analysis/cka/`, `analysis/permanip/`
+  (L1 checkpoints). `analysis/spectra/` is fine — it loads no checkpoint
+- **pytest and sklearn are absent locally.** Local runs use a shim in the session
+  scratchpad, which is **cleared between sessions**. Re-run the suite on Kaggle
+  after touching tests
+- **Adding runs after seeing a result is optional stopping.** Five runs was set by
+  matching the existing campaign under budget — a reason that predates the result
 
-## Wording that is settled
+---
 
-Thesis: ESSENCE §0, revised 2026-09-06. Use **"fixed-split training-run
-variability"**, never "optimisation variability" or "bound". The repeat finding is
-an **audit (n=1)** with no causal attribution. Until V2 lands it is a **protocol
-gap**, not leakage.
+## 6. Wording that is settled
 
-## Writing order — agreed
+| never write | write |
+|---|---|
+| "FAD provides no benefit" | "neither demonstrated nor excluded a gain of the published magnitude" |
+| "three different conclusions" | "three uncertainty models, two conclusions" — video and component agree |
+| "leakage" (for the L1→L2 gap) | **"protocol gap"** — V2 has not isolated the cause |
+| "neither measured uncertainty" | **"neither reports"** — we can only see the page |
+| "optimisation variability" | **"fixed-split training-run variability"** |
+| "selectively powered" | "informative for large differences, insufficient resolution for FAD-sized ones" |
+| "positive control" | **"large-separation calibration model"** |
+| "we beat / outperform" | **nothing** — no performance claim is made anywhere |
+| "three published measurements" | **two published, plus ours** |
 
-Build outward from the evidence, not from the introduction.
+Full table: `ESSENCE.md` §11. Variance vocabulary: §0b. Limitations: §8a (six).
 
-1. Conditional-vs-crossed table and the central two-panel figure
-2. Results, written directly from `results/canonical.json`
-3. Methods, so every reported number has a traceable procedure
-4. Recommendations (ESSENCE §8b) and limitations (§8a) **immediately after** results
-5. Introduction and related work, around the three contributions
-6. Abstract and conclusion **last**
+---
 
-⚠️ **No further experiments** unless peer review requests them. The approved
-primary-result sentence is in `results/canonical.json` under `manuscript_sentence`
-— quote it, do not paraphrase; a test checks its figures against the data.
-
-## Key documents
+## 7. Key documents
 
 | file | what |
 |---|---|
-| `results/canonical.json` | the primary result — every table draws from it |
-| `results/analysis/crossed/STABILITY.md` | the high-replicate stability check and its verdict |
-| `results/PROVENANCE.md` | tag history, prespecification timing, superseded numbers |
-| `docs/crossed-prespecification.md` | decision rule, committed before the confirmatory runs |
-| `docs/target-group-prespecification.md` | committed before that analysis was implemented |
+| `results/canonical.json` | the primary result + approved sentence |
+| `docs/ESSENCE.md` | frozen framing, contributions, limitations, recommendations |
+| `docs/VERIFICATION-LEDGER.md` | what is verified, assumed, or owed |
+| `docs/REMAINING-WORK.md` | every candidate experiment with compute time |
+| `docs/related-work.md` | reference papers + the citations still unverified |
+| `docs/REPRODUCIBILITY.md` | methods, hyperparameters, why no tuning |
+| `docs/f3net-ablation-verified.md` | the +0.014, verified from source |
+| `results/PROVENANCE.md` | tag history, prespecification timing |
+| `results/analysis/crossed/STABILITY.md` | the high-replicate stability check |
 
-## Gap register
+Reproduce the primary result on CPU in ~2 minutes:
 
-Closed: G1, G2, G4, G5, G6, G7.
-**Open: G3 only** — `band_ablation.py` has never been executed (smoke test, ~5 min
-GPU). It supports no claim in the paper.
+```
+python -m src.crossed_boot --a-glob 'results/predictions_v8/ffpp_c40_vid_xception_seed*_test.csv' --b-glob 'results/predictions_v8/ffpp_c40_vid_xception_fad_seed*_test.csv' --margins 0.014 --n-boot 50000 --boot-seed 0 --out-dir /tmp/check
+```
+
+---
+
+## 8. Course deliverables
+
+Sequence: **proposal → literature review → full report → paper**, written in
+reverse from frozen results. User supplies the spec for each.
+
+Decided: the project is presented **as it stands**, not as it evolved. No pivot
+narrative.
+
+Two writing skills are installed (`~/.claude/skills/`): `academic-paper` and
+`academic-paper-reviewer`. Hooks deliberately **not** installed — the plugin's
+PreToolUse guard would intercept every write and Bash call.
+
+⚠️ Anything those skills generate must be reconciled against
+`VERIFICATION-LEDGER.md` for citations, and `ESSENCE.md` §11 for claim discipline.
