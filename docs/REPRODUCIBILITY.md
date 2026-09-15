@@ -77,7 +77,35 @@ tarballs.
 
 ## Training hyperparameters
 
-Defaults (`src/train.py`), used for every in-domain/ablation run unless noted:
+Defaults (`src/train.py`), used for every in-domain/ablation run unless noted.
+
+⚠️ **No hyperparameter search was performed.** These are the library/script defaults,
+fixed once and applied identically to every configuration. This is deliberate, not an
+omission — see "Why no tuning" below — but it means **no model here is claimed to be
+at its best**, and absolute performance should not be compared with tuned published
+systems.
+
+### Why no tuning
+
+1. **The comparison requires identical settings.** Both arms of every contrast must
+   share hyperparameters or the difference confounds architecture with tuning effort.
+   Tuning per-arm would raise an unanswerable question about which arm was tuned harder.
+2. **The research question is about evaluation, not peak performance.** We measure
+   whether a difference of a given size is resolvable, not how high either model can score.
+3. **Tuning would add a variance source we could not afford to propagate.** We already
+   struggle to separate training-run from split-composition variance at n=5; adding a
+   tuning dimension would make the crossed analysis intractable at our budget.
+
+### The only validation-driven choice
+
+Checkpoint selection: the epoch with the **best validation ROC-AUC** is kept
+(`src/train.py:142`), evaluated on a held-out validation split that is never used for
+training or testing. Identical rule for every run. Nothing else is selected on data.
+
+⚠️ The 15-epoch budget is fixed, not early-stopped. Some runs peak earlier; ESSENCE
+records that epoch-3 peaks do **not** license post-hoc budget cuts, since choosing a
+budget after seeing results is the same error the paper criticises elsewhere.
+
 
 | param | value |
 |---|---|
@@ -89,8 +117,8 @@ Defaults (`src/train.py`), used for every in-domain/ablation run unless noted:
 | image size | 128 |
 | loss | Focal loss, γ=2, `α_pos = n_real/(n_real+n_fake)` ≈ 0.20 |
 | grad clip | 1.0 (global norm) |
-| AMP | enabled on CUDA |
-| seeds | {0, 1, 2} for all headline comparisons |
+| AMP | **DISABLED — all headline runs are fp32.** `src/run_ablation.py`, which produced every in-domain matrix, never passes `--amp`; `train.py`'s flag is `store_true` defaulting False; `results/reference/train_args_c40_vid.json` records `amp: false`. ⚠️ An earlier version of this table said "enabled on CUDA", which was wrong. The V8 attempt that *did* pass `--amp` was discarded for exactly this reason (commit `c131486`). |
+| seeds | c23 in-domain {0,1,2}; **c40 in-domain {0,1,2,3,4}**; **V8 fixed-split {0,1,2,3,4}** with `--split-seed 0`. (An earlier version of this table said {0,1,2} throughout, which is stale.) |
 
 Model architecture parameters (embed_dim, mask channels, band-dropout p, fusion
 type) are named-config-driven — see `src/config.py::MODEL_CONFIGS` and
