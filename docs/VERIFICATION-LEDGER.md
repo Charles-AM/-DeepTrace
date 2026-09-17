@@ -681,3 +681,80 @@ limitation 1, which is precisely that we did **not** achieve identity-disjointne
 **Never write "identity" for this unit.** Write **"source-target component"**. The
 column name is left as-is because the frozen results depend on it; this entry
 exists so the name is not trusted.
+
+---
+
+## 18. Contribution 2's remaining numbers, recomputed (2026-09-17)
+
+### 18.1 The canonical result reproduces exactly
+
+`src/crossed_boot.py` was run with the documented command from `STATE-OF-PLAY.md`
+§7. Output, unmodified:
+
+```
+seeds=[0,1,2,3,4]  items=150  components=29  aggregate=video
+  crossed         95% CI [-0.0358, +0.0180]  hw 0.0269  P(>0.014)=0.0407  upper MC[+0.0176,+0.0184]
+  non-additivity ratio 1.697
+```
+
+Every figure in `canonical.json` reproduced: interval, exceedance rate, Monte Carlo
+band, non-additivity ratio. ✅
+
+### 18.2 Frame-pooled and video-aggregated estimates both match
+
+Independent reimplementation (own AUC, own bootstrap) against
+`results/predictions/ffpp_c40_vid_*`:
+
+| estimand | seeds 0–4 | match |
+|---|---|---|
+| frame-pooled | −0.0196, −0.0101, +0.0142, +0.0253, +0.0145 | ✅ exact, all five |
+| video-aggregated (mean `logit_margin`) | −0.0303, −0.0208, +0.0203, +0.0306, +0.0164 | ✅ exact, all five |
+
+Aggregation moves the estimate in **all five** runs and preserves sign in all five
+— confirming `results/analysis/aggregation/`.
+
+### 18.3 ⚠️ NEW FINDING — the aggregation *space* is a third estimand choice
+
+"Video-aggregated" is under-specified. Frames can be averaged in **logit space**
+(what `src/cluster_boot.py` does) or in **probability space**. Both are defensible;
+neither is conventionally reported.
+
+| seed | mean-logit | mean-prob | Δ | exceeds +0.014? |
+|---|---|---|---|---|
+| 0 | −0.0303 | −0.0325 | +0.0022 | no → no |
+| 1 | −0.0208 | −0.0192 | −0.0017 | no → no |
+| 2 | **+0.0203** | **+0.0100** | **+0.0103** | **yes → NO** |
+| 3 | +0.0306 | +0.0339 | −0.0033 | yes → yes |
+| 4 | **+0.0164** | **+0.0056** | **+0.0108** | **yes → NO** |
+
+- Mean |Δ| = **0.0057**, 41% of the reference effect
+- Max |Δ| = **0.0108** = **0.8× the reference effect**
+- **2 of 5 runs change whether they appear to exceed +0.014**, on nothing but the
+  space in which frames were averaged
+
+Sign is preserved in all five, so this changes magnitude and verdict, not
+direction. Say so.
+
+**Why it matters.** Contribution 1 shows protocol choice matters and contribution 2
+shows the uncertainty unit matters. This is a **third layer**: a sub-choice inside
+one estimand, invisible in every paper we have read, that moves the estimate by up
+to 0.8× the effect under debate. It costs no GPU — a deterministic recomputation on
+committed predictions — and it is the cheapest new result available.
+
+⚠️ Scope: five runs, one comparison, c40, descriptive. Not a general claim about
+aggregation spaces. **Owed:** replicate at c23 before it goes in the paper.
+
+### 18.4 Documentation gap in the approved sentence
+
+`canonical.json` carries
+`estimand = "video-aggregated AUC (frames averaged to one score per video)"`, but
+the **`manuscript_sentence` does not state it** — it says only "the mean FAD −
+Xception difference across five training runs was −0.0092 AUC".
+
+In a paper whose first contribution is that estimand choice changes the answer,
+quoting the headline without naming its estimand is indefensible. And per §18.3 it
+is not even fully specified by "video-aggregated" — the averaging space needs
+naming too.
+
+**Owed:** revise `manuscript_sentence` to name the estimand, and re-run
+`tests/test_canonical.py`.
