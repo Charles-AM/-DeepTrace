@@ -56,7 +56,7 @@ much. See "Claims we deliberately do not make" below.
 | 3.2 | F3-Net reports **no measure of variability anywhere** | full-text search, ledger §4 | ✅ |
 | 3.3 | DeepfakeBench reports **no measure of variability anywhere** | full-text search, ledger §4 | ✅ |
 | 3.4 | DeepfakeBench pools **frames** for its metric | *"Our benchmark currently adopts the frame level evaluation..."* | ✅ verbatim |
-| 3.5 | DeepfakeBench acknowledges frame-vs-video as a fairness problem | same passage | ✅ — they recognise it, they do not ignore it |
+| 3.5 | DeepfakeBench identifies the frame-vs-video **inconsistency** as causing unfair comparisons, and adopts frame-level pooling as its **solution** | same passage | ✅ — do **not** write that they call pooling itself a fairness error; that inverts them |
 | 3.6 | The two published Xception figures differ by 0.067 | F3-Net 0.893 vs DeepfakeBench 0.8261 | ✅ **4.8× the effect under debate** |
 
 ## 4. Literature anchors for the error itself
@@ -75,6 +75,15 @@ much. See "Claims we deliberately do not make" below.
 
 | ❌ never write | why |
 |---|---|
+| "recognising a face it has already seen" | **The shortcut's mechanism was never isolated.** Write "exploiting same-video content or acquisition cues" |
+| "identical data / byte-identical images" (of the L1↔L2 comparison) | The crop **corpus** is the same; train/test **membership** is not, and cannot be. Say **only the partitioning rule changed** |
+| "a property of the evaluation" (unqualified) | Say **"consistent in direction and approximate magnitude across the three tested architectures"** — n=3 |
+| "FAD is worth +0.014" | **F3-Net reported a +0.014 AUC ablation gain under its setting.** Attribute it |
+| "13× larger, therefore the FAD claim fails" | The two quantities answer different questions — an absolute protocol shift vs a matched architectural contrast. Use it as **scale context**, never as disproof |
+| "made the architectural question answerable at all" | Too categorical. **"Restored headroom and improved practical resolution"** |
+| "the field has numbers but not error bars" | **Two papers audited.** Say "these two influential examples report point estimates without uncertainty" |
+| "the standard setup falls short" | FF++ supplies fixed video-level splits. There is no deficient "standard setup" to indict |
+| "crop-randomised splitting is invalid" | It is a valid estimator of a **different estimand** — performance on unseen frames of *known* videos. Say it **answers a different question** |
 | "The field commonly splits by crop" | **No evidence.** FF++ ships video-level splits; a paper following the official protocol is not doing this |
 | "Published numbers are inflated by 18 points" | Our L2 absolutes (~0.79–0.82) sit below F3-Net's published range for reasons that are **ours**: scoped subset, 128px inputs, 15 epochs, frame-pooled metric |
 | "Leakage" (unqualified, for the L1→L2 gap) | The two protocols also induce different partitions. **"Protocol gap"** until V2 separates them |

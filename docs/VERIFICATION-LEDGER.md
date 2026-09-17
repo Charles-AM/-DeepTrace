@@ -52,7 +52,9 @@ Last updated 2026-09-11.
 |---|---|---|
 | Standardises data management, implementation framework, evaluation metrics/protocols | abstract, quoted | ✅ |
 | Adopts **frame-level** evaluation | paper body: *"Our benchmark currently adopts the frame level evaluation to build a fair basis for comparison among detectors"* | ✅ |
-| Identifies frame-vs-video inconsistency as causing "unfair comparisons" | same passage — **they recognise it; they do not ignore it** | ✅ |
+| Identifies frame-vs-video **inconsistency** as causing "unfair comparisons" | *"there is an inconsistency in the usage of these evaluation metrics in the community, some are at the frame level, while others are at the video level, leading to unfair comparisons"* | ✅ |
+| ⚠️ They do **NOT** call frame pooling itself a fairness error | pooling is their **solution** to the inconsistency, not their diagnosis. Never write "DeepfakeBench acknowledges frame pooling as a fairness problem" — it inverts them | ✅ precision fix 2026-09-17 |
+| Correct PubMed record for Kapoor & Narayanan | **PMID 37720327**. (PMID 36913544 is a cobalt molybdenum sulfide catalysis paper — a miscitation seen in review feedback) | ✅ resolved via NCBI E-utilities |
 | Four metrics: ACC, AUC, AP, EER — none a measure of variability | paper body, enumerated | ✅ |
 | F3Net 0.8271 vs Xception 0.8261 at FF-c40 (+0.0010) | main results table, text-extracted | ✅ |
 | **Reports no measure of variability anywhere** | full-text search, see §4 | ✅ |
@@ -268,3 +270,27 @@ Acc**. The comparison table therefore compares different methods on different
 metrics, with gaps. Recorded as an observation about reporting practice; it is
 **not** a criticism we need to make in the paper, and it is not evidence for any
 of our three contributions.
+
+---
+
+## 10. Two errors, two anchors — keep them apart (2026-09-17)
+
+From external review, and adopted. These had been conflated under "the same error
+with two names". They are two distinct errors, and they map onto two contributions.
+
+| error | what it is | anchor | our contribution |
+|---|---|---|---|
+| **Nonindependence between train and test** | crops from one video appear on both sides of the split | Kapoor & Narayanan, *Patterns* 4(9), 100804, 2023 (**PMID 37720327**) — [L3.2]; 294 papers, 17 fields | **1** |
+| **Pseudoreplication** | treating correlated crops as independent *inferential* units when computing uncertainty | Hurlbert, *Ecological Monographs* 54(2), 187–211, 1984 | **2** |
+
+The first is a **splitting** error; the second is an **inference** error. A study can
+commit either without the other. Citing Hurlbert for the splitting problem, or
+Kapoor & Narayanan for the uncertainty problem, misattributes both.
+
+### Relationship to DeepfakeBench
+
+DeepfakeBench standardises the **estimand** (frame-level) so that detectors are
+compared on a common basis. That addresses inconsistency, not dependence. The
+pseudoreplication problem survives their standardisation untouched. Our
+contribution 2 is therefore **complementary to** their effort, not a correction of
+it — write it that way.
