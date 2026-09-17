@@ -576,3 +576,61 @@ conditional comparisons.
 So the unit-sensitivity null is **not** evidence that clustering choice never
 matters. It is evidence that *in this split* the two candidate units nearly
 coincide. State it that way, and it stops looking like a convenient result.
+
+---
+
+## 16. Settled related-work wording for DeepfakeBench (2026-09-17)
+
+Agreed text. Every clause traces to §3, §14 or the verified quote on p.5.
+
+### The one-line formulation
+
+> **DeepfakeBench standardises which performance estimate is computed; our study
+> examines how uncertain that estimate is.**
+
+Use this wherever the relationship needs stating in a sentence. It draws the
+estimand/inference boundary without positioning us as correcting them.
+
+### The related-work paragraph
+
+> DeepfakeBench identifies inconsistent frame- and video-level evaluation as an
+> obstacle to fair comparison and adopts frame-level metrics as a common basis. Its
+> evaluation module enumerates four performance metrics — ACC, AUC, AP and EER —
+> alongside ROC-AUC curve, radar chart, histogram, Grad-CAM, t-SNE and
+> detector-specific visualisations. **None of these items is described as
+> estimating sampling uncertainty or training-run variability in the reported
+> performance metrics.** Thus DeepfakeBench standardises the estimand and
+> evaluation pipeline across detectors, whereas our work examines the uncertainty
+> that remains after standardisation, when test observations are clustered and
+> trained models vary across runs.
+
+### Why each clause is safe
+
+| clause | grounding |
+|---|---|
+| "identifies **inconsistent** ... as an obstacle" | attributes unfairness to the inconsistency, not to pooling — the inversion to avoid (§3) |
+| "enumerates ... " | their own list, p.5 (§14) |
+| "**is described as**" | a claim about their description, not about what a histogram could in principle be |
+| "the uncertainty that **remains after** standardisation" | positions us downstream, not in opposition |
+
+### The histogram qualification — keep it
+
+A histogram visualises a distribution, but **unless it is built from resampled
+metric estimates or repeated training runs, it is not an uncertainty estimate for
+AUC**. Their text does not say what theirs plots. This names the exact condition
+under which it would count, which is why the "described as" phrasing is sufficient
+and no stronger claim is needed.
+
+### ⚠️ Attached to any citation of their +0.0010
+
+DeepfakeBench's F3Net figure (0.8271 vs Xception 0.8261) carries the unresolved
+scope ambiguity recorded in §3 as **E3**: their **paper** describes F3Net as
+two-branch FAD+LFS; their **code** (`f3net_detector.py`) implements the FAD branch
+only. Our comparison holds under either reading (14× or 40×), but **the sentence
+citing +0.0010 needs a footnote saying which reading is assumed.**
+
+### This paragraph is the template
+
+It describes what the cited work did accurately, states the boundary of that
+contribution, and claims only the remainder. Use the same shape when writing about
+F3-Net: no adversarial framing is needed when the boundary is drawn precisely.
