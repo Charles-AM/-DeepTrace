@@ -41,7 +41,9 @@ Last updated 2026-09-11.
 | **"LQ" = c40** | **CLOSED 2026-09-17.** FF++ (arXiv:1901.08971 §3, *Postprocessing – Video Quality*) defines the mapping itself: *"To generate high quality videos, we use a light compression denoted by HQ (constant rate quantization parameter equal to 23) ... Low quality videos (LQ) are produced using a quantization of 40."* F3-Net cites FF++ [50] and defines its labels identically (*"LQ indicates low quality (heavy compression), HQ indicates high quality (light compression) and RAW indicates raw videos without compression"*). HQ = quantization 23 = c23; LQ = quantization 40 = c40 | ✅ **verified** — definitional chain, no longer an inference. F3-Net never writes "c40", but uses FF++'s own labels in FF++'s own sense |
 | **The +0.014 is measured on the LQ (heavy compression) task** | two independent captions — Fig. 7(a) p.12 *"Ablation study of the proposed F3-Net on the low quality task(LQ)"*; Table 3 p.14 *"...on FAD in FF++ low quality (LQ)"* | ✅ verified 2026-09-17 |
 | **F3-Net is explicitly motivated by heavy compression** | abstract: *"especially wins a big lead upon low-quality media"*; intro: *"if the visual quality ... is tremendously degraded, such as compressed by JPEG or H.264 ... the forgery artifacts ... cannot be captured in RGB domain any more"*; contributions: *"significantly improves the performance over low-quality forgery media"* | ✅ verified 2026-09-17 |
-| F3-Net's gain over Xception shrinks as quality rises: LQ +0.040, HQ +0.018, RAW +0.006 | Table 1 p.9 | ⚠️ **reconstructed from a column-scrambled pdftotext extraction — confirm visually before citing** |
+| F3-Net's gain over Xception shrinks as quality rises: LQ +0.040, HQ +0.018, RAW +0.006 | Table 1 p.9 — Xception 0.893/0.963/0.992, F3-Net(Xception) 0.933/0.981/0.998 | ✅ **confirmed visually 2026-09-17**; the earlier text reconstruction matched exactly |
+| **The full-system gain is backbone-dependent**: +0.040 on Xception vs **+0.022** on Slowfast at LQ | Table 1 p.9 — Slowfast 0.936 → F3-Net(Slowfast) 0.958; same pattern at HQ (+0.018 vs +0.011) and RAW (+0.006 vs +0.005) | ✅ their numbers; **our inference** from them |
+| Table 1 reports **no AUC at all** for five of the twelve methods (Steg.Features, LD-CNN, Constrained Conv, CustomPooling CNN, MesoNet) and **no Acc** for Face X-ray | Table 1 p.9, dashes in the respective columns | ✅ observed directly |
 | "**Frequency methods** claim their largest gains under compression" (plural, as a class) | only F3-Net checked. FreqDebias and others **not** examined | ❌ **do not assert — narrow to F3-Net** |
 
 ## 3. DeepfakeBench (Yan et al., NeurIPS 2023) — arXiv:2307.01426
@@ -228,3 +230,41 @@ under L2 the same three sat **2.1 points** apart (0.7957 / 0.8169 / 0.8117) — 
 Status: **our interpretation, computed from verified numbers.** It is a legitimate
 observation about measurement, not a claim about F3-Net's mechanism, and must not
 be written as one.
+
+---
+
+## 9. Backbone dependence in F3-Net's own Table 1 — 2026-09-17
+
+Confirmed from the table image. Adding the **same** full F3-Net system to two
+different backbones produces materially different gains:
+
+| backbone | LQ baseline | LQ with F3-Net | gain |
+|---|---|---|---|
+| Xception | 0.893 | 0.933 | **+0.040** |
+| Slowfast | 0.936 | 0.958 | **+0.022** |
+
+The same ordering holds at HQ (+0.018 vs +0.011) and RAW (+0.006 vs +0.005).
+
+**Why this matters to us.** It is evidence *from the proposing paper's own results
+table* that the benefit of the frequency system is **not a stable constant** — it
+depends on what it is attached to, varying by ~1.8× across two backbones at LQ.
+That is directly supportive of contribution 3: an architectural gain measured once,
+on one backbone, without any uncertainty estimate, is a weaker piece of evidence
+than its presentation implies.
+
+⚠️ **Two honest caveats, state both.**
+
+1. **Ceiling.** Slowfast starts higher (0.936 vs 0.893), so it has less headroom.
+   Part of the smaller gain is mechanical, exactly as in §8.
+2. **n = 1 each.** These are two single measurements with no repetition and no
+   interval — the same limitation we identify everywhere else. We cannot say the
+   difference between +0.040 and +0.022 is larger than the noise, because neither
+   paper reports noise. **Use it to illustrate the problem, never as a measurement.**
+
+### A second observation about the table
+
+Five of the twelve methods report **no AUC at all**, and Face X-ray reports **no
+Acc**. The comparison table therefore compares different methods on different
+metrics, with gaps. Recorded as an observation about reporting practice; it is
+**not** a criticism we need to make in the paper, and it is not evidence for any
+of our three contributions.
