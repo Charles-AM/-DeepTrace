@@ -713,7 +713,14 @@ Independent reimplementation (own AUC, own bootstrap) against
 Aggregation moves the estimate in **all five** runs and preserves sign in all five
 — confirming `results/analysis/aggregation/`.
 
-### 18.3 ⚠️ NEW FINDING — the aggregation *space* is a third estimand choice
+### 18.3 ⚠️ SUPERSEDED BY §19 — WRONG CAMPAIGN. Read §19 instead.
+
+> **This table is the varying-split campaign (`results/predictions/`), not the
+> V8 fixed-split runs behind the primary result.** Its mean is +0.00324, not the
+> canonical −0.0092. The conceptual point stands; the claim that it bears on the
+> primary result did not. Corrected in §19.
+
+### 18.3 (as originally written — the aggregation *space* as a third estimand choice)
 
 "Video-aggregated" is under-specified. Frames can be averaged in **logit space**
 (what `src/cluster_boot.py` does) or in **probability space**. Both are defensible;
@@ -758,3 +765,86 @@ naming too.
 
 **Owed:** revise `manuscript_sentence` to name the estimand, and re-run
 `tests/test_canonical.py`.
+
+---
+
+## 19. Aggregation space, done on the right campaign (2026-09-17)
+
+§18.3 used `results/predictions/` — the **varying-split** campaign, which has no
+`split_seed` column. The primary result comes from `results/predictions_v8/`,
+where every file carries `split_seed=0`. The mean of the §18.3 table is **+0.00324**
+against the canonical **−0.0092**: different experiments. Caught in review.
+
+### 19.1 Implementation validated first
+
+An independent crossed bootstrap reproduced the canonical result under mean-logit
+before being trusted under any other setting:
+
+| | reproduced | canonical |
+|---|---|---|
+| point estimate | −0.0092 | −0.0092 |
+| 95% CI | [−0.0360, +0.0175] | [−0.0358, +0.0180] |
+| P(>0.014) | 0.0405 | 0.0407 |
+
+### 19.2 The result — conclusion robust, quantities not
+
+V8 fixed-split, 5 runs × 29 components, 50,000 replicates:
+
+| | mean-logit (canonical) | mean-probability | shift |
+|---|---|---|---|
+| point estimate | **−0.0092** | **−0.0060** | +0.0032 (23% of reference) |
+| 95% CI | [−0.0360, +0.0175] | [−0.0379, +0.0238] | — |
+| half-width | 0.0268 | 0.0308 | **+15% wider** |
+| **P(> +0.014)** | **0.0405** | **0.0825** | **doubles** |
+| contains 0 | yes | yes | — |
+| contains +0.014 | yes | yes | — |
+| **verdict** | neither demonstrated nor excluded | **unchanged** | — |
+
+**The primary conclusion is robust to the aggregation space.** Both intervals
+contain zero and +0.014.
+
+**But the quantities it is built from are not.** The exceedance rate **doubles**
+(4.05% → 8.25%), the interval widens 15%, and per-seed estimates move by up to
+**0.0125 = 0.89× the reference effect** (per-seed deltas +0.0053, +0.0125, −0.0114,
++0.0044, +0.0050).
+
+This is the stronger version of the finding: the headline survives, and a number
+quoted *in the approved manuscript sentence* doubles under a choice no one reports.
+
+### 19.3 Status — post-hoc, label it
+
+⚠️ **This is a post-hoc estimand-sensitivity analysis.** The discrepancy was
+observed before the analysis was specified. It is **not** prespecified and must
+never be presented as if it were.
+
+### 19.4 The conceptual decomposition — three distinct choices
+
+Video-level AUC does not define an estimand. Three choices must each be stated:
+
+1. **What is the evaluation unit?** (frame, video file, target group, component)
+2. **Per frame, or summarised per video?**
+3. **If summarised — in what score space, with which operator?**
+
+Mean logit margin, $s_v = \frac{1}{n_v}\sum_i \operatorname{logit}(p_{vi})$, and
+mean probability, $s_v = \frac{1}{n_v}\sum_i p_{vi}$, **do not commute with the
+sigmoid**, so they can rank videos differently and yield different AUCs. Neither is
+incorrect; they encode different aggregation rules.
+
+### 19.5 Wording — required
+
+❌ "two of five runs flip their verdict"
+✅ **"In two of five varying-split runs, changing from mean-logit to
+mean-probability aggregation moved the point estimate from above to below the
++0.014 reference magnitude."** A per-seed threshold crossing is **not** a
+statistical verdict.
+
+❌ "no paper specifies the averaging space"
+✅ **"The papers in our documented audit did not state the score space used for
+video aggregation."** Our audit did not systematically check methods sections,
+supplements and evaluation code across the field.
+
+### 19.6 Consequence for §18.4
+
+The approved sentence quotes **4.07%**. Under mean-probability the same analysis
+gives **8.25%**. A quoted figure that doubles under an unstated choice makes naming
+the estimand — **and the averaging space** — mandatory, not stylistic.
