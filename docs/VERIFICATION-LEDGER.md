@@ -39,6 +39,10 @@ Last updated 2026-09-11.
 | Their FAD matches ours structurally | three bands, learnable additive term, inverse-DCT per band | ✅ |
 | **Reports no measure of variability anywhere** | full-text search, see §4 | ✅ |
 | "LQ" = c40 | p.429/996: *"LQ indicates low quality (heavy compression), HQ … light compression, RAW … without compression"*. The **c-notation is never used**; the mapping follows from FF++ shipping exactly these three levels | ⚠️ inference, not a stated equivalence |
+| **The +0.014 is measured on the LQ (heavy compression) task** | two independent captions — Fig. 7(a) p.12 *"Ablation study of the proposed F3-Net on the low quality task(LQ)"*; Table 3 p.14 *"...on FAD in FF++ low quality (LQ)"* | ✅ verified 2026-09-17 |
+| **F3-Net is explicitly motivated by heavy compression** | abstract: *"especially wins a big lead upon low-quality media"*; intro: *"if the visual quality ... is tremendously degraded, such as compressed by JPEG or H.264 ... the forgery artifacts ... cannot be captured in RGB domain any more"*; contributions: *"significantly improves the performance over low-quality forgery media"* | ✅ verified 2026-09-17 |
+| F3-Net's gain over Xception shrinks as quality rises: LQ +0.040, HQ +0.018, RAW +0.006 | Table 1 p.9 | ⚠️ **reconstructed from a column-scrambled pdftotext extraction — confirm visually before citing** |
+| "**Frequency methods** claim their largest gains under compression" (plural, as a class) | only F3-Net checked. FreqDebias and others **not** examined | ❌ **do not assert — narrow to F3-Net** |
 
 ## 3. DeepfakeBench (Yan et al., NeurIPS 2023) — arXiv:2307.01426
 
@@ -206,3 +210,21 @@ demonstration on byte-identical crops; it needs no claim about others' practice.
   documented in the field**, with a verified DeepfakeBench quote.
 
 Conflating them overstates the first and wastes the second.
+
+---
+
+## 8. Ceiling effects — our own interpretation, flagged as such
+
+F3-Net's advantage shrinks from +0.040 (LQ) to +0.006 (RAW). **Part of that is
+almost certainly mechanical**: at RAW every method scores ~0.99, so there is
+little room left to gain. A shrinking advantage as quality rises is therefore
+**not by itself evidence that frequency contributes more under compression**.
+
+We can say this from our own data rather than speculating about theirs. Under L1
+our three architectures sat **0.6 AUC points** apart (0.9878 / 0.9933 / 0.9935);
+under L2 the same three sat **2.1 points** apart (0.7957 / 0.8169 / 0.8117) — a
+3.7× expansion. Ceilings compress architectural differences.
+
+Status: **our interpretation, computed from verified numbers.** It is a legitimate
+observation about measurement, not a claim about F3-Net's mechanism, and must not
+be written as one.
