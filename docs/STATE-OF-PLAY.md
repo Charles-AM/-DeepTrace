@@ -55,7 +55,7 @@ checks its figures against the data.
 | Compression | c40 intervals **1.5–2.5×** wider than c23 on hash-verified identical test content |
 | Run-to-run | range 0.034 with the split frozen = 2.4× the effect |
 | Repeatability audit | 0.0336 movement, **n = 1**, no cause isolated |
-| Cost | FAD ≈ **+3%** compute |
+| Cost | FAD ≈ **+3%** (GFLOPs +2.70%, latency +3.19%; params only +0.24% — say which) |
 
 ### External comparison
 
@@ -81,7 +81,7 @@ established by full-text search, see `docs/VERIFICATION-LEDGER.md` §4.
 | committed predictions | 66,000 across 32 dumps |
 | analysis directories | 15, all with READMEs |
 | result CSVs | 74 |
-| tests | **253 passed, 2 skipped** under pytest |
+| tests | **253 passed, 2 skipped** — ⚠️ **a Kaggle figure**; locally only **107 pass**, the rest need torch (ledger §20.4) |
 | citations verified | **15 of 22** in the previously-unverified section |
 | verification ledger | **16 sections** — every external claim traced to a quote |
 | contribution 1 | **dissected and evidence-mapped** (2026-09-17); wording settled |

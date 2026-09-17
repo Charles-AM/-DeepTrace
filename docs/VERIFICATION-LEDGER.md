@@ -910,3 +910,80 @@ two contributions that §10 just took the trouble to separate.
 > conclusion: neither demonstrated a FAD benefit nor excluded the reference-sized
 > gain. Thus, the conclusion was robust, but its numerical warrant depended on an
 > aggregation choice that must be reported explicitly.
+
+---
+
+## 20. Contribution 3's evidence, audited (2026-09-17)
+
+### 20.1 What C3 rests on — all present and validated
+
+| element | evidence | status |
+|---|---|---|
+| Primary data | 10 V8 prediction dumps, `split_seed=0`, identical test items | ✅ committed |
+| Crossed result −0.0092, [−0.0358, +0.0180] | `results/analysis/crossed/`, `canonical.json` | ✅ **exact reproduction** (§18.1) |
+| Conditionals: component-only, seed-only | same run | ✅ both exclude +0.014 |
+| Exceedance 4.07%, MC band [0.0176, 0.0184] | same | ✅ |
+| Canonical test suite | `tests/test_canonical.py` | ✅ **18 passed** |
+| Reference effect +0.014 | F3-Net Fig. 7(a) p.12, Table 3 p.14 | ✅ verified from source |
+| LQ = c40 | FF++ §3 p.5, quantization 40 | ✅ definitional (E2 closed) |
+| Aggregation-space robustness | paired, 50,000 replicates | ✅ verdict unchanged (§19) |
+
+**No experiment is missing for contribution 3.** Its evidence is the most complete
+of the three.
+
+### 20.2 Cost accounting — verified, with a caveat on which figure
+
+From `results/analysis/efficiency/params_flops_latency.csv`:
+
+| xception → f3net (Xception+FAD) | change |
+|---|---|
+| params | 20.81 → 20.86 M = **+0.24%** |
+| GFLOPs | 1.48 → 1.52 = **+2.70%** |
+| batch-32 latency | 40.7 → 42.0 ms = **+3.19%** |
+
+✅ "FAD ≈ **+3%**" is accurate **for GFLOPs and latency**. It is **not** true of
+parameters (+0.24%). Say which quantity when quoting it.
+
+### 20.3 ⚠️ DISCREPANCY — the +44% latency figure does not match its own CSV
+
+`results/analysis/efficiency/README.md` states the separate frequency branch costs
+**"+31% FLOPs / +44% latency"**, and `ESSENCE.md` and `STATE-OF-PLAY.md` repeat it.
+
+Recomputed from the generated CSV (baseline_spatial → full):
+
+| | CSV | README |
+|---|---|---|
+| GFLOPs | 0.59 → 0.77 = **+30.5%** | +31% ✅ rounding |
+| latency | 10.2 → 14.9 ms = **+46.1%** | **+44%** ❌ **2.1 points out** |
+
+The CSV is the generated artifact and should win. **Do not quote +44% until this is
+resolved** — either the README predates a regeneration, or a different pair was used.
+The FLOPs figure is fine.
+
+⚠️ This affects a **secondary** claim about our own `full` configuration, not the
+FAD cost and not the primary result.
+
+### 20.4 Test suite — what can and cannot run locally
+
+With numpy, scipy, pandas, scikit-learn and pytest installed in a scratch venv:
+
+```
+107 passed, 13 errors
+```
+
+The 13 errors are **collection failures on torch-dependent modules** — `test_dct`,
+`test_detector`, `test_engine`, `test_f3net`, `test_freq_dropout`,
+`test_frequency_mask`, `test_sas`, `test_robustness`, `test_utils` and others.
+They are **not failures**; torch is not installed locally and there is no GPU.
+
+| | |
+|---|---|
+| run and pass locally | **107** |
+| require Kaggle (torch) | the remainder of the ~253 |
+
+**The "253 passed, 2 skipped" figure in `STATE-OF-PLAY.md` is a Kaggle figure** and
+should be labelled as such — it cannot be reproduced on this machine.
+
+⚠️ The venv lives in the **session scratchpad and is cleared between sessions**.
+Reinstall with:
+`pip install numpy scipy pandas scikit-learn pytest`
