@@ -447,3 +447,44 @@ They also state the remedy as a requirement:
 
 > "The train-test split **should account for the dependencies in the data** to
 > ensure correct performance evaluation."
+
+### 13.3 They state the general problem is hard — and we are in the tractable case
+
+> "Handling nonindependence between the training and test sets **in general** (i.e.,
+> without any assumptions about independence in the data) **is a hard problem**,
+> because **we might not know the underlying dependency structure** of the task in
+> many cases."
+
+This sentence does two jobs for us, in opposite directions. Use both.
+
+#### It answers "isn't this obvious? just split by video"
+
+The reviewer objection contribution 1 is most exposed to is that video-disjoint
+splitting is common sense. Kapoor & Narayanan say the general problem is **hard**,
+precisely because the dependency structure is usually unknown.
+
+FaceForensics++ is the fortunate case: the structure is **recoverable from the
+metadata**. Video ids are explicit, and the `target_source` sequence naming lets us
+recover the pair graph and run union-find over it — yielding 150 components, all of
+size 2, `video_groups_per_component = 2.0` (`results/analysis/clusters/`).
+
+So our claim is not "we thought of splitting by video". It is: *this is a domain
+where the dependency structure can be recovered, so the cost of ignoring it can be
+measured rather than merely asserted.* That is why the study is possible here and
+hard elsewhere.
+
+#### It also legitimises our own limitation 1
+
+We do **not** have the true dependency structure either. Our components are
+**source-target components, not verified human identities** — FF++ sequence ids are
+not identity labels (`results/analysis/clusters/README.md`). The same actor could
+appear in two unconnected components and we would not know.
+
+That is exactly the situation they describe: *we might not know the underlying
+dependency structure*. Limitation 1 in `ESSENCE.md` §8a is therefore not an
+admission of sloppiness — it is **an instance of a documented open problem**, and
+should be written that way, citing this sentence.
+
+**Net effect:** the same sentence defends the contribution against "too obvious"
+and defends the limitation against "you didn't go far enough". Cite it in both
+places.
