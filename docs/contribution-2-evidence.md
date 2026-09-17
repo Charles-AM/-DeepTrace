@@ -53,7 +53,7 @@ agree with each other. Never "three different conclusions".
 | 2.3 | Per-run detail | 0.0370, 0.0442, 0.0624, 0.0489, 0.0452 | ✅ |
 | 2.4 | Four of five intervals include +0.014 | seed 0 excludes it via its upper endpoint (diff −0.0303, CI [−0.0702, +0.0039]) | ✅ descriptive tally |
 | 2.5 | Video-file unit, secondary | 0.042–0.067 (3.0–4.8×) | ✅ **do not splice with 2.1** — different resampling units |
-| 2.6 | Half-width floor, matched spatial-family comparisons | 0.023–0.038 = **1.7–2.7×** the reference | ✅ |
+| 2.6 | **Observed half-width range** among the evaluated spatial-family comparisons | 0.023–0.038 = 1.7–2.7× the reference | ✅ — **not a "floor"**. Five observed values do not establish a lower bound |
 
 ⚠️ Half-width is defined **h = (U − L)/2**. Percentile intervals are **not centred**
 on the point estimate — measured offsets reach 0.0028, 20% of the reference effect.
@@ -77,8 +77,8 @@ not an exclusion *rate*, and these are not a combined test.
 | # | claim | value | status |
 |---|---|---|---|
 | 3.4 | Point estimate | **−0.0092** | ✅ |
-| 3.5 | Crossed is wider than either conditional | **1.8×** | ✅ |
-| 3.6 | **Either conditional alone supports a stronger claim than the data permit** | both exclude +0.014; the crossed interval does not | ✅ **this is the contribution in one line** |
+| 3.5 | Crossed half-width relative to the conditionals | **1.8–2.0×** (0.0269 vs 0.0149 and 0.0133) | ✅ — not "1.8× than either" |
+| 3.6 | **Each conditional excludes +0.014 for its restricted estimand** — and each is valid for that target. **Neither alone supports an architecture-level conclusion**, which must generalise over both test content and training runs; the crossed interval, which does, excludes nothing | ✅ **this is the contribution in one line** |
 | 3.7 | Exceedance above the reference | **4.07%** of 50,000 replicates | ✅ |
 | 3.8 | Monte Carlo band on the upper endpoint | [0.0176, 0.0184] — entirely above +0.014 | ✅ |
 | 3.9 | Non-additivity ratio | **1.697** = var(crossed) / (var(comp) + var(seed)) | ✅ exploratory |
@@ -241,13 +241,13 @@ deterministic; **the bootstrap summary is not** unless indices or RNG state are 
 
 | # | source | role |
 |---|---|---|
-| 10.1 | **Hurlbert**, Ecol. Monogr. 54(2), 187–211, 1984 | **pseudoreplication** — treating correlated observations as independent *inferential* units. **This is contribution 2's anchor**, not contribution 1's |
+| 10.1 | **Hurlbert**, Ecol. Monogr. 54(2), 187–211, 1984 | **pseudoreplication** — anchors the **clustered test-inference** half of contribution 2 (steps 4). ⚠️ **Not** the anchor for training-run propagation — see 10.7 |
 | 10.2 | **Field & Welsh**, JRSS-B 69(3), 369–390, 2007 | the cluster bootstrap |
 | 10.3 | **Cameron, Gelbach & Miller**, REStat 90(3), 414–427, 2008 | over-rejection with **"few (five to thirty) clusters"** — **we have 29**. Limitation 4 cites this rather than admitting ignorance |
 | 10.4 | **DeLong et al.**, Biometrics 44(3), 837–845, 1988 | answers *"why not DeLong?"* — its variance estimator assumes independent observations, the very assumption under test |
 | 10.5 | **Davison & Hinkley**, 1997 | the better cite for **coverage**, which limitation 4 concerns |
 | 10.6 | **Lakens**, SPPS 8(4), 355–362, 2017 | why "not significant" ≠ "no effect"; margins must be set externally. Ours is anchored to +0.014, stronger than the arbitrary margins he warns against |
-| 10.7 | **Bouthillier et al.**, MLSys 2021 | training-run variance in general ML. They assume i.i.d. test data, note *"if errors are correlated, not i.i.d., the degrees of freedom are smaller and the distribution is wider"*, and set it aside. **That is the gap we occupy.** They also state variance contributions are **not additive** — which 3.9 quantifies |
+| 10.7 | **Bouthillier et al.**, MLSys 2021 | **the anchor for training-run propagation** (step 5), as Hurlbert is for clustered test inference. Training-run variance in general ML. They assume i.i.d. test data, note *"if errors are correlated, not i.i.d., the degrees of freedom are smaller and the distribution is wider"*, and set it aside. **That is the gap we occupy.** They also state variance contributions are **not additive** — which 3.9 quantifies |
 | 10.8 | **Henderson et al.** AAAI 2018 / **Melis et al.** ICLR 2018 | seed variance overwhelming architectural differences, established in other subfields |
 | 10.9 | **DeepfakeBench** | **the boundary**: they standardise *which* estimate is computed; we examine *how uncertain* it is (ledger §16) |
 
@@ -288,13 +288,18 @@ inference error (Hurlbert).
 
 ---
 
-## Open items — experiments and documentation owed
+## Open items
 
-### Experiments
+⚠️ **The experimental programme producing the frozen result is closed**
+(`results-frozen-v2`). Nothing below can revise a number in `results/canonical.json`.
+These are **optional follow-up work**, not gaps that block the manuscript. The only
+genuinely owed item is documentation.
+
+### Optional follow-up experiments
 
 | # | what | cost | what it closes |
 |---|---|---|---|
-| **A1** | Bootstrap coverage simulation | ~1.5 h CPU, **local** | **Limitation 4.** Converts "coverage at 29 clusters unverified" into a measured number. Cameron et al. put us inside the documented over-rejection regime, so either outcome is reportable |
+| **A1** | Bootstrap coverage simulation | ~1.5 h CPU, **local** | ⚠️ **Does NOT "retire" limitation 4.** A simulation measures coverage under a *chosen* data-generating process; it cannot establish coverage for the unknown real FF++ population. It would **narrow** the limitation to a measured statement under stated assumptions. Cameron et al. put 29 clusters inside the documented over-rejection regime, so either outcome is reportable |
 | **A4** | Per-manipulation cluster-aware intervals | ~20 min CPU | `permanip_l2` is **descriptive only — it has no intervals at all** |
 | **A5** | Resolution curves, remaining seeds + c23 component unit | ~30 min CPU | currently c40 seed-0 only at the component unit |
 | **A6** | BCa sensitivity | ~30 min CPU | **no BCa anywhere in the repo.** Percentile intervals can be biased at 29 clusters |
@@ -308,4 +313,4 @@ inference error (Hurlbert).
 | D1 | Name the estimand **and the averaging space** in `manuscript_sentence`; add an 11th test asserting it | **Charlie's approval** — approved wording |
 | D2 | Limitations sentence: our reference effect may be measured at a different granularity than our estimate (ledger §11) | — |
 | D3 | Results directory + README for the §8 sensitivity analysis, marked post-hoc | — |
-| D4 | Limitation 4 rewritten to cite Cameron et al. rather than admit ignorance | A1 |
+| D4 | Limitation 4 rewritten to cite Cameron et al. rather than admit ignorance | — (does **not** depend on A1) |

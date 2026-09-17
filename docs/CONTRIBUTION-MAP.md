@@ -27,8 +27,9 @@ has both members in test, which is what collapses 30 groups into 29 components
 
 ## The decision chain
 
-A researcher comparing two detectors on FF++ makes five choices. Each has a
-measured cost. **Each contribution owns part of the chain.**
+A researcher comparing two detectors on FF++ makes **five evaluation choices,
+followed by an architectural conclusion.** Each choice has a measured cost, and
+each contribution owns part of the chain.
 
 | step | the choice | measured cost | owner |
 |---|---|---|---|
@@ -84,13 +85,21 @@ written (2026-09-17). **A1 still owed** — it retires limitation 4.
 
 > Applying both corrections to a published architectural claim.
 
-**Owns:** the conclusion. **Reference effect:** F3-Net's own FAD ablation, **+0.014
-AUC**, measured on the LQ task — which FF++ defines as H.264 quantization 40, i.e.
-**the same c40 setting as ours** (ledger §2, E2 closed).
+**Owns:** the case-study finding. **Reference effect:** F3-Net's own FAD ablation,
+**+0.014 AUC**, measured on the LQ task — which FF++ defines as H.264 quantization
+40. The reference and our analysis share the **nominal FF++ c40 compression level**,
+though the broader experimental settings differ (subset size, input resolution,
+training budget, and possibly the estimand — ledger §11) and must be stated as
+differing.
 
-Result, frozen in `results/canonical.json`: **−0.0092, 95% CI [−0.0358, +0.0180]**,
-containing zero, +0.014 (F3-Net) and +0.0010 (DeepfakeBench). FAD costs ≈ **+3%**
-compute.
+Result, frozen in `results/canonical.json`: **−0.0092, 95% CI [−0.0358, +0.0180]**.
+**Primary reference points: zero and +0.014.** FAD costs ≈ **+3%** compute.
+
+⚠️ DeepfakeBench's +0.0010 is **not a reference threshold** — its F3Net scope is
+ambiguous (paper says FAD+LFS, code says FAD only, ledger E3) and its design is not
+matched to ours. Use it only as **between-study evidence**: two published sources
+differ by 14× on the same nominal comparison, and by 0.067 on plain Xception —
+4.8× the effect under debate.
 
 **Status:** dissected in conversation, result frozen and reproduced exactly.
 **No evidence map yet** — the remaining gap.
@@ -101,9 +110,11 @@ compute.
 
 Each contribution is the precondition for the next.
 
-**C1 makes C2 possible.** Under crop-randomised splitting every architecture scores
-~0.99 and the three sit 0.6 points apart against the ceiling. There is no room for
-an uncertainty analysis to say anything. Fixing the protocol restored headroom.
+**C1 establishes what C2 analyses.** C1 fixes the evaluation protocol and estimand
+to which C2's uncertainty analysis applies. An uncertainty analysis *could* be run
+under crop randomisation — it would simply target a protocol whose estimand does not
+match a claim about unseen videos, and would operate on scores compressed against
+the ceiling (observed architectural range 0.006 under L1 against 0.021 under L2).
 
 **C1 and C2 together make C3 meaningful.** A −0.0092 point estimate means nothing
 without knowing that the design's resolution is 2.6–4.5× the effect being tested.
@@ -117,24 +128,61 @@ published effect.
 
 ---
 
-## The ladder — every choice dwarfs the effect
+## Magnitudes — by category
 
-| quantity | AUC points | owner |
+⚠️ **These are not one ordered scale.** Absolute performance shifts, interval
+half-widths, standard deviations and point estimates answer different questions and
+must not be ranked together. The categories below are comparable *within*
+themselves; across them, only loose descriptive comparison is warranted.
+
+**A. Absolute performance shifts from design choices** (AUC points)
+
+| quantity | size | owner |
 |---|---|---|
-| Protocol choice (crop vs video split) | **~18** | C1 |
-| Compression's effect on that gap | **~10** | C1 |
-| Test-content uncertainty (component half-widths) | 3.7 – 6.2 | C2 |
-| Run-to-run variation, split frozen | 3.4 | C2 |
-| Repeatability movement, nominally identical config | 3.4 | C2 |
-| Crossed interval half-width | 2.7 | C2 |
-| **The published effect under debate (+0.014)** | **1.4** | C3 |
-| Aggregation-space shift in the point estimate | 0.3 | C1 |
-| Our point estimate for FAD | 0.9 | C3 |
+| Protocol choice, crop- vs video-disjoint split | **~18** | C1 |
+| Compression's effect on that gap (difference-in-differences) | **~10** | C1 |
 
-**Every source of variation we measured is larger than the effect the literature
-argues about.** That ordering is the paper.
+**B. Interval half-widths** — the resolution the design achieves
 
----
+| quantity | size | owner |
+|---|---|---|
+| Component bootstrap, five c40 runs | 3.7 – 6.2 | C2 |
+| Crossed interval | 2.7 | C2 |
+| Conditional intervals | 1.3 – 1.5 | C2 |
+
+**C. Standard deviations across runs**
+
+| quantity | size | owner |
+|---|---|---|
+| Complete-pipeline (varying split) | 1.88 | C2 |
+| Fixed-split training-run | 1.45 | C2 |
+
+**D. Point estimates**
+
+| quantity | size |
+|---|---|
+| F3-Net's reported FAD ablation gain | **+1.4** |
+| Our crossed estimate | −0.92 |
+| Shift from the aggregation-space choice | 0.32 |
+
+**E. Supplementary — single-observation audit**
+
+| quantity | size | caveat |
+|---|---|---|
+| Repeatability movement, nominally identical config | 3.4 | **n = 1**, no causal attribution. Supplementary only — do not place in a headline comparison |
+
+### What may be said across categories
+
+✅ **The protocol gap (category A, ~18 points) is an order of magnitude larger than
+the reported effect it would be used to adjudicate (+0.014).** That is a descriptive
+comparison of two absolute AUC shifts, and it is fair.
+
+✅ **The design's resolution (category B, 2.7–6.2 points) is 2–4× the reported
+effect.** That is the resolution argument, and it is the point of contribution 2.
+
+❌ **Never** "every source of variation we measured is larger than the effect" — the
+aggregation-space shift (0.32) and our own point estimate (0.92) are smaller, and
+the claim is contradicted by the table it introduces.
 
 ## Two errors, two anchors — do not cross them
 
