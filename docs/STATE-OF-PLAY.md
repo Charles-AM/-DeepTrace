@@ -81,7 +81,7 @@ established by full-text search, see `docs/VERIFICATION-LEDGER.md` §4.
 | committed predictions | 66,000 across 32 dumps |
 | analysis directories | 15, all with READMEs |
 | result CSVs | 74 |
-| tests | **253 passed, 2 skipped** — ⚠️ **a Kaggle figure**; locally only **107 pass**, the rest need torch (ledger §20.4) |
+| tests | ✅ **suite passes clean on Kaggle, 2026-09-17** — `pytest` exit code **0**, 2 skipped, ~257 tests. Locally only **107** run (the rest need torch) — ledger §21 |
 | citations verified | **15 of 22** in the previously-unverified section |
 | verification ledger | **16 sections** — every external claim traced to a quote |
 | contribution 1 | **dissected and evidence-mapped** (2026-09-17); wording settled |

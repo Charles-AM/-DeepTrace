@@ -987,3 +987,55 @@ should be labelled as such — it cannot be reproduced on this machine.
 ⚠️ The venv lives in the **session scratchpad and is cleared between sessions**.
 Reinstall with:
 `pip install numpy scipy pandas scikit-learn pytest`
+
+---
+
+## 21. Test suite verified on Kaggle — 2026-09-17
+
+Run by Charlie in a **CPU-only** Kaggle session (no GPU quota consumed), on a fresh
+clone of the repo at `0f464e2`:
+
+```
+python -m pytest tests/ -q
+```
+
+| | |
+|---|---|
+| **pytest exit code** | **0** — authoritative: pytest exits non-zero on any failure or error |
+| failures / errors | **none** — no `F` or `E` in 257 progress characters |
+| skipped | **2** |
+| approximate total | **~257** — inferred from the 28/56/84/100% progress markers |
+| torch-dependent modules | **all ran and passed**, including the 13 that cannot even collect locally |
+
+⚠️ **The total is approximate.** Kaggle truncated the summary line across three
+attempts, including with `-p no:warnings`, `--tb=no` and `subprocess` capture. The
+**pass/fail status is certain** (exit 0); the **count is inferred** from progress
+markers and is recorded as approximate rather than invented precisely.
+
+### What this replaces
+
+`STATE-OF-PLAY.md` carried **"253 passed, 2 skipped"**, a figure from an earlier
+Kaggle run that had not been re-verified. It is now known to be **stale** — the
+suite has grown since. Do not quote 253.
+
+### What it confirms
+
+- Nothing broke across the 21 commits of 2026-09-17
+- The 13 modules invisible to local runs — `test_dct`, `test_detector`,
+  `test_engine`, `test_f3net`, `test_freq_dropout`, `test_frequency_mask`,
+  `test_sas`, `test_robustness`, `test_utils` and others — are healthy
+- The warnings observed are harmless: matplotlib pyparsing deprecations, and a
+  `pin_memory` notice consistent with a CPU-only session
+
+### How to re-run it
+
+CPU accelerator, two cells, no installs (Kaggle ships torch, numpy, scipy,
+scikit-learn, pandas and pytest):
+
+```
+!git clone https://github.com/Charles-AM/-DeepTrace.git /kaggle/working/dt
+!cd /kaggle/working/dt && python -m pytest tests/ -q
+```
+
+⚠️ Never `pip install -r requirements.txt` on Kaggle — it breaks the pre-installed
+torch build (`docs/REPRODUCIBILITY.md`).
