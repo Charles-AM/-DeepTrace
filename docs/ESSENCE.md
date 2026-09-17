@@ -50,7 +50,8 @@ result contradicts something below.
 2. **Inference effect** — separating crop, test-content, and optimisation
    randomness, and reporting what resolution the design actually achieves.
 3. **FAD case study** — consistently small point estimates across compression
-   levels and protocols; **resolution pending cluster-aware inference (V1)**.
+   levels and protocols. ✅ **Resolved**: crossed component × training-run
+   inference gives −0.0092, 95% CI [−0.0358, +0.0180] (`results/canonical.json`).
 
 Everything below is supporting detail for these four boxes.
 
@@ -230,8 +231,10 @@ Antecedents: Frank et al. ICML 2020; Zhang et al. WIFS 2019; Durall et al. CVPR
 2. **Inference effect** — separate crop, test-content, and training randomness via
    paired cluster-aware evaluation; report what resolution the design actually has.
 3. **FAD case study** — consistently small point estimates across compression
-   levels and protocols, cost-accounted; whether they exceed prespecified
-   thresholds is **pending cluster-aware inference (V1)**.
+   levels and protocols, cost-accounted. ✅ **Resolved 2026-09-06**: the crossed
+   interval [−0.0358, +0.0180] contains zero, +0.014 and +0.0010 — it neither
+   demonstrates a FAD advantage nor excludes a gain of the published magnitude
+   (`results/canonical.json`). Status markers updated 2026-09-17.
 
 Complementarity (late fusion, α-sweep) is **explanatory evidence**, not a fourth
 contribution.

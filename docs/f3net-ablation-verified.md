@@ -75,3 +75,59 @@ average the AUC scores of each frame in a video."* That phrasing is ambiguous an
 is **not** the frame-pooled AUC we currently compute. It reinforces C0b (report
 video-level aggregation alongside frame-level), and any claim of direct
 comparability should be hedged until we match the aggregation.
+
+---
+
+## Reading the ablation — what rows 2–5 tell us
+
+Added 2026-09-17. The table above is verified from source; everything in this
+section is **arithmetic on it, plus our interpretation**, and is labelled as such.
+
+### Why our reference is +0.014 and not +0.040
+
+F3-Net is three components: FAD, LFS, and MixBlock. **We implemented FAD only** —
+no LFS, no MixBlock. So the matched published quantity is row 2 minus row 1
+(0.907 − 0.893 = **+0.014**), not row 5 minus row 1 (+0.040).
+
+**The conservative direction is the one people will assume we avoided, so state it
+explicitly.** Our crossed 95% interval is [−0.0358, **+0.0180**].
+
+| reference used | verdict | strength |
+|---|---|---|
+| +0.014 (FAD only — **what we use**) | interval **contains** it → *cannot exclude* | weaker |
+| +0.040 (full system — **do not use**) | interval **excludes** it, since 0.0180 < 0.040 | stronger |
+
+Using the full-system number would have handed us an **exclusion** claim. We chose
+the matched component instead, which denies us that claim. The threshold was not
+outcome-shopped, and this table is the evidence.
+
+### FAD is the weaker of the two frequency branches
+
+| component, alone | AUC | gain |
+|---|---|---|
+| FAD (row 2) | 0.907 | **+0.014** |
+| LFS (row 3) | 0.920 | **+0.027** |
+
+LFS contributes **~1.9× what FAD does** in F3-Net's own ablation. The component we
+implemented and tested is the *smaller* of the two. Relevant context for the case
+study: we are testing the harder-to-detect half, which makes our
+insufficient-resolution finding less surprising, not more.
+
+### The two branches are sub-additive
+
+If FAD and LFS contributed independently, combining them would give
+0.014 + 0.027 = **+0.041**. Row 4 reports **+0.035** (0.928 − 0.893).
+
+The combination delivers **less than the sum of the parts**, so the two frequency
+branches partly capture the same information rather than contributing separately.
+
+⚠️ **Our inference from their numbers, not their claim.** F3-Net does not describe
+its branches as redundant. Do not attribute it to them. MixBlock adds a further
++0.005 (row 5 − row 4).
+
+### How to verify the table yourself
+
+`~/Downloads/2007.09355v2.pdf`, **Fig. 7(a) p.12** (the five-row ablation) and
+**Table 3 p.14** (the FAD component analysis). Both captions state the task is
+FF++ **LQ**, which FF++ §3 p.5 defines as H.264 quantization 40 — i.e. **c40**,
+the same setting as our primary result.
