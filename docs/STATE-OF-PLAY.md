@@ -101,7 +101,7 @@ established by full-text search, see `docs/VERIFICATION-LEDGER.md` §4.
 
 **Free (no quota), all runnable locally — numpy and scipy are present:**
 A2 verify the **remaining 7** citations (~1 h, **blocks submission**; was ~20
-before the 2026-09-15 pass) · A1 coverage simulation (~1.5 h, retires limitation 4,
+before the 2026-09-15 pass) · A1 coverage simulation (~1.5 h, **narrows** limitation 4 — it cannot retire it,
 and Cameron et al. put 29 clusters inside the documented over-rejection regime) ·
 A3 three figures (~1 h, needs a matplotlib venv) · A4 per-manipulation intervals ·
 A5 more resolution curves · A6 BCa sensitivity
@@ -223,7 +223,7 @@ the other.
   interval and the resolution curves are all recorded but not independently
   recomputed in a verification pass
 - **A1 (coverage simulation) has not run** — ~1.5 h CPU, free, and it is the
-  experiment that retires limitation 4
+  experiment that **narrows** limitation 4 (it cannot retire it — see below)
 - **The estimand-mismatch limitation sentence is owed** (§11)
 
 ### Next session
@@ -231,3 +231,5 @@ the other.
 Dissect contribution 2 the way contribution 1 was dissected on 2026-09-17: claim by
 claim, each traced to a file or a quote, ending in an evidence map and a
 do-not-write table. Then run A1.
+
+⚠️ **A1 does not retire limitation 4** — a simulation measures coverage under a *chosen* data-generating process, not for the unknown real FF++ population. It **narrows** the limitation to a measured statement under stated assumptions.

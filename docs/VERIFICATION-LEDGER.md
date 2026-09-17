@@ -37,7 +37,7 @@ Last updated 2026-09-11.
 | +0.014 is the **learnable** variant (`f_base + f_w`) | Table 3: fixed filters reach only 0.901 | ✅ |
 | Full system is +0.040 — **do not use** | Fig. 7(a) row 5 | ✅ |
 | Their FAD matches ours structurally | three bands, learnable additive term, inverse-DCT per band | ✅ |
-| **Reports no measure of variability anywhere** | full-text search, see §4 | ✅ |
+| In our documented full-text audit: **no confidence intervals, standard errors, standard deviations or repeated-run variability** accompany the reported detector comparisons | full-text search, see §4 | ✅ — scope to the audit; avoid the unqualified "anywhere" |
 | **"LQ" = c40** | **CLOSED 2026-09-17.** FF++ (arXiv:1901.08971 §3, *Postprocessing – Video Quality*) defines the mapping itself: *"To generate high quality videos, we use a light compression denoted by HQ (constant rate quantization parameter equal to 23) ... Low quality videos (LQ) are produced using a quantization of 40."* F3-Net cites FF++ [50] and defines its labels identically (*"LQ indicates low quality (heavy compression), HQ indicates high quality (light compression) and RAW indicates raw videos without compression"*). HQ = quantization 23 = c23; LQ = quantization 40 = c40 | ✅ **verified** — definitional chain, no longer an inference. F3-Net never writes "c40", but uses FF++'s own labels in FF++'s own sense |
 | **The +0.014 is measured on the LQ (heavy compression) task** | two independent captions — Fig. 7(a) p.12 *"Ablation study of the proposed F3-Net on the low quality task(LQ)"*; Table 3 p.14 *"...on FAD in FF++ low quality (LQ)"* | ✅ verified 2026-09-17 |
 | **F3-Net is explicitly motivated by heavy compression** | abstract: *"especially wins a big lead upon low-quality media"*; intro: *"if the visual quality ... is tremendously degraded, such as compressed by JPEG or H.264 ... the forgery artifacts ... cannot be captured in RGB domain any more"*; contributions: *"significantly improves the performance over low-quality forgery media"* | ✅ verified 2026-09-17 |
@@ -57,7 +57,7 @@ Last updated 2026-09-11.
 | Correct PubMed record for Kapoor & Narayanan | **PMID 37720327**. (PMID 36913544 is a cobalt molybdenum sulfide catalysis paper — a miscitation seen in review feedback) | ✅ resolved via NCBI E-utilities |
 | Four metrics: ACC, AUC, AP, EER — none a measure of variability | paper body, enumerated | ✅ |
 | F3Net 0.8271 vs Xception 0.8261 at FF-c40 (+0.0010) | main results table, text-extracted | ✅ |
-| **Reports no measure of variability anywhere** | full-text search, see §4 | ✅ |
+| In our documented full-text audit: **no confidence intervals, standard errors, standard deviations or repeated-run variability** accompany the reported detector comparisons | full-text search, see §4 | ✅ — scope to the audit; avoid the unqualified "anywhere" |
 | Their F3Net scope | **paper** says two-branch FAD+LFS, re-implemented from the paper; **code** (`f3net_detector.py`) says FAD branch only, following a reference GitHub implementation | ⚠️ contradictory; our comparison holds under either reading (14× or 40×) |
 | "Reproducibility" means consistent protocol/data | used of data pipelines and reported results, not of statistical stability | ✅ |
 
@@ -204,7 +204,9 @@ Because FF++ ships video-level splits, a paper following the official protocol i
 as it already is in `STATE-OF-PLAY.md` — *protocol and estimand choices change
 apparent performance* — which asserts that the choice is consequential **without
 claiming anyone made the wrong choice**. Our evidence is a controlled
-demonstration on byte-identical crops; it needs no claim about others' practice.
+demonstration built from the same crop corpus with partition membership differing
+by the splitting rule; it needs no claim about others' practice. (Never "identical
+crops" — train/test membership necessarily differs when the split rule is what changed.)
 
 ### Keep the two errors apart
 

@@ -44,7 +44,7 @@ much. See "Claims we deliberately do not make" below.
 | 2.3 | It is the **learnable** FAD variant | Table 3: fixed filters reach only 0.901 | ✅ |
 | 2.4 | It is measured on the **LQ** task | Fig. 7(a) caption *"on the low quality task(LQ)"*; Table 3 caption | ✅ |
 | 2.5 | **LQ = c40** | FF++ §3 p.5: HQ = quantization 23, *"Low quality videos (LQ) are produced using a quantization of 40"* | ✅ definitional |
-| 2.6 | So their +0.014 and our primary result share one compression setting | 2.4 + 2.5 | ✅ |
+| 2.6 | They share the **nominal FF++ c40 compression level** | 2.4 + 2.5 | ✅ — ⚠️ **not the broader settings**: subset size, input resolution, training budget and possibly the estimand all differ (ledger §11). Never write "the same setting" unqualified |
 | 2.9 | ⚠️ They may **not** share an estimand | F3-Net p.10: *"we also average the AUC scores of each frame in a video"* — reads as video-aggregated; ours is frame-pooled | ⚠️ ledger §11 — **qualify the 13× comparison** |
 | 2.7 | The full-system +0.040 must **not** be used as our reference | we implement neither LFS nor MixBlock | ✅ decided, `ESSENCE.md` §7 |
 | 2.8 | Using +0.040 would have given us a **stronger** claim | our CI upper endpoint is 0.0180 < 0.040, so it would be excluded | ✅ shows the threshold was not outcome-shopped |
@@ -106,4 +106,8 @@ partitions (difficulty). V2 holds test content fixed and varies only seen/unseen
 status, isolating the leakage component.
 
 Until it runs, "protocol gap" is the honest word, and it appears as a hedge in five
-places in `ESSENCE.md`. This is the single highest-value GPU experiment remaining.
+places in `ESSENCE.md`.
+
+⚠️ **Optional follow-up, not a blocker.** The experimental programme producing the
+frozen result is closed (`results-frozen-v2`); V2 would add a measurement, not
+repair a gap. Of the optional GPU work it has the highest value.

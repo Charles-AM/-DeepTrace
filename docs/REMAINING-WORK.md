@@ -14,7 +14,7 @@ is about closing gaps a reviewer or marker could reasonably probe.
 
 | # | item | why | cost |
 |---|---|---|---|
-| **A1** | **Bootstrap coverage simulation** | **Closes limitation 4.** We currently state that percentile-bootstrap coverage with 29 components is *unverified*. A simulation study settles it: estimate component- and run-level variance from our own data, simulate many datasets with a known true effect, run the crossed bootstrap on each, and measure how often the 95% interval actually contains it. | ~1.5 h CPU |
+| **A1** | **Bootstrap coverage simulation** | **Narrows limitation 4** (it cannot close it — a simulation measures coverage under a *chosen* data-generating process, not for the unknown real FF++ population). We currently state that percentile-bootstrap coverage with 29 components is *unverified*. A simulation study settles it: estimate component- and run-level variance from our own data, simulate many datasets with a known true effect, run the crossed bootstrap on each, and measure how often the 95% interval actually contains it. | ~1.5 h CPU |
 | **A2** | Verify ~20 citations in Groups A/G/H | **Blocks submission.** Written from memory, never checked — including the dataset paper and the backbone | ~1 h |
 | **A3** | Three publication figures | Needed for every document. Two-panel forest plot, protocol gap, resolution curve | ~1 h |
 | **A4** | Per-manipulation cluster-aware intervals | `permanip_l2` is currently descriptive only, with no uncertainty. Computable from committed dumps | ~20 min |
@@ -29,8 +29,9 @@ error in the estimated endpoints, not the frequentist coverage of the bootstrap
 procedure itself. Numerical stability is demonstrated; small-sample coverage
 remains unknown."*
 
-A simulation converts "unknown" into a measured number. If coverage is ~95%, the
-limitation shrinks to a sentence. If it is 88%, that is a **finding** — and one
+A simulation converts "unknown" into a measured number **under a stated
+data-generating process**. If coverage is ~95%, the limitation shrinks to a
+sentence. If it is 88%, that is a **finding** — and one
 that strengthens the paper, since under-coverage means the field's intervals are
 even more optimistic than we showed.
 

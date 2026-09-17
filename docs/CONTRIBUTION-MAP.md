@@ -37,7 +37,7 @@ each contribution owns part of the chain.
 | 2 | **What do I compute?** frame-pooled or video-aggregated | moves the estimate in **5 of 5** runs | **C1** |
 | 3 | **In what score space?** mean-logit or mean-probability | exceedance rate **4.1% → 8.3%** | **C1** |
 | 4 | **What unit carries the uncertainty?** frame, video, component | **verdict flips** — frame excludes zero, clustered units do not | **C2** |
-| 5 | **Do I propagate training-run variation too?** | crossed interval **1.8× wider**; both conditionals exclude +0.014, the crossed one does not | **C2** |
+| 5 | **Do I propagate training-run variation too?** | crossed half-width **1.8–2.0×** the conditional half-widths; each conditional excludes +0.014 for its restricted estimand, the crossed interval does not | **C2** |
 | — | **What may I then conclude about the architecture?** | neither demonstrated nor excluded | **C3** |
 
 Steps 1–3 determine **which quantity is estimated**. Steps 4–5 determine **how
@@ -75,11 +75,13 @@ error. **Evidence:** `docs/contribution-2-evidence.md`.
 
 Headline numbers: one estimate (−0.0196) under three uncertainty models gives two
 conclusions; component half-widths 0.037–0.062 = 2.6–4.5× the reference; the crossed
-interval [−0.0358, +0.0180] is 1.8× wider than either conditional, and **only the
+interval [−0.0358, +0.0180] has **1.8–2.0× the conditional half-widths**, and **only the
 crossed one fails to exclude +0.014**; non-additivity ratio 1.697.
 
 **Status:** positioning settled, all numbers independently validated, evidence map
-written (2026-09-17). **A1 still owed** — it retires limitation 4.
+written (2026-09-17). A1 is **optional follow-up**, not owed.
+
+⚠️ **A1 does not retire limitation 4** — a simulation measures coverage under a *chosen* data-generating process, not for the unknown real FF++ population. It **narrows** the limitation to a measured statement under stated assumptions.
 
 ### Contribution 3 — the FAD case study
 
