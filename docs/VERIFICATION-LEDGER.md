@@ -163,3 +163,46 @@ method-paper era** — it claimed "we find it does not", cited superseded and
 DO-NOT-CITE results, and treated FAD as the subject rather than the case study.
 Quarantined in place with a DO-NOT-USE banner rather than deleted. **A replacement
 intro paragraph is now owed.**
+
+---
+
+## 7. FF++ official splits — verified 2026-09-17
+
+**Verified.** FaceForensics++ provides official train/validation/test splits defined
+at **video level**: **720 / 140 / 140**. Source: the FF++ dataset repository,
+<https://github.com/ondyari/FaceForensics/tree/master/dataset> — *"We used 720
+videos for train and 140 videos for validation as well as testing."*
+
+This closes the open to-do on the FF++ entry in `related-work.md` ("check their
+official split sizes").
+
+### The correction it forces
+
+A claim was made in conversation that crop-randomised splitting is what "a lot of
+published work" does. **That claim is unsupported and is not made anywhere in this
+repository.** It should never enter the proposal, report or paper.
+
+What is actually established:
+
+| claim | status |
+|---|---|
+| FF++ official splits are video-level, 720/140/140 | ✅ verified (above) |
+| DeepfakeBench pools **frames** for the metric | ✅ verified, verbatim (§3) |
+| **We** used crop-randomised splits before 2026-09-05 | ✅ our own logs, `results/in_domain_c40/` vs `_c40_vid/` |
+| The field commonly splits by crop | ❌ **no evidence — do not assert** |
+
+Because FF++ ships video-level splits, a paper following the official protocol is
+**not** crop-randomised at the split level. Contribution 1 must therefore be stated
+as it already is in `STATE-OF-PLAY.md` — *protocol and estimand choices change
+apparent performance* — which asserts that the choice is consequential **without
+claiming anyone made the wrong choice**. Our evidence is a controlled
+demonstration on byte-identical crops; it needs no claim about others' practice.
+
+### Keep the two errors apart
+
+- **Splitting** by crop → leakage (Kapoor & Narayanan [L3.2]). Demonstrated by us;
+  not attributed to anyone else.
+- **Pooling frames** for the metric → the estimand problem. **This one is
+  documented in the field**, with a verified DeepfakeBench quote.
+
+Conflating them overstates the first and wastes the second.

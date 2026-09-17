@@ -373,7 +373,7 @@ open reading questions.
 
 | citation | role |
 |---|---|
-| **✅ Rössler, Cozzolino, Verdoliva, Riess, Thies, Nießner. "FaceForensics++: Learning to Detect Manipulated Facial Images." ICCV 2019.** | the dataset. Also the source of the `target_source` naming our component clustering exploits. Check their official split sizes and how sequence pairs were formed |
+| **✅ Rössler, Cozzolino, Verdoliva, Riess, Thies, Nießner. "FaceForensics++: Learning to Detect Manipulated Facial Images." ICCV 2019.** | the dataset. Also the source of the `target_source` naming our component clustering exploits. ✅ **Official splits verified 2026-09-17: video-level, 720/140/140** — so FF++ itself is not crop-randomised, and we must not imply otherwise (ledger §7) |
 | **✅ Chollet. "Xception: Deep Learning with Depthwise Separable Convolutions." CVPR 2017, pp. 1800–1807.** | the backbone for both arms, and for F3-Net. Why the comparison is matched |
 | **⚠️ Lin, Goyal, Girshick, He, Dollár. "Focal Loss for Dense Object Detection." ICCV 2017.** | our training objective, γ=2.0, α from train class balance |
 | **✅ Loshchilov, Hutter. "Decoupled Weight Decay Regularization." ICLR 2019.** | AdamW. Also the citation that makes our `no_decay_param_groups` fix legible — decoupled decay was being applied to a scalar gate |
