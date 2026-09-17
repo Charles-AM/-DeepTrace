@@ -294,3 +294,58 @@ compared on a common basis. That addresses inconsistency, not dependence. The
 pseudoreplication problem survives their standardisation untouched. Our
 contribution 2 is therefore **complementary to** their effort, not a correction of
 it — write it that way.
+
+---
+
+## 11. Estimand mismatch — F3-Net's AUC granularity (2026-09-17)
+
+Found while checking whether the "13×" comparison is sound.
+
+**F3-Net, Evaluation Metrics, p.10, verbatim:**
+
+> "(2) AUC. Following face X-ray [40], we use AUC score as another evaluation
+> metric. **For single-frame methods, we also average the AUC scores of each frame
+> in a video.**"
+
+And immediately above, for accuracy:
+
+> "for single-frame methods, we average the accuracy scores of each frame in a
+> video."
+
+### What this means
+
+The sentence is **loose as written**: an AUC cannot be computed for a single frame,
+since AUC requires both positive and negative examples. Read with the Acc sentence,
+the intended procedure is most plausibly **average frame scores to a video-level
+score, then compute AUC across videos** — i.e. **video-aggregated**, not
+frame-pooled.
+
+| source | estimand | status |
+|---|---|---|
+| **Ours** | **frame-pooled** AUC — every crop one row | ✅ known, `ESSENCE.md` §8a |
+| **DeepfakeBench** | **frame-level** | ✅ verbatim, §3 |
+| **F3-Net** | reads as **video-aggregated**; wording is ambiguous | ⚠️ **inference from an unclear sentence — do not state as fact** |
+
+### Consequences — both must be written into the paper
+
+1. **The 13× comparison may mix estimands.** Our 18 points is frame-pooled;
+   F3-Net's +0.014 may not be. Qualify it: it is **scale context across two
+   evaluation designs**, not a like-for-like ratio. Our own
+   `results/analysis/aggregation/` shows switching estimands moves the estimate in
+   all five seeds, so this is not a hypothetical concern.
+2. **A candidate mechanical explanation for the 0.067 Xception discrepancy.**
+   F3-Net reports 0.893, DeepfakeBench 0.8261. DeepfakeBench pools frames
+   (verified); F3-Net appears not to. Estimand difference is a **plausible
+   contributor**. ⚠️ **Hypothesis only** — the two also differ in subset, crops,
+   training budget and implementation. Do not present it as the explanation.
+
+### Why this strengthens rather than weakens the paper
+
+Contribution 1 is that **protocol and estimand choices change apparent
+performance**. Finding that two influential papers may report AUC at different
+granularities — one stated plainly, one stated ambiguously — is a direct instance
+of the thesis, not a problem for it. It also explains why we report both
+frame-pooled and video-aggregated results rather than picking one.
+
+**Owed:** a sentence in the limitations noting that our reference effect may be
+measured at a different granularity than our own estimate.

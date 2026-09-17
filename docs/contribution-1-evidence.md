@@ -45,6 +45,7 @@ much. See "Claims we deliberately do not make" below.
 | 2.4 | It is measured on the **LQ** task | Fig. 7(a) caption *"on the low quality task(LQ)"*; Table 3 caption | ✅ |
 | 2.5 | **LQ = c40** | FF++ §3 p.5: HQ = quantization 23, *"Low quality videos (LQ) are produced using a quantization of 40"* | ✅ definitional |
 | 2.6 | So their +0.014 and our primary result share one compression setting | 2.4 + 2.5 | ✅ |
+| 2.9 | ⚠️ They may **not** share an estimand | F3-Net p.10: *"we also average the AUC scores of each frame in a video"* — reads as video-aggregated; ours is frame-pooled | ⚠️ ledger §11 — **qualify the 13× comparison** |
 | 2.7 | The full-system +0.040 must **not** be used as our reference | we implement neither LFS nor MixBlock | ✅ decided, `ESSENCE.md` §7 |
 | 2.8 | Using +0.040 would have given us a **stronger** claim | our CI upper endpoint is 0.0180 < 0.040, so it would be excluded | ✅ shows the threshold was not outcome-shopped |
 
@@ -79,7 +80,7 @@ much. See "Claims we deliberately do not make" below.
 | "identical data / byte-identical images" (of the L1↔L2 comparison) | The crop **corpus** is the same; train/test **membership** is not, and cannot be. Say **only the partitioning rule changed** |
 | "a property of the evaluation" (unqualified) | Say **"consistent in direction and approximate magnitude across the three tested architectures"** — n=3 |
 | "FAD is worth +0.014" | **F3-Net reported a +0.014 AUC ablation gain under its setting.** Attribute it |
-| "13× larger, therefore the FAD claim fails" | The two quantities answer different questions — an absolute protocol shift vs a matched architectural contrast. Use it as **scale context**, never as disproof |
+| "13× larger, therefore the FAD claim fails" | Two objections, both fatal to the strong reading. They answer different questions (absolute protocol shift vs matched architectural contrast), **and they may not share an estimand** — ours is frame-pooled, F3-Net's reads as video-aggregated (ledger §11). Use as **scale context across two evaluation designs**, never as disproof |
 | "made the architectural question answerable at all" | Too categorical. **"Restored headroom and improved practical resolution"** |
 | "the field has numbers but not error bars" | **Two papers audited.** Say "these two influential examples report point estimates without uncertainty" |
 | "the standard setup falls short" | FF++ supplies fixed video-level splits. There is no deficient "standard setup" to indict |
