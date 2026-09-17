@@ -488,3 +488,49 @@ should be written that way, citing this sentence.
 **Net effect:** the same sentence defends the contribution against "too obvious"
 and defends the limitation against "you didn't go far enough". Cite it in both
 places.
+
+---
+
+## 14. DeepfakeBench's evaluation module, enumerated in full (2026-09-17)
+
+Confirmed by Charlie against p.5 of the PDF. The passage matches §3 verbatim, and
+the **complete** paragraph lets us state the no-uncertainty finding more strongly.
+
+### What the module contains, by their own enumeration
+
+| category | items |
+|---|---|
+| metrics | ACC, AUC, AP, EER |
+| performance visualisations | ROC-AUC curve, radar chart, histogram |
+| analysis tools | Grad-CAM, t-SNE, per-detector custom visualisations |
+
+### Why this is a stronger claim than what we had
+
+§4 established "no measure of variability is reported anywhere" by **full-text
+search** — an absence argument, which invites the reviewer response *"perhaps you
+missed it."*
+
+This paragraph is the authors **enumerating their own evaluation apparatus**, and
+no element of it estimates uncertainty in a metric. Four point-estimate metrics,
+three visualisations of point performance, two interpretability tools.
+
+Upgrade the wording from *"we searched and found none"* to:
+
+> **DeepfakeBench enumerates its evaluation module as four metrics (ACC, AUC, AP,
+> EER) together with performance and interpretability visualisations; none of these
+> estimates variability in a reported metric.**
+
+That is a claim about what they say they do, not about what we failed to find.
+
+⚠️ **One qualification, state it.** A histogram *is* a distribution — but a
+distribution over examples or prediction scores, not an uncertainty estimate for
+the metric. The enumeration does not say what the histogram plots. Do not claim it
+cannot be one; claim only that **no item is described as a variability estimate**.
+This is **our reading of their enumeration**, not their statement.
+
+### Bearing on contribution 2
+
+Their module standardises *which* number is computed and makes it comparable
+across detectors. It does not address how much that number would move under
+resampling or retraining. That gap is contribution 2's subject, and this
+enumeration is the cleanest evidence that the gap is real rather than alleged.
