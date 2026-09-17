@@ -39,10 +39,11 @@ neither detect FAD's published gain nor rule it out.
 
 ## 2. Why the crossed interval is the right one
 
-It is **1.8× wider** than either conditional interval, and either conditional
-alone would have supported a stronger claim than the data permit: the
-component-only interval excludes +0.014, the seed-only interval excludes +0.014,
-and the crossed interval — the honest one — does not.
+Its half-width is **1.8–2.0× the conditional half-widths** (0.0269 against 0.0149
+and 0.0133). Each conditional analysis excludes +0.014 **for its restricted
+estimand**, and each is valid for that target. But neither alone supports an
+**architecture-level** conclusion, which must generalise over both test content and
+training runs — and the crossed interval, which does, does not exclude +0.014.
 
 Each analysis is valid for a different estimand:
 

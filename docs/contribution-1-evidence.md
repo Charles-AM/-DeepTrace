@@ -26,13 +26,13 @@ much. See "Claims we deliberately do not make" below.
 |---|---|---|---|---|
 | 1.1 | Crop-randomised (L1) reports more than video-disjoint (L2) at c40 | +0.1921 / +0.1764 / +0.1817 (~18 pts) | `results/in_domain_c40_vid/README.md` §1 | ✅ |
 | 1.2 | It holds across three architectures | baseline_spatial, xception, xception+FAD | same | ✅ |
-| 1.3 | Compared on identical crops | same crop set as `results/in_domain_c40/` | same, header | ✅ |
+| 1.3 | Both protocols built from the **same underlying crop corpus**; partition membership differed according to the splitting rule | `results/in_domain_c40/` vs `_c40_vid/` | ✅ — **never write "identical crops"**: train/test membership necessarily differs |
 | 1.4 | The L2 split was verified before training | *"300 video groups, 0 spanning more than one split"* | run log, quoted in README | ✅ |
 | 1.5 | The gap is smaller at c23 | +0.0955 / +0.0814 / +0.0780 (~8 pts) | `results/in_domain_c23_vid/README.md` §1 | ✅ |
 | 1.6 | Heavy compression enlarges the gap | **+0.0966 / +0.0950 / +0.1037** (difference-in-differences) | same | ✅ |
 | 1.7 | Report the difference-in-differences, not the ratio | absolute spread 0.0087 vs ratio spread 0.32 | same | ✅ decided |
 | 1.8 | `frequency_only` shows almost no protocol gap | **+0.0075**, an order of magnitude smaller | `results/in_domain_c23_vid/README.md` §2 | ✅ contrary to prediction |
-| 1.9 | L1 compresses architectural differences | 0.6 pts apart at L1 vs 2.1 pts at L2 (**3.7×**) | derived from 1.1's absolutes | ✅ arithmetic |
+| 1.9 | Observed architectural range | **0.006 AUC under L1, 0.021 under L2** | derived from 1.1's absolutes | ✅ arithmetic — **measurement, not a causal claim**. Avoid "compresses" |
 | 1.10 | Unit structure of the subset | 3,000 crops → 150 videos → 30 target groups → **29 components** | `results/analysis/clusters/`, `component_stats.csv` | ✅ script-generated |
 
 ## 2. Claims about the reference effect
@@ -54,8 +54,8 @@ much. See "Claims we deliberately do not make" below.
 | # | claim | evidence | status |
 |---|---|---|---|
 | 3.1 | FF++ ships **official video-level splits**, 720/140/140 | FF++ dataset repository | ✅ |
-| 3.2 | F3-Net reports **no measure of variability anywhere** | full-text search, ledger §4 | ✅ |
-| 3.3 | DeepfakeBench reports **no measure of variability anywhere** | full-text search, ledger §4 | ✅ |
+| 3.2 | In our documented full-text audit of F3-Net we found **no confidence intervals, standard errors, standard deviations or repeated-run variability** accompanying the reported detector comparisons | ledger §4 | ✅ — scope the claim to the audit |
+| 3.3 | DeepfakeBench's **described evaluation module standardises point metrics and visualisations but does not describe sampling- or training-run uncertainty estimation** | ledger §14, their own enumeration | ✅ — the affirmative form is safer than an absence claim |
 | 3.4 | DeepfakeBench pools **frames** for its metric | *"Our benchmark currently adopts the frame level evaluation..."* | ✅ verbatim |
 | 3.5 | DeepfakeBench identifies the frame-vs-video **inconsistency** as causing unfair comparisons, and adopts frame-level pooling as its **solution** | same passage | ✅ — do **not** write that they call pooling itself a fairness error; that inverts them |
 | 3.6 | The two published Xception figures differ by 0.067 | F3-Net 0.893 vs DeepfakeBench 0.8261 | ✅ **4.8× the effect under debate** |
@@ -64,7 +64,8 @@ much. See "Claims we deliberately do not make" below.
 
 | # | anchor | exact term | where |
 |---|---|---|---|
-| 4.1 | Kapoor & Narayanan, *Patterns* 4(9), 100804, 2023 | **[L3.2] Nonindependence between training and test samples** | free PDF, search "[L3.2]" |
+| 4.1 | Kapoor & Narayanan, *Patterns* 4(9), 100804, 2023 | **[L3.2] Nonindependence between training and test samples** — ⚠️ **anchors the SPLITTING decision only**, not the frame/video or logit/probability estimand choices | free PDF, search "[L3.2]" |
+| 4.1b | DeepfakeBench + metric-definition literature | the estimand sub-choices (aggregation level, score space) need **their own motivation** — Kapoor & Narayanan do not cover them | ledger §14, §16 |
 | 4.2 | Their example matches ours | *"training and test samples come from the same people or units"* | same section |
 | 4.3 | Their prescribed remedy is what we implemented | *"block cross-validation"*; also *"The train-test split should account for the dependencies in the data"* | same section |
 | 4.7 | **Leakage is a property of the claim, not the split** | *"...constitutes leakage, **unless the scientific claim is about a distribution that has the same dependence structure**"* | ✅ **anchors our refusal to call crop-randomised splitting invalid** — ledger §13.1 |

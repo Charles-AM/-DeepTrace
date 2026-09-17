@@ -273,9 +273,9 @@ Updated 2026-09-06 after Tier 0 and V8.
 | Fixed-split training-run sd 0.0145 vs complete-pipeline 0.0188 | **point estimate only** — not distinguishable (F=1.70, df 4,4); component changes sign between attempts | `results/in_domain_c40_fixedsplit/` §1 |
 | A nominally identical seed-0 configuration did not repeat across sessions (Δ moved 0.0336 = 2.4× the reference effect) | **audit, n=1** — no causal attribution | `results/in_domain_c40_fixedsplit/` §2 |
 | **Crossed (component × training-run) FAD − Xception at c40: −0.0092, 95% CI [−0.0358, +0.0180]**, 50,000 replicates — contains both zero and +0.014 | **solid — the paper's primary FAD result**; canonical block `results/canonical.json` | `results/analysis/crossed/` |
-| Crossed interval 1.8× wider than either conditional; both conditionals exclude +0.014 and the crossed one does not | **solid** | same |
+| Crossed half-width 1.8–2.0× the conditional half-widths; both conditionals exclude +0.014 and the crossed one does not | **solid** | same |
 | Informative for large architectural differences, insufficient resolution for FAD-sized ones (>0.10: 9/9 exclude zero; <0.03: 0/8) | **solid as controls** — post-hoc stratified, **not** a power analysis; related comparisons | `results/analysis/generality/` |
-| Half-width floor 0.023–0.038 for matched spatial-family comparisons = **1.7–2.7× the +0.014**; ~2× wider whenever frequency_only is involved | **solid** | same |
+| Observed half-width range 0.023–0.038 among the evaluated spatial-family comparisons = **1.7–2.7× the +0.014**; ~2× wider whenever frequency_only is involved | **solid** | same |
 | Crossed conclusion robust to target-group vs component clustering **in this split** (half-width differs 0.0002; no verdict changes in 8 conditional comparisons) | **solid** — prespecified at `0639ba0` | `results/analysis/unit_sensitivity/` |
 | frequency_only strongest on Deepfakes, weakest on NeuralTextures (0.246 spread) | **descriptive** → supplementary; **replicates at L2** | `results/analysis/permanip_l2/` |
 | Separate frequency branch +31% FLOPs / +44% latency; FAD ≈ +3% | **solid** | `results/analysis/efficiency/` |
