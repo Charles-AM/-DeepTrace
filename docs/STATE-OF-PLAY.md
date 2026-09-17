@@ -226,10 +226,49 @@ the other.
   experiment that **narrows** limitation 4 (it cannot retire it — see below)
 - **The estimand-mismatch limitation sentence is owed** (§11)
 
-### Next session
+### Contribution 2 — DONE 2026-09-17
 
-Dissect contribution 2 the way contribution 1 was dissected on 2026-09-17: claim by
-claim, each traced to a file or a quote, ending in an evidence map and a
-do-not-write table. Then run A1.
+Dissected, all numbers independently validated (ledger §17–19), evidence map
+written, external review applied. `docs/contribution-2-evidence.md`.
+
+---
+
+## 10. Next session — contribution 3, then the tests
+
+**Charlie's plan, 2026-09-17:** dissect contribution 3 in conversation first — the
+way contributions 1 and 2 were done — and run the remaining tests alongside it.
+Do **not** write `contribution-3-evidence.md` before that conversation; the map is
+the output of the dissection, not a substitute for it.
+
+### What contribution 3 already has
+
+| | |
+|---|---|
+| result | **−0.0092, 95% CI [−0.0358, +0.0180]**, frozen in `results/canonical.json` |
+| reproduction | ✅ **exact** — `src/crossed_boot.py`, documented command (ledger §18.1) |
+| test suite | ✅ 18 passed |
+| reference effect | +0.014, verified from source, LQ = c40 (ledger §2, E2 closed) |
+| ablation reasoning | `docs/f3net-ablation-verified.md` — why +0.014 and not +0.040, LFS vs FAD, sub-additivity |
+| cost accounting | FAD ≈ +3% compute |
+
+### What the dissection still needs to settle
+
+- Whether C3 is framed as a **case-study finding** rather than a contribution in
+  the methodological sense (suggested in review, not yet decided)
+- The **estimand sentence** in `canonical.json` — blocked on Charlie's approval
+- The §11 **limitations sentence**: our reference effect may be measured at a
+  different granularity than our estimate
+- DeepfakeBench's +0.0010 as **between-study evidence only**, never a threshold
+- A do-not-write table, which C3 does not yet have
+
+### Tests to run alongside
+
+All free and local (numpy, scipy and pytest are installed): A4 per-manipulation
+intervals (~20 min) · A6 BCa (~30 min) · A5 more resolution curves (~30 min) ·
+c23 replication of the aggregation contrast (~20 min) · A1 coverage simulation
+(~1.5 h). A3 figures (~1 h) needs matplotlib added to the venv.
+
+⚠️ All optional follow-up — the frozen result cannot change. A3 is the one with
+real consequences for a course submission, since **no usable figures exist**.
 
 ⚠️ **A1 does not retire limitation 4** — a simulation measures coverage under a *chosen* data-generating process, not for the unknown real FF++ population. It **narrows** the limitation to a measured statement under stated assumptions.
