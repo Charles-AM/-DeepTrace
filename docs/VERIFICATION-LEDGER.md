@@ -775,16 +775,21 @@ naming too.
 where every file carries `split_seed=0`. The mean of the §18.3 table is **+0.00324**
 against the canonical **−0.0092**: different experiments. Caught in review.
 
-### 19.1 Implementation validated first
+### 19.1 Two different things — do not conflate them
 
-An independent crossed bootstrap reproduced the canonical result under mean-logit
-before being trusted under any other setting:
+⚠️ **"Exact reproduction" applies to one of these and not the other.**
 
-| | reproduced | canonical |
+| what | result | status |
 |---|---|---|
-| point estimate | −0.0092 | −0.0092 |
-| 95% CI | [−0.0360, +0.0175] | [−0.0358, +0.0180] |
-| P(>0.014) | 0.0405 | 0.0407 |
+| Rerunning `src/crossed_boot.py` with the documented command | [−0.0358, +0.0180], P=0.0407 | ✅ **exact** — same code, same seed, same draws |
+| An **independent reimplementation** under mean-logit | [−0.0360, +0.0175], P=0.0405 | ✅ **agrees within Monte Carlo error** — *not* exact reproduction |
+
+The stored resampling indices from the frozen 50,000-replicate run were not
+retained, so an independent implementation cannot reproduce it exactly and must not
+claim to. The aggregation step is deterministic; the **bootstrap summary is not**
+unless the resampling indices or RNG state are fixed.
+
+**The frozen primary result stands unchanged.** Nothing in this section revises it.
 
 ### 19.2 The result — conclusion robust, quantities not
 
@@ -809,7 +814,8 @@ contain zero and +0.014.
 +0.0044, +0.0050).
 
 This is the stronger version of the finding: the headline survives, and a number
-quoted *in the approved manuscript sentence* doubles under a choice no one reports.
+quoted *in the approved manuscript sentence* doubles under a choice that our
+documented audit found unstated.
 
 ### 19.3 Status — post-hoc, label it
 
@@ -848,3 +854,57 @@ supplements and evaluation code across the field.
 The approved sentence quotes **4.07%**. Under mean-probability the same analysis
 gives **8.25%**. A quoted figure that doubles under an unstated choice makes naming
 the estimand — **and the averaging space** — mandatory, not stylistic.
+
+### 19.7 The paired contrast — both arms on identical resamples
+
+The comparison above is **paired**: one set of 50,000 component × training-run
+resamples was generated and applied to *both* aggregation rules, so the contrast
+carries no Monte Carlo noise between arms.
+
+| | mean-logit | mean-probability |
+|---|---|---|
+| point estimate | −0.0092 | −0.0060 |
+| 95% CI | [−0.0360, +0.0175] | [−0.0379, +0.0238] |
+| half-width | 0.0268 | 0.0308 (+15%) |
+| P(> +0.014) | 0.0405 | 0.0825 |
+| contains 0 / +0.014 | yes / yes | yes / yes |
+
+**Per-replicate paired difference (probability − logit):** mean **+0.00286**, with
+95% of replicates in **[−0.0072, +0.0126]**.
+
+So the aggregation rule is **not a constant offset** — it moves individual
+resamples in both directions. Under the *same* resample, the two rules disagree
+about whether that replicate exceeds +0.014 in **4.48%** of cases.
+
+### 19.8 Framing — "robust conclusion, aggregation-sensitive quantities"
+
+Use that phrase. **Not** "fragile quantities" — more precise and less sensational.
+
+> The conclusion that this evaluation neither demonstrates nor excludes the
+> reference gain survived both mean-logit and mean-probability video aggregation.
+> Meanwhile the point estimate moved by 0.0032, the interval half-width increased
+> by approximately 15%, and the bootstrap exceedance rate rose from approximately
+> 4.1% to 8.3%.
+
+### 19.9 Where it belongs — contribution 1, not contribution 2
+
+| | defines | contribution |
+|---|---|---|
+| frame-pooled vs video-aggregated | **which quantity is estimated** | **1** (estimand) |
+| mean-logit vs mean-probability | **how the video score is formed** | **1** (estimand) |
+| frame / video / component resampling | **how uncertainty is calculated** | **2** (inference) |
+
+The aggregation operator defines the video **score**; component resampling defines
+how **uncertainty** is computed. Keep them apart — conflating them would merge the
+two contributions that §10 just took the trouble to separate.
+
+### 19.10 Manuscript wording — agreed
+
+> As a post-hoc sensitivity analysis, we replaced mean-logit video aggregation with
+> mean-probability aggregation. The estimated FAD–Xception difference shifted from
+> −0.0092 to −0.0060 AUC, the crossed interval widened by approximately 15%, and
+> the bootstrap exceedance rate above +0.014 increased from approximately 4.1% to
+> 8.3%. Nevertheless, both aggregation rules produced the same substantive
+> conclusion: neither demonstrated a FAD benefit nor excluded the reference-sized
+> gain. Thus, the conclusion was robust, but its numerical warrant depended on an
+> aggregation choice that must be reported explicitly.
