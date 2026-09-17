@@ -1,6 +1,6 @@
 # State of play — resume here
 
-Last updated 2026-09-15. Read this first; everything else is detail.
+Last updated **2026-09-17**. Read this first; everything else is detail.
 
 **Next session starts at `docs/EXPERIMENT-PLAN.md`.**
 
@@ -83,6 +83,10 @@ established by full-text search, see `docs/VERIFICATION-LEDGER.md` §4.
 | result CSVs | 74 |
 | tests | **253 passed, 2 skipped** under pytest |
 | citations verified | **15 of 22** in the previously-unverified section |
+| verification ledger | **16 sections** — every external claim traced to a quote |
+| contribution 1 | **dissected and evidence-mapped** (2026-09-17); wording settled |
+| contribution 2 | **positioning settled, dissection NOT started** — no evidence map yet |
+| contribution 3 | dissected earlier (the ablation); result frozen |
 | prespecifications | 2, committed before the analyses they govern |
 | tags | 3, immutable (`results/PROVENANCE.md`) |
 | manuscript | **not started** |
@@ -163,6 +167,7 @@ Full table: `ESSENCE.md` §11. Variance vocabulary: §0b. Limitations: §8a (six
 | `docs/ESSENCE.md` | frozen framing, contributions, limitations, recommendations |
 | `docs/VERIFICATION-LEDGER.md` | what is verified, assumed, or owed |
 | `docs/EXPERIMENT-PLAN.md` | **where each experiment runs, and its literature anchor** |
+| `docs/contribution-1-evidence.md` | **contribution 1 indexed by claim** — draft from this, not from memory. 15 do-not-write entries |
 | `docs/REMAINING-WORK.md` | every candidate experiment with compute time |
 | `docs/related-work.md` | reference papers + the citations still unverified |
 | `docs/REPRODUCIBILITY.md` | methods, hyperparameters, why no tuning |
@@ -192,3 +197,37 @@ PreToolUse guard would intercept every write and Bash call.
 
 ⚠️ Anything those skills generate must be reconciled against
 `VERIFICATION-LEDGER.md` for citations, and `ESSENCE.md` §11 for claim discipline.
+
+---
+
+## 9. Where contribution 2 actually stands (2026-09-17)
+
+**Positioning is settled. The dissection is not started.** Do not mistake one for
+the other.
+
+### Settled
+
+| against | our boundary | ledger |
+|---|---|---|
+| **DeepfakeBench** | they standardise *which* estimate is computed; we examine *how uncertain* it is | §16 |
+| **Bouthillier et al.** | they enumerate training-run variance under an explicit i.i.d. assumption and flag correlated errors in one sentence without modelling them; we handle the clustered case | §6 |
+| **Hurlbert** | pseudoreplication — an **inference** error, distinct from contribution 1's **splitting** error | §10 |
+| **Cameron, Gelbach & Miller** | over-rejection documented at 5–30 clusters; **we have 29**, so limitation 4 is a citation rather than an admission | §6 |
+
+### Not done
+
+- **No `docs/contribution-2-evidence.md`.** Contribution 1 has one; contribution 2
+  does not. That file is what made contribution 1 safe to draft from
+- **Its own numbers have not been re-verified from raw dumps** the way contribution
+  1's were in §15 — the cluster bootstrap, the three-units result, the crossed
+  interval and the resolution curves are all recorded but not independently
+  recomputed in a verification pass
+- **A1 (coverage simulation) has not run** — ~1.5 h CPU, free, and it is the
+  experiment that retires limitation 4
+- **The estimand-mismatch limitation sentence is owed** (§11)
+
+### Next session
+
+Dissect contribution 2 the way contribution 1 was dissected on 2026-09-17: claim by
+claim, each traced to a file or a quote, ending in an evidence map and a
+do-not-write table. Then run A1.
