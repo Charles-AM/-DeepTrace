@@ -392,3 +392,58 @@ rather than an isolated negative finding.
 ⚠️ Their correction dissolved the advantage outright; **ours does not** — our
 interval contains zero *and* +0.014. Cite it as a precedent for the *pattern*, not
 as a parallel result.
+
+---
+
+## 13. [L3.2] in full — two clauses we had missed (2026-09-17)
+
+Independently confirmed by Charlie against the PDF. The three quotes already in §6
+are verbatim. The fuller passage adds two things that materially improve our
+framing.
+
+### 13.1 The conditional clause licenses our careful wording
+
+> "Nonindependence between training and test samples constitutes leakage,
+> **unless the scientific claim is about a distribution that has the same
+> dependence structure.**"
+
+This is not a hedge on their part — it is a definition. Leakage is a property of
+**the claim**, not of the split. Crop-randomised splitting is leakage *for a claim
+about unseen videos*, and is not leakage *for a claim about unseen frames of known
+videos*.
+
+**Why this matters.** Under external review we adopted the wording "crop-randomised
+splitting is not invalid in itself — it estimates a different quantity, performance
+on unseen frames of known videos." That was adopted as a matter of caution. It
+turns out to be **what the source literature actually says**. Cite this clause
+directly when making that point; it converts a defensive hedge into a positive
+claim with an anchor.
+
+### 13.2 Their histopathology example is structurally identical to ours
+
+> "a recent study on histopathology uses **different observations of the same
+> patient** in the training and test sets. In this case, the scientific claim is
+> being made about the ability to predict gene mutations in **new patients**;
+> however, it is evaluated on data from **old patients** ... leading to a
+> **mismatch between the test set distribution and the scientific claim**."
+
+| their case | ours |
+|---|---|
+| different observations of the same **patient** | different crops of the same **video** |
+| claim is about **new patients** | claim is about **unseen videos** |
+| evaluated on **old patients** | evaluated on **seen videos** |
+
+Use this as the introductory analogy. It is a published, peer-reviewed instance of
+our exact structure in a different field, which makes the error legible to a reader
+who knows nothing about deepfakes.
+
+**Adopt their phrasing: "a mismatch between the test set distribution and the
+scientific claim."** It is more precise than "leakage" and more informative than
+"protocol gap", because it names *what* is mismatched. It also sidesteps the
+attribution problem entirely — a mismatch is a property of a study design, not an
+accusation about a researcher.
+
+They also state the remedy as a requirement:
+
+> "The train-test split **should account for the dependencies in the data** to
+> ensure correct performance evaluation."
