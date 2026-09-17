@@ -83,9 +83,19 @@ written (2026-09-17). A1 is **optional follow-up**, not owed.
 
 ⚠️ **A1 does not retire limitation 4** — a simulation measures coverage under a *chosen* data-generating process, not for the unknown real FF++ population. It **narrows** the limitation to a measured statement under stated assumptions.
 
-### Contribution 3 — the FAD case study
+### Contribution 3 — the FAD case-study finding
 
-> Applying both corrections to a published architectural claim.
+> Using F3-Net's FAD component as a case study, analyses **conditional on either
+> test content or training runs exclude** the published +0.014 reference gain,
+> whereas an **architecture-level analysis propagating both** sources of variation
+> does not. The corrected evaluation therefore neither demonstrates a FAD benefit
+> nor excludes a gain of the reported magnitude.
+
+**Why it matters:** it shows how an apparently decisive architectural conclusion can
+lose its warrant once all relevant uncertainty is included.
+
+**The research question this answers** — as it stands, not as it began:
+*What can this evaluation legitimately tell us about a FAD-sized architectural gain?*
 
 **Owns:** the case-study finding. **Reference effect:** F3-Net's own FAD ablation,
 **+0.014 AUC**, measured on the LQ task — which FF++ defines as H.264 quantization

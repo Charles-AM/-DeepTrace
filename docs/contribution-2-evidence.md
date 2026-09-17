@@ -285,6 +285,8 @@ inference error (Hurlbert).
 | "two of five runs flipped their verdict" | a per-seed threshold crossing is **not a statistical verdict**. ✅ "moved the point estimate from above to below the +0.014 reference magnitude" |
 | "no paper reports the score space" | ✅ **"the papers in our documented audit did not state the score space used for video aggregation"** |
 | "estimate ± h" | percentile intervals are **not centred**; offsets reach 0.0028. **Report endpoints** |
+| "the design's resolution was inadequate before we ran anything" | **The interval widths were discovered through the experiments**, not known in advance. ✅ "The measured uncertainty was 2.6–4.5× the reference effect in individual-run component analyses; the crossed primary interval had a half-width of 0.0269, approximately **1.9×** the reference" |
+| "the claim is strongest precisely where the measurement is most fragile" | Conflates **our** c40 evaluation's precision with **F3-Net's** experiment. ✅ "F3-Net reports its largest advantage under low-quality compression, while our matched-content analyses found c40 intervals 1.5–2.5× wider than c23. Thus, **in our study**, the regime motivating the frequency claim was also the less precisely resolved regime" |
 
 ---
 
