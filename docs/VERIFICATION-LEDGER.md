@@ -534,3 +534,45 @@ Their module standardises *which* number is computed and makes it comparable
 across detectors. It does not address how much that number would move under
 resampling or retraining. That gap is contribution 2's subject, and this
 enumeration is the cleanest evidence that the gap is real rather than alleged.
+
+---
+
+## 15. Our own splitting claims, verified from the raw dumps (2026-09-17)
+
+Prompted by a draft paragraph describing our protocol. Rather than trusting the
+READMEs, these were recomputed from
+`results/predictions_v8/ffpp_c40_vid_xception_seed0_test.csv` (3,000 rows).
+
+| claim | result | status |
+|---|---|---|
+| The grouping key is the **target** video | `video_id == target_seq` in **3000/3000** rows | ✅ |
+| A group holds the real video **and all four manipulated variants** | **30/30** groups carry Deepfakes, Face2Face, FaceSwap, NeuralTextures **and** real; **30/30** carry both labels | ✅ |
+| Test target groups | **30** | ✅ |
+| Components among them | **29** | ✅ matches `STATE-OF-PLAY.md` |
+| Test targets whose partner is in train/val | **28 of 30 = 93.3%** | ✅ confirms the "~93%" in `REMAINING-WORK.md` C4 |
+| Pairs with both members in test | **exactly one** — (251, 375) | ✅ explains the 30 → 29 collapse |
+
+### Wording this licenses
+
+> "We partition by target-video group, preventing crops and manipulated variants
+> associated with the same target video from crossing the training–test boundary.
+> This removes same-video overlap but not every dependency: source–target
+> relationships connect otherwise distinct target groups across partitions — in our
+> test split, **28 of 30 target groups have their manipulation partner in
+> training**."
+
+Use the number. "Can connect otherwise distinct groups" is abstract enough that a
+reader cannot tell whether it is a technicality or a hole; 93% settles it and shows
+the residual was measured rather than gestured at.
+
+### The limitation and the null result are one fact
+
+Because only one pair co-occurs in test, **target groups and components are nearly
+the same partition here** (30 vs 29). That is precisely why
+`results/analysis/unit_sensitivity/` found the choice between them almost
+immaterial — half-width differing by 0.0002, no verdict changes across 8
+conditional comparisons.
+
+So the unit-sensitivity null is **not** evidence that clustering choice never
+matters. It is evidence that *in this split* the two candidate units nearly
+coincide. State it that way, and it stops looking like a convenient result.
