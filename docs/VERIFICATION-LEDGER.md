@@ -349,3 +349,46 @@ frame-pooled and video-aggregated results rather than picking one.
 
 **Owed:** a sentence in the limitations noting that our reference effect may be
 measured at a different granularity than our own estimate.
+
+---
+
+## 12. Kapoor & Narayanan — two precision points (2026-09-17)
+
+### 12.1 The 294 figure is about leakage in general
+
+Verbatim, abstract:
+
+> "we find 17 fields where leakage has been found, **collectively affecting 294
+> papers** ... Based on our survey, we introduce a detailed taxonomy of **eight
+> types of leakage**"
+
+So 294 papers span **all eight types**, not [L3.2] nonindependence alone. Figure 1
+confirms: *"Survey of 22 papers that identify pitfalls ... across 17 fields,
+collectively affecting 294 papers."*
+
+❌ Never write: "Kapoor & Narayanan classify nonindependence ... documented across
+294 papers in 17 fields" — it implies all 294 are nonindependence cases.
+✅ Write: "Kapoor and Narayanan identify nonindependence between training and test
+samples as a form of leakage; **their broader review** documented leakage across
+294 papers in 17 fields."
+
+### 12.2 Their civil-war study is a direct precedent for our finding
+
+Also in the abstract, and we had not been using it:
+
+> "we conduct a reproducibility study of civil war prediction, where complex ML
+> models are believed to vastly outperform traditional statistical models such as
+> logistic regression (LR). **When the errors are corrected, complex ML models do
+> not perform substantively better than decades-old LR**"
+
+This is the closest published precedent to our own result: an apparent
+architectural advantage that **did not survive correction of the evaluation**.
+
+**Use it in the introduction.** It establishes that our kind of finding has a
+precedent in a peer-reviewed venue, which pre-empts "this is just a null result".
+It also positions us as the deepfake-detection instance of a documented pattern
+rather than an isolated negative finding.
+
+⚠️ Their correction dissolved the advantage outright; **ours does not** — our
+interval contains zero *and* +0.014. Cite it as a precedent for the *pattern*, not
+as a parallel result.

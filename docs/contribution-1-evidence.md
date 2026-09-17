@@ -67,7 +67,8 @@ much. See "Claims we deliberately do not make" below.
 | 4.1 | Kapoor & Narayanan, *Patterns* 4(9), 100804, 2023 | **[L3.2] Nonindependence between training and test samples** | free PDF, search "[L3.2]" |
 | 4.2 | Their example matches ours | *"training and test samples come from the same people or units"* | same section |
 | 4.3 | Their prescribed remedy is what we implemented | *"block cross-validation"* | same section |
-| 4.4 | Scale of the problem across science | 17 fields, **294 papers** | abstract |
+| 4.4 | Scale of the problem across science | **leakage of all eight types** affects 294 papers across 17 fields | abstract — ⚠️ **not** 294 cases of [L3.2]; write "their broader review documented leakage across 294 papers in 17 fields" |
+| 4.6 | **Precedent: correcting leakage dissolved an apparent advantage** | their civil-war prediction reproducibility study — *"When the errors are corrected, complex ML models do not perform substantively better than decades-old LR"* | ✅ **the closest published precedent for our kind of finding** |
 | 4.5 | Hurlbert, *Ecological Monographs* 54(2), 187–211, 1984 | **pseudoreplication** | the founding reference |
 
 ---
