@@ -634,3 +634,50 @@ citing +0.0010 needs a footnote saying which reading is assumed.**
 It describes what the cited work did accurately, states the boundary of that
 contribution, and claims only the remainder. Use the same shape when writing about
 F3-Net: no adversarial framing is needed when the boundary is drawn precisely.
+
+---
+
+## 17. Contribution 2's headline, independently recomputed (2026-09-17)
+
+The three-units result is contribution 2's signature finding. It was recomputed
+from the raw dumps with a **separate implementation** of AUC and of the cluster
+bootstrap — not by re-reading `results/analysis/cluster_boot/`.
+
+Inputs: `results/predictions/ffpp_c40_vid_xception_seed0_test.csv` and
+`..._f3net_seed0_test.csv`. Row alignment asserted on `path` before comparing.
+
+| quantity | recomputed | stored | |
+|---|---|---|---|
+| AUC Xception | 0.8135 | 0.8135 | ✅ exact |
+| AUC Xception+FAD | 0.7939 | 0.7939 | ✅ exact |
+| difference | −0.0196 | −0.0196 | ✅ exact |
+| units: frame / video / component | 3000 / 150 / 29 | 3000 / 150 / 29 | ✅ exact |
+| **frame** 95% CI | [−0.0326, −0.0074] | [−0.0325, −0.0079] | ✅ **excludes zero** |
+| **video** 95% CI | [−0.0616, +0.0161] | [−0.0606, +0.0167] | ✅ contains zero |
+| **component** 95% CI | [−0.0522, +0.0095] | [−0.0534, +0.0096] | ✅ contains zero |
+
+Endpoints differ in the third decimal, as expected from independent RNG draws at
+4,000 replicates. **All three verdicts are identical.** The finding is a property
+of the data, not of our implementation.
+
+Definitions used, for reproducibility: the **video** unit is
+`video_id + manipulation` (150 = 30 targets × 5 variants including real); the
+**component** unit is union-find over the `target_seq`/`source_seq` pair graph,
+giving 29.
+
+### ⚠️ Naming trap — fix before drafting
+
+`results/analysis/cluster_boot/ALL.csv` names the third unit **`identity`**.
+
+It is **not** identity. `results/analysis/clusters/README.md` states plainly:
+*"These are source-target components, not verified human identities. FF++ sequence
+ids are not identity labels."*
+
+The column name contradicts the documentation. Anyone reading the CSV without the
+README will write "identity-level clustering" into the paper, which would be a
+false claim about what we controlled for — and it collides directly with
+limitation 1, which is precisely that we did **not** achieve identity-disjointness.
+
+**Never write "identity" for this unit.** Write **"source-target component"**. The
+column name is left as-is because the frozen results depend on it; this entry
+exists so the name is not trusted.
