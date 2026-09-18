@@ -175,7 +175,17 @@ Full table: `ESSENCE.md` §11. Variance vocabulary: §0b. Limitations: §8a (six
 | `results/PROVENANCE.md` | tag history, prespecification timing |
 | `results/analysis/crossed/STABILITY.md` | the high-replicate stability check |
 
-Reproduce the primary result on CPU in ~2 minutes:
+**Reproduce every headline number, one command, CPU, ~3 minutes:**
+
+```
+python -m src.reproduce
+```
+
+11 checks — unit structure, the canonical crossed result, and the aggregation-space
+contrast — each compared against a value recorded in the repository. It also prints
+what **cannot** be reproduced from committed data and why, rather than skipping it.
+
+Reproduce only the primary result:
 
 ```
 python -m src.crossed_boot --a-glob 'results/predictions_v8/ffpp_c40_vid_xception_seed*_test.csv' --b-glob 'results/predictions_v8/ffpp_c40_vid_xception_fad_seed*_test.csv' --margins 0.014 --n-boot 50000 --boot-seed 0 --out-dir /tmp/check
