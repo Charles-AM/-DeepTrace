@@ -10,7 +10,13 @@ sampling position within each clip. **The only difference is whether the model
 trained on those videos.**
 
 Architecture, weights, training data and checkpoint-selection rule are all held
-constant, so partition difficulty is removed by construction.
+constant.
+
+⚠️ **Composition is matched; intrinsic difficulty is not controlled.** The two sets
+contain **different video groups**. Assignment was random under the seeded L2 split,
+so no systematic bias is expected — but with 30 groups per side the realised
+difficulty may differ. An earlier version of this file said partition difficulty was
+"removed by construction". **That overstated it.**
 
 ## Result
 
@@ -20,7 +26,16 @@ constant, so partition difficulty is removed by construction.
 | unseen (crops from videos never seen) | **0.7886** |
 | **seen-video advantage** | **+0.1998** |
 
-Interval: see `v2_advantage.json`, **independent component resampling**.
+Reported under **three estimands**, because contribution 1 is that estimand choice
+changes reported quantities — reporting one would undercut it:
+
+| estimand | see |
+|---|---|
+| frame-pooled (primary) | `v2_advantage.json` |
+| video-aggregated, mean-logit | same |
+| video-aggregated, mean-probability | same |
+
+Intervals use **independent component resampling** within each set.
 
 ## In context
 

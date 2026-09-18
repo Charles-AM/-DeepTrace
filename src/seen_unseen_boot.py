@@ -30,55 +30,85 @@ def _rows(p):
         return list(csv.DictReader(fh))
 
 
-def _prep(rows):
+ESTIMANDS = (
+    ("frame_pooled", None),
+    ("video_mean_logit", "logit_margin"),
+    ("video_mean_probability", "prob_fake"),
+)
+
+
+def _prep(rows, field=None):
+    """field=None -> frame-pooled. Otherwise aggregate to one score per video."""
     comp = _components(rows)
-    lab = np.array([int(r["label"]) for r in rows])
-    sc = np.array([float(r["prob_fake"]) for r in rows])
-    keys = sorted(set(comp))
-    idx = {c: np.array([i for i, cc in enumerate(comp) if cc == c]) for c in keys}
+    if field is None:
+        lab = np.array([int(r["label"]) for r in rows])
+        sc = np.array([float(r["prob_fake"]) for r in rows])
+        units = comp
+    else:
+        key = [r["video_id"] + "|" + r["manipulation"] for r in rows]
+        vids = sorted(set(key))
+        by = {v: [i for i, k in enumerate(key) if k == v] for v in vids}
+        lab = np.array([int(rows[by[v][0]]["label"]) for v in vids])
+        sc = np.array([np.mean([float(rows[i][field]) for i in by[v]]) for v in vids])
+        units = [comp[by[v][0]] for v in vids]
+    keys = sorted(set(units))
+    idx = {c: np.array([i for i, cc in enumerate(units) if cc == c]) for c in keys}
     return lab, sc, keys, idx
 
 
 def run(seen, unseen, n_boot=50000, boot_seed=0, out_dir=None):
+    """Report the advantage under all three estimands.
+
+    The paper's first contribution is that estimand choice changes reported
+    quantities, so reporting this result under one estimand would undercut it.
+    """
     S, U = _rows(seen), _rows(unseen)
-    sl, ss, sk, si = _prep(S)
-    ul, us, uk, ui = _prep(U)
-    if set(sk) & set(uk):
-        raise SystemExit("seen and unseen share components -- this is not the V2 design")
-
-    auc_s, auc_u = fast_auc(ss, sl), fast_auc(us, ul)
-    print(f"  seen   AUC {auc_s:.4f}  ({len(sk)} components, {len(S)} crops)")
-    print(f"  unseen AUC {auc_u:.4f}  ({len(uk)} components, {len(U)} crops)")
-    print(f"  advantage  {auc_s - auc_u:+.4f}")
-
-    rng = np.random.default_rng(boot_seed)
-    diffs, skipped = [], 0
-    for _ in range(n_boot):
-        a = np.concatenate([si[sk[i]] for i in rng.integers(0, len(sk), len(sk))])
-        b = np.concatenate([ui[uk[i]] for i in rng.integers(0, len(uk), len(uk))])
-        if sl[a].sum() in (0, len(a)) or ul[b].sum() in (0, len(b)):
-            skipped += 1
-            continue
-        diffs.append(fast_auc(ss[a], sl[a]) - fast_auc(us[b], ul[b]))
-    d = np.array(diffs)
-    lo, hi = np.percentile(d, 2.5), np.percentile(d, 97.5)
+    results = {}
+    for name, field in ESTIMANDS:
+        sl, ss, sk, si = _prep(S, field)
+        ul, us, uk, ui = _prep(U, field)
+        if set(sk) & set(uk):
+            raise SystemExit("seen and unseen share components -- not the V2 design")
+        auc_s, auc_u = fast_auc(ss, sl), fast_auc(us, ul)
+        rng = np.random.default_rng(boot_seed)
+        diffs, skipped = [], 0
+        for _ in range(n_boot):
+            a = np.concatenate([si[sk[i]] for i in rng.integers(0, len(sk), len(sk))])
+            b = np.concatenate([ui[uk[i]] for i in rng.integers(0, len(uk), len(uk))])
+            if sl[a].sum() in (0, len(a)) or ul[b].sum() in (0, len(b)):
+                skipped += 1
+                continue
+            diffs.append(fast_auc(ss[a], sl[a]) - fast_auc(us[b], ul[b]))
+        d = np.array(diffs)
+        lo, hi = np.percentile(d, 2.5), np.percentile(d, 97.5)
+        results[name] = {
+            "auc_seen": round(auc_s, 4), "auc_unseen": round(auc_u, 4),
+            "advantage": round(float(auc_s - auc_u), 4),
+            "ci_lo": round(float(lo), 4), "ci_hi": round(float(hi), 4),
+            "half_width": round(float((hi - lo) / 2), 4),
+            "n_units_seen": len(sl), "n_units_unseen": len(ul),
+            "n_components_seen": len(sk), "n_components_unseen": len(uk),
+            "n_boot_used": len(d), "n_boot_skipped": skipped,
+            "excludes_zero": bool(lo > 0 or hi < 0),
+        }
+        print(f"  {name:24s} seen {auc_s:.4f}  unseen {auc_u:.4f}  "
+              f"adv {auc_s-auc_u:+.4f}  95% CI [{lo:+.4f}, {hi:+.4f}]")
 
     out = {
-        "estimand": "frame-pooled AUC, one fixed model, two matched disjoint-group sets",
+        "primary_estimand": "frame_pooled",
         "resampling": "independent component resampling within each set (NOT paired)",
-        "auc_seen": round(auc_s, 4), "auc_unseen": round(auc_u, 4),
-        "advantage": round(float(auc_s - auc_u), 4),
-        "ci_lo": round(float(lo), 4), "ci_hi": round(float(hi), 4),
-        "half_width": round(float((hi - lo) / 2), 4),
-        "n_components_seen": len(sk), "n_components_unseen": len(uk),
-        "n_boot_used": len(d), "n_boot_skipped": skipped, "boot_seed": boot_seed,
-        "excludes_zero": bool(lo > 0 or hi < 0),
-        "_scope": ("Conditional on one trained model. Propagates test-content "
-                   "variation only; no training-run variation. A mechanism "
+        "boot_seed": boot_seed,
+        "by_estimand": results,
+        "_scope": ("Conditional on ONE trained model. Propagates test-content "
+                   "variation only; NO training-run variation. A mechanism "
                    "experiment, not a population-level protocol estimate."),
+        "_residual_confound": ("The two sets contain DIFFERENT video groups. "
+                               "Composition is matched (counts, manipulation mix, "
+                               "sampling positions) and assignment was random under "
+                               "the seeded L2 split, but equal composition does not "
+                               "guarantee equal intrinsic difficulty. With 30 groups "
+                               "per side the realised difficulty may differ."),
     }
-    print(f"  95% CI     [{lo:+.4f}, {hi:+.4f}]  half-width {(hi-lo)/2:.4f}")
-    print(f"  excludes zero: {out['excludes_zero']}   ({len(d)} replicates, {skipped} skipped)")
     if out_dir:
         out_dir = Path(out_dir); out_dir.mkdir(parents=True, exist_ok=True)
         (out_dir / "v2_advantage.json").write_text(json.dumps(out, indent=2))
