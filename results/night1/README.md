@@ -205,3 +205,105 @@ the five V8 runs, so the inconclusive cell costs little.
    assumed — the same class of silent failure the split guard exists to prevent.
 2. Commit the prediction CSVs.
 3. Recompute every number above from the dumps rather than from the log.
+
+---
+
+# Re-run results — 2026-09-18, 4h37m
+
+The driver executed **three times** (the `--stages` flag never reached the run
+cell, and the second clone failed with *"destination path already exists"*, so all
+three invocations used the 13:47 clone — **without** the B1 reorder or the
+prediction-collision fix).
+
+## 1. B2 — the V2 seen condition is extreme
+
+| run | seen test AUC |
+|---|---|
+| 14:21 | **0.9826** |
+| 18:23 | **0.9884** |
+
+The model was trained on the seen manifest and evaluated on **held-out crops from
+videos it trained on**. It scores **0.98–0.99** — essentially L1's 0.9933 — where
+the same architecture under video-disjoint evaluation scores **0.8169**.
+
+⚠️ **This is not yet the V2 estimate.** V2 compares seen against unseen **from the
+same model**; the number above compares a seen score against a *different* model's
+L2 score. The unseen dump exists (written second, so it survived the collision) and
+the comparison must be computed from the two CSVs, not from these logs.
+
+**But the direction is already informative.** A seen-video condition reaching 0.99
+is difficult to reconcile with the ~18-point protocol gap being mostly partition
+difficulty.
+
+## 2. C1 — the replication flipped sign at both usable rates
+
+| lr | 2026-09-17 | re-run | |
+|---|---|---|---|
+| 1e-4 | **+0.0064** | **−0.0084** | ⚠️ **sign flip** |
+| 3e-4 | **+0.0151** | **−0.0062** | ⚠️ **sign flip** |
+| 1e-3 | +0.2415 | +0.0457 | same sign, both degenerate |
+
+And in the re-run, **five of six cells peaked at the final epoch** — including
+lr 1e-4, the only cell the first sweep certified valid.
+
+**C1 is uninformative, and the replication is what establishes that.** Two sweeps
+at identical settings disagree in sign at both interpretable rates. No conclusion
+about learning-rate sensitivity can be drawn from either.
+
+✅ **One prespecified question is answered.** `docs/night1-rerun-handling.md` asked
+whether the lr 1e-3 divergence reproduces. **It does — Xception reached exactly
+0.5000 with a frozen training loss in both sweeps.** Divergence at that rate is a
+property of the configuration, not a one-off failure.
+
+⚠️ The two sweeps are **not pooled**, per the handling rule.
+
+## 3. C2 — five observations of one nominal configuration
+
+Same split, same seed, same code, same hyperparameters, fp32 throughout.
+
+| run | session | Xception | + FAD | difference |
+|---|---|---|---|---|
+| V8 seed 0 | A | 0.79705 | 0.81104 | **+0.0140** |
+| `c2_rep1` | B | 0.8043 | 0.7929 | **−0.0114** |
+| `c2_rep2` | B | 0.8193 | 0.7882 | **−0.0311** |
+| `c2_rep1` re-run | C | 0.7949 | 0.8178 | **+0.0229** |
+| `c2_rep2` re-run | C | 0.7907 | 0.8065 | **+0.0158** |
+
+Signs: **+ − − + +**. Range **0.0540** = **3.9×** the reference effect.
+
+### What the handling rule permits
+
+The permitted use is the **cross-session comparison** the original prespecification
+wanted and could not make:
+
+> **Session B produced two negative differences; session C produced two positive
+> differences, from the same nominal configuration.** Within each session the two
+> repeats agree in sign; across sessions they do not.
+
+⚠️ **Not pooled.** The sd **0.0226** across the three 2026-09-17 observations
+stands as reported and is **not** recomputed with the re-run.
+⚠️ **No causal attribution**, per `docs/c2-repeat-prespecification.md` §5 — and the
+rule binds precisely because the pattern now looks systematic. cuDNN kernel
+selection, hardware allocation and library versions are untested candidates.
+
+### Why this matters most
+
+A nominally identical configuration produced a FAD − Xception difference of **both
+signs**. Any architectural claim resting on a single training run is therefore
+underdetermined at this scale — which is contribution 3's thesis, demonstrated on
+our own pipeline rather than argued.
+
+## 4. B1 — failed in all three invocations
+
+Same cause each time: no checkpoint for `ffpp_c40_vid_xception_seed0`, since none
+are committed. Both fixes (reorder after B2; clean exit instead of `KeyError`) were
+pushed after this clone and are untested.
+
+## Owed
+
+1. **Compute the V2 estimate** from `night1/v2_predictions/` — the surviving CSV is
+   the **unseen** one; the seen dump was overwritten by the collision. Re-score from
+   the checkpoint, which is in the version output.
+2. **Regenerate C1/C2 prediction dumps** while the checkpoints exist. All ten runs
+   are aggregate-only.
+3. None of the above changes `results/canonical.json`.
