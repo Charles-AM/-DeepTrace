@@ -44,7 +44,7 @@ Last updated 2026-09-11.
 | F3-Net's gain over Xception shrinks as quality rises: LQ +0.040, HQ +0.018, RAW +0.006 | Table 1 p.9 — Xception 0.893/0.963/0.992, F3-Net(Xception) 0.933/0.981/0.998 | ✅ **confirmed visually 2026-09-17**; the earlier text reconstruction matched exactly |
 | **The full-system gain is backbone-dependent**: +0.040 on Xception vs **+0.022** on Slowfast at LQ | Table 1 p.9 — Slowfast 0.936 → F3-Net(Slowfast) 0.958; same pattern at HQ (+0.018 vs +0.011) and RAW (+0.006 vs +0.005) | ✅ their numbers; **our inference** from them |
 | Table 1 reports **no AUC at all** for five of the twelve methods (Steg.Features, LD-CNN, Constrained Conv, CustomPooling CNN, MesoNet) and **no Acc** for Face X-ray | Table 1 p.9, dashes in the respective columns | ✅ observed directly |
-| "**Frequency methods** claim their largest gains under compression" (plural, as a class) | only F3-Net checked. FreqDebias and others **not** examined | ❌ **do not assert — narrow to F3-Net** |
+| "**Frequency methods** claim their largest gains under compression" (plural, as a class) | **RESOLVED 2026-09-18.** FreqDebias (CVPR 2025) examined: it trains on FF++ **HQ** and frames its contribution as *generalisation*, not compression. It does **not** make the claim | ❌ **confirmed do-not-assert — the claim is F3-Net-specific** (`docs/split-policy-audit.md`) |
 
 ## 3. DeepfakeBench (Yan et al., NeurIPS 2023) — arXiv:2307.01426
 

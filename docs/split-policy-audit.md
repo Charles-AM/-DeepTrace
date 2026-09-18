@@ -1,6 +1,6 @@
 # Split-policy audit — do FF++ papers state how they partitioned?
 
-**Status: template. No papers examined yet beyond F3-Net.**
+**Status: COMPLETE, 2026-09-18. Seven papers examined.**
 
 ## The question
 
@@ -58,27 +58,71 @@ One paper is already done and shows what EXPLICIT looks like:
 Already done: **F3-Net** (EXPLICIT) · **DeepfakeBench** (standardises evaluation,
 does not split per-paper — ledger §3)
 
-## Findings
+## Findings — 2026-09-18
 
-Fill in as you go. **Verbatim quotes only.**
+All PDFs fetched from arXiv and searched with `pdftotext` + grep.
 
-| paper | verdict | quote / sections searched | date |
+| paper | venue | verdict | evidence |
 |---|---|---|---|
-| F3-Net, ECCV 2020 | **EXPLICIT** | §4.1 p.10, quoted above | 2026-09-18 |
-| CADDM, CVPR 2023 | | | |
-| SBI, CVPR 2022 | | | |
-| FreqDebias, CVPR 2025 | | | |
-| Ojha et al., CVPR 2023 | | | |
-| UCF, ICCV 2023 | | | |
-| DF40, NeurIPS 2024 | | | |
+| **F3-Net** | ECCV 2020 | **EXPLICIT** | §4.1 p.10: *"720 videos are used for training, 140 videos are reserved for validation and 140 videos for testing"* |
+| **SBI** | CVPR 2022 | **EXPLICIT** | *"We follow the official train/test splits for all datasets except FFIW where we use the original validation set as our test set because the official test set has not been released yet"* — states the exception too |
+| **CADDM** | CVPR 2023 | **EXPLICIT** | §5.1: trained on *"720 original videos"*; evaluated on FF++ *"which contains 140 original videos and 700 fake videos"* |
+| **DF40** | NeurIPS 2024 | **EXPLICIT** | *"uses 720 selected videos for training and 140 for testing and validation... we use the 720 corresponding fake videos for training and the original 720 real videos as real samples"* |
+| **FreqDebias** | CVPR 2025 | **IMPLICIT** | *"For preprocessing and training, we adhere to the configurations outlined in DeepFakeBench [64] to maintain a fair comparison"* — defers rather than states |
+| **UCF** | ICCV 2023 | ⚠️ **UNSTATED** | **Zero occurrences** of split, partition, 720, 140, train set, training videos, held-out or divided in the entire paper. Its Datasets section names the datasets and compression level only |
+| Ojha et al. | CVPR 2023 | **n/a** | Does not use FF++ — one mention, in the reference list. It targets GAN/diffusion image detection. Out of scope |
+
+### The headline
+
+**Zero of six crop-randomise.** Four state their partition explicitly, one defers
+to a benchmark, one does not state it.
+
+### Two findings beyond the question asked
+
+**1. FreqDebias does NOT claim its largest gains under compression.** It trains on
+FF++ **HQ** (c23) and frames its contribution as *generalisation* across datasets,
+not compression robustness. Compression appears only in a descriptive sentence
+listing FF++'s three levels.
+
+→ **This settles the do-not-assert item in ledger §2.** The claim *"frequency
+methods report their largest gains under heavy compression"* is **specific to
+F3-Net** and must never be pluralised. The most recent frequency paper in our
+bibliography does not make it.
+
+**2. The estimand choice propagates.** FreqDebias adopts DeepfakeBench's
+configuration and reports **frame-level AUC** (*"evaluated on other datasets using
+the frame-level AUC metric"*). UCF states **no** metric granularity at all.
+
+→ Frame-level pooling is not an isolated choice by one benchmark; it is inherited
+by papers that adopt that benchmark. Relevant to contribution 1's estimand half.
+
+### How to verify each — 5 minutes
+
+| paper | arXiv | where | search for |
+|---|---|---|---|
+| F3-Net | 2007.09355 | §4.1 Setting, p.10 | `720 videos are used` |
+| SBI | 2204.08376 | Experiments → Datasets | `official train/test splits` |
+| CADDM | 2210.14457 | §5.1 Experiment Setting → Datesets *(their typo)* | `720 original videos` |
+| DF40 | 2406.13495 | appendix, protocol section | `720 selected videos` |
+| FreqDebias | 2509.22412 | Implementation detail | `adhere to the configurations` |
+| UCF | 2304.13949 | §Datasets | `split` — **expect zero hits** |
+| Ojha | 2302.10174 | anywhere | `FaceForensics` — one hit, in references |
+
+Reproduce the whole audit:
+
+```
+curl -sL -o p.pdf https://arxiv.org/pdf/<ID> && pdftotext p.pdf p.txt
+grep -n -i "split\|partition\|720\|140 videos\|official" p.txt
+```
 
 ## ⚠️ What may be concluded
 
 This is a **small, non-random, convenience sample** chosen from our own related
 work. Whatever it shows:
 
-✅ *"Of the N FF++ papers whose methods sections we examined, M stated their
-partitioning procedure explicitly."*
+✅ *"Of the six FF++ papers whose methods sections we examined, four stated their
+partitioning procedure explicitly, one deferred to a benchmark's configuration, and
+one did not state it. **None described crop-randomised splitting.**"*
 
 ❌ Any statement about "the field", "most papers", or a prevalence rate.
 
