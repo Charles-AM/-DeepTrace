@@ -177,6 +177,22 @@ def verify_v2_manifests(dry):
                      f"failure of 2026-09-18.")
         log(f"v2 manifest VERIFIED  {tag}: {counts}")
 
+
+def dump_predictions(run_name, tag, dry, out=None):
+    """Write the per-prediction CSV for a finished run.
+
+    train.py saves a per-run JSON and best.pt but NOT per-frame scores; predict.py
+    is a separate step. Every run before 2026-09-18 that skipped it is stuck at
+    aggregate level and cannot be re-analysed -- the exact hole that leaves the L1
+    column unable to carry a cluster bootstrap. A dump is ~200 KB against an 83 MB
+    checkpoint, so there is no reason ever to skip it.
+    """
+    return sh([sys.executable, "-m", "src.predict",
+               "--run", run_name, "--results-root", str(out or OUT),
+               "--dataset-name", tag, "--seed", "0", "--split-seed", str(SPLIT_SEED),
+               "--split", "test",
+               "--out-dir", str(OUT / "predictions" / run_name)], dry)
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--dry-run", action="store_true")
@@ -251,6 +267,9 @@ def main():
                 rc = sh(train_cmd(ref, cfg, 0, data_root, lr=lr,
                                   epochs=C1_EPOCHS, out=OUT / "c1", tag=tag), dry)
                 results[f"C1_{cfg}_{lr:g}"] = rc
+                if rc == 0:
+                    results[f"C1_dump_{cfg}_{lr:g}"] = dump_predictions(
+                        f"{tag}_{cfg}_seed0", tag, dry, out=OUT / "c1")
 
     # ---- C2: repeat audit (~2.4 h) -------------------------------------
     if "C2" in stages:
@@ -261,6 +280,9 @@ def main():
                 rc = sh(train_cmd(ref, cfg, 0, data_root,
                                   out=OUT / "c2", tag=tag), dry)
                 results[f"C2_{cfg}_rep{rep}"] = rc
+                if rc == 0:
+                    results[f"C2_dump_{cfg}_rep{rep}"] = dump_predictions(
+                        f"{tag}_{cfg}_seed0", tag, dry, out=OUT / "c2")
 
     log("=== SUMMARY ===")
     for k, v in results.items():
