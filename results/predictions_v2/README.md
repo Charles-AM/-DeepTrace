@@ -26,6 +26,26 @@ one directory silently overwrites the first — that happened twice on 2026-09-1
 | manifests | built by `src/seen_unseen.py` from the verified L2 seed-0 manifest |
 | checkpoint location | Kaggle notebook output `contribution-3` — **not committed**, see `docs/ARTIFACT-POLICY.md` |
 
+## ✅ Committed and independently reproduced, 2026-09-18
+
+Both dumps are committed. Their SHA-256 prefixes match the Kaggle run exactly
+(`cdfbb5439525` seen, `3d086527cc66` unseen), and all three estimands recompute from
+these copies on a different machine:
+
+| estimand | advantage | 95% CI |
+|---|---|---|
+| frame-pooled | **+0.1998** | [+0.1428, +0.2543] |
+| video mean-logit | +0.1731 | [+0.1044, +0.2352] |
+| video mean-probability | +0.1778 | [+0.1109, +0.2384] |
+
+Interval endpoints differ from the Kaggle run in the fourth decimal — independent
+RNG draws at 50,000 replicates. Point estimates are exact.
+
+⚠️ **The four membership checks cannot run locally**, because the manifests are not
+committed. `verify_v2.py` reports them as **SKIPPED, not FAILED** — an unrunnable
+check is not a failing one. They passed on Kaggle with the real manifests (13/13);
+to re-verify membership elsewhere, the two V2 manifests must be attached.
+
 ## Validation performed before analysis
 
 `python -m src.verify_v2 ...` — **13/13 passed**:

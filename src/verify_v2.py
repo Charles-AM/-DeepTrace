@@ -19,12 +19,23 @@ import numpy as np
 from .agg_space import fast_auc
 
 checks: list[tuple[str, bool, str]] = []
+skipped: list[tuple[str, str]] = []
 
 
 def ck(name, ok, detail=""):
     checks.append((name, bool(ok), detail))
     print(f"  {'PASS' if ok else 'FAIL'}  {name:52s} {detail}")
     return ok
+
+
+def skip(name, why):
+    """Record a check that COULD NOT RUN -- distinct from one that failed.
+
+    Reporting FAIL for an unrunnable check is the same defect as reporting OK for
+    an unexecuted step: it misdescribes what happened.
+    """
+    skipped.append((name, why))
+    print(f"  SKIP  {name:52s} {why}")
 
 
 def _rows(p):
@@ -70,23 +81,33 @@ def main(argv=None):
     ck("seen has 750 predictions", len(S) == 750, f"got {len(S)}")
     ck("unseen has 750 predictions", len(U) == 750, f"got {len(U)}")
 
-    # 3. no exact evaluation crop appears in training
-    train = set(_manifest_split(a.manifest_seen, "train"))
+    # 3-5. membership checks need the training manifest
+    have_manifest = Path(a.manifest_seen).is_file() and Path(a.manifest_seen).stat().st_size > 0
+    train = set(_manifest_split(a.manifest_seen, "train")) if have_manifest else set()
+    if not have_manifest or not train:
+        for n in ("zero seen-eval crops in training",
+                  "zero unseen-eval crops in training",
+                  "seen groups ARE represented in training",
+                  "unseen groups are NOT represented in training"):
+            skip(n, "training manifest unavailable")
+        train = None
     sp, up = {r["path"] for r in S}, {r["path"] for r in U}
-    ck("zero seen-eval crops in training", len(sp & train) == 0, f"overlap {len(sp & train)}")
-    ck("zero unseen-eval crops in training", len(up & train) == 0, f"overlap {len(up & train)}")
+    if train is not None:
+        ck("zero seen-eval crops in training", len(sp & train) == 0, f"overlap {len(sp & train)}")
+        ck("zero unseen-eval crops in training", len(up & train) == 0, f"overlap {len(up & train)}")
 
     # 4/5. group-level representation — the actual seen/unseen distinction
     import re
     def vid_of(path):
         m = re.search(r"videos-(\d+)", path)
         return m.group(1) if m else None
-    train_groups = {vid_of(x) for x in train} - {None}
     sg, ug = _groups(S), _groups(U)
-    ck("seen groups ARE represented in training",
-       sg <= train_groups, f"{len(sg & train_groups)}/{len(sg)} represented")
-    ck("unseen groups are NOT represented in training",
-       len(ug & train_groups) == 0, f"{len(ug & train_groups)} leaked")
+    if train is not None:
+        train_groups = {vid_of(x) for x in train} - {None}
+        ck("seen groups ARE represented in training",
+           sg <= train_groups, f"{len(sg & train_groups)}/{len(sg)} represented")
+        ck("unseen groups are NOT represented in training",
+           len(ug & train_groups) == 0, f"{len(ug & train_groups)} leaked")
     ck("seen and unseen groups are disjoint", len(sg & ug) == 0,
        "independent resampling required, NOT paired")
 
@@ -114,7 +135,10 @@ def main(argv=None):
 
     failed = [n for n, ok, _ in checks if not ok]
     print("=" * 74)
-    print(f"{len(checks) - len(failed)}/{len(checks)} checks passed")
+    print(f"{len(checks) - len(failed)}/{len(checks)} checks passed"
+          + (f", {len(skipped)} SKIPPED (not run)" if skipped else ""))
+    for n, why in skipped:
+        print(f"  SKIPPED: {n} -- {why}")
     if failed:
         print("\nDO NOT ANALYSE THESE DUMPS. Failed:")
         for n in failed:
