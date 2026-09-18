@@ -1,0 +1,6 @@
+{
+  "paired_diff_mean": 0.00286,
+  "paired_diff_p2.5": -0.0072,
+  "paired_diff_p97.5": 0.0126,
+  "replicates_disagreeing_on_margin": 0.0448
+}
