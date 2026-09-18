@@ -9,6 +9,39 @@ does not go in the document.
 
 ---
 
+## ⚠️ Contribution 1 has TWO halves with DIFFERENT evidential status
+
+Adopted 2026-09-18 after the split-policy audit. Presenting them as one thing
+overstates the first and wastes the second.
+
+| half | what it is | evidential status |
+|---|---|---|
+| **1a — splitting** (~18 pts) | a **controlled stress test** of train–test nonindependence, deliberately instantiated | **Counterfactual.** No evidence any of the six audited papers does this |
+| **1b — estimand** (frame/video, logit/probability) | ambiguity in what "AUC" denotes | **Documented in practice.** DeepfakeBench and FreqDebias both state frame-level adoption; aggregation space is unstated everywhere |
+
+**1b is the stronger card.** Lead with it, and use 1a's ~18 points to set scale.
+
+### Agreed wording for 1a
+
+> We intentionally instantiate crop-randomised splitting as a controlled train–test
+> nonindependence stress test. Our targeted audit found no evidence that the six
+> examined papers use this splitting procedure.
+
+That defeats the straw-man objection while keeping the measurement's value.
+
+### Agreed precision for 1b
+
+Frame-level AUC is **not wrong** — it estimates frame-level discrimination, which
+is a real quantity. The problems are narrower and both documented:
+
+1. papers reporting **different estimands** are compared as though they report the
+   same quantity
+2. the **aggregation rule is underspecified** — no paper we read states whether
+   video scores average logits or probabilities, and our own sensitivity shows that
+   choice moves the exceedance rate from 4.1% to 8.3%
+
+❌ Never imply frame pooling is a methodological error.
+
 ## The claim
 
 > Protocol and estimand choices change apparent performance and the apparent size
@@ -75,7 +108,8 @@ either. Do not imply the L1 side has the same evidential depth as L2.
 | 2.3 | It is the **learnable** FAD variant | Table 3: fixed filters reach only 0.901 | ✅ |
 | 2.4 | It is measured on the **LQ** task | Fig. 7(a) caption *"on the low quality task(LQ)"*; Table 3 caption | ✅ |
 | 2.5 | **LQ = c40** | FF++ §3 p.5: HQ = quantization 23, *"Low quality videos (LQ) are produced using a quantization of 40"* | ✅ definitional |
-| 2.6 | They share the **nominal FF++ c40 compression level** | 2.4 + 2.5 | ✅ — ⚠️ **not the broader settings**: subset size, input resolution, training budget and possibly the estimand all differ (ledger §11). Never write "the same setting" unqualified |
+| 2.6 | They share the **nominal FF++ c40 compression level**, the **backbone comparison**, and **video-level partitioning** | 2.4 + 2.5 + ledger §22 | ✅ **matched in protocol family only** |
+| 2.6b | ⚠️ They do **not** match in: full FF++ vs our scoped subset · input resolution · frames sampled per video · training budget and implementation · possibly the video-AUC construction | c40_vid README; ledger §11 | ✅ — write *"matches in compression condition, backbone comparison and video-level partitioning, but is not an exact reproduction of its full experimental protocol"* |
 | 2.9 | ⚠️ They may **not** share an estimand | F3-Net p.10: *"we also average the AUC scores of each frame in a video"* — reads as video-aggregated; ours is frame-pooled | ⚠️ ledger §11 — **qualify the 13× comparison** |
 | 2.7 | The full-system +0.040 must **not** be used as our reference | we implement neither LFS nor MixBlock | ✅ decided, `ESSENCE.md` §7 |
 | 2.8 | Using +0.040 would have given us a **stronger** claim | our CI upper endpoint is 0.0180 < 0.040, so it would be excluded | ✅ shows the threshold was not outcome-shopped |

@@ -84,10 +84,11 @@ FF++ **HQ** (c23) and frames its contribution as *generalisation* across dataset
 not compression robustness. Compression appears only in a descriptive sentence
 listing FF++'s three levels.
 
-→ **This settles the do-not-assert item in ledger §2.** The claim *"frequency
-methods report their largest gains under heavy compression"* is **specific to
-F3-Net** and must never be pluralised. The most recent frequency paper in our
-bibliography does not make it.
+→ **This settles the do-not-assert item in ledger §2** — but state the limit
+precisely. The audit shows the motivation **cannot be generalised** from F3-Net to
+the category. It does **not** show that no other frequency paper makes the claim;
+we examined one. Write *"F3-Net reports its largest FAD-related advantage under
+low-quality compression"* and stop there.
 
 **2. The estimand choice propagates — and is described as the convention.**
 FreqDebias states it directly:
