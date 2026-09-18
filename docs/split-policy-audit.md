@@ -1,6 +1,6 @@
 # Split-policy audit — do FF++ papers state how they partitioned?
 
-**Status: COMPLETE, 2026-09-18. Seven papers examined.**
+**Status: COMPLETE, 2026-09-18. Seven papers examined; four independently confirmed by Charlie the same day.**
 
 ## The question
 
@@ -65,10 +65,10 @@ All PDFs fetched from arXiv and searched with `pdftotext` + grep.
 | paper | venue | verdict | evidence |
 |---|---|---|---|
 | **F3-Net** | ECCV 2020 | **EXPLICIT** | §4.1 p.10: *"720 videos are used for training, 140 videos are reserved for validation and 140 videos for testing"* |
-| **SBI** | CVPR 2022 | **EXPLICIT** | *"We follow the official train/test splits for all datasets except FFIW where we use the original validation set as our test set because the official test set has not been released yet"* — states the exception too |
-| **CADDM** | CVPR 2023 | **EXPLICIT** | §5.1: trained on *"720 original videos"*; evaluated on FF++ *"which contains 140 original videos and 700 fake videos"* |
-| **DF40** | NeurIPS 2024 | **EXPLICIT** | *"uses 720 selected videos for training and 140 for testing and validation... we use the 720 corresponding fake videos for training and the original 720 real videos as real samples"* |
-| **FreqDebias** | CVPR 2025 | **IMPLICIT** | *"For preprocessing and training, we adhere to the configurations outlined in DeepFakeBench [64] to maintain a fair comparison"* — defers rather than states |
+| **SBI** | CVPR 2022 | **EXPLICIT** (by naming) ✅✅ | *"We follow the official train/test splits for all datasets except FFIW where we use the original validation set as our test set because the official test set has not been released yet"* — names the protocol **and** states its one deviation |
+| **CADDM** | CVPR 2023 | **EXPLICIT** (by counts) ✅✅ | §5.1: trained on *"720 original videos"*; evaluated on FF++ *"which contains 140 original videos and 700 fake videos"*. ⚠️ **Never says "official split"** and never mentions the validation set — 720 + 140 = 860 of 1,000. Explicit enough that a reader knows videos do not span the split, but weaker than naming the protocol |
+| **DF40** | NeurIPS 2024 | **EXPLICIT** (naming + counts) ✅✅ | **The strongest of the four.** *"**We adhere to the official data split method**, which uses 720 selected videos for training and 140 for testing and validation."* Names the protocol and gives the counts |
+| **FreqDebias** | CVPR 2025 | **IMPLICIT** ✅✅ | *"For preprocessing and training, we adhere to the configurations outlined in DeepFakeBench [64] to maintain a fair comparison"* — defers rather than states. Backbone ResNet-34, 256×256, 50 epochs — all differ from ours |
 | **UCF** | ICCV 2023 | ⚠️ **UNSTATED** | **Zero occurrences** of split, partition, 720, 140, train set, training videos, held-out or divided in the entire paper. Its Datasets section names the datasets and compression level only |
 | Ojha et al. | CVPR 2023 | **n/a** | Does not use FF++ — one mention, in the reference list. It targets GAN/diffusion image detection. Out of scope |
 
@@ -89,12 +89,23 @@ methods report their largest gains under heavy compression"* is **specific to
 F3-Net** and must never be pluralised. The most recent frequency paper in our
 bibliography does not make it.
 
-**2. The estimand choice propagates.** FreqDebias adopts DeepfakeBench's
-configuration and reports **frame-level AUC** (*"evaluated on other datasets using
-the frame-level AUC metric"*). UCF states **no** metric granularity at all.
+**2. The estimand choice propagates — and is described as the convention.**
+FreqDebias states it directly:
 
-→ Frame-level pooling is not an isolated choice by one benchmark; it is inherited
-by papers that adopt that benchmark. Relevant to contribution 1's estimand half.
+> *"To benchmark our method, **we follow the deepfake detection studies [8, 62, 64,
+> 65] and adopt the frame-level area-under-the-curve (AUC)**, and Equal Error Rate
+> (EER) metrics."*
+
+They adopt frame-level AUC and **characterise it as following four prior studies**.
+UCF states no metric granularity at all.
+
+→ Frame pooling is not one benchmark's isolated choice. It is inherited by papers
+adopting that benchmark, and at least one of them describes it as the prevailing
+convention, citing four works.
+
+⚠️ **That is FreqDebias's characterisation, not our finding.** Write *"FreqDebias
+describes frame-level AUC as the convention it follows, citing four studies."*
+**Never** *"frame-level AUC is the field norm"* — we have not surveyed that.
 
 ### How to verify each — 5 minutes
 
