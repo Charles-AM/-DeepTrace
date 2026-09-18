@@ -94,10 +94,17 @@ def main():
         print("        (the result exists but is aggregate-only until they are)")
     else:
         from src.seen_unseen_boot import run as v2_run
-        r = v2_run(str(seen), str(unseen), n_boot=20000, boot_seed=0, out_dir=None)
-        check("V2 seen AUC", r["auc_seen"], 0.9884, 0.0002)
-        check("V2 unseen AUC", r["auc_unseen"], 0.7886, 0.0002)
-        check("V2 seen-video advantage", r["advantage"], 0.1998, 0.0004)
+        # Point estimates are deterministic; a small bootstrap is enough to verify
+        # them. The full 50,000-replicate intervals live in
+        # results/analysis/v2/v2_advantage.json.
+        r = v2_run(str(seen), str(unseen), n_boot=2000, boot_seed=0, out_dir=None)
+        fp = r["by_estimand"]["frame_pooled"]
+        vl = r["by_estimand"]["video_mean_logit"]
+        check("V2 seen AUC (frame-pooled)", fp["auc_seen"], 0.9884, 0.0002)
+        check("V2 unseen AUC (frame-pooled)", fp["auc_unseen"], 0.7886, 0.0002)
+        check("V2 advantage (frame-pooled)", fp["advantage"], 0.1998, 0.0004)
+        check("V2 advantage (video mean-logit)", vl["advantage"], 0.1731, 0.0004)
+        check("V2 advantage excludes zero", fp["excludes_zero"], True)
 
     # ---- summary -----------------------------------------------------------
     print("\n" + "=" * 74)
