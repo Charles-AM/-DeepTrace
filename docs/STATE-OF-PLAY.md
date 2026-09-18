@@ -48,6 +48,9 @@ checks its figures against the data.
 |---|---|
 | Unit structure | 3,000 crops → 150 videos → 30 target groups → **29 components** |
 | Protocol gap | ~8.5 pts c23, ~18 pts c40; difference-in-differences +9.5 to +10.4 |
+| **V2 seen-video advantage** | **+0.1998 frame-pooled, CI [+0.1422, +0.2542]** — one model, matched disjoint-group sets. Also +0.1731 (video mean-logit) and +0.1778 (mean-probability); **all exclude zero** |
+| **V2 estimand spread** | **0.0267 = 1.9× the reference effect** — aggregation choice alone |
+| **Resolution calibration** | V2 effect is **3.6×** its half-width (excludes zero); FAD effect is **0.34×** its half-width (cannot resolve) |
 | Three units, one estimate (−0.0196) | frame [−0.0325, −0.0079] **excludes zero**; video and component do not |
 | Conditional vs crossed | both conditionals exclude +0.014; crossed does not |
 | Resolution | component half-widths 0.037–0.062 = **2.6–4.5×** the effect |
