@@ -194,17 +194,6 @@ def main():
     manifest = resolve_manifest(data_root, dry)
     results = {}
 
-    # ---- B1: band_ablation smoke test (~5 min) -------------------------
-    if "B1" in stages:
-        log("=== B1 band_ablation smoke ===")
-        runs = sorted((REPO / "results/predictions_v8").glob("*xception_seed0*.csv"))
-        cmd = [sys.executable, "-m", "src.band_ablation",
-               "--runs", "ffpp_c40_vid_xception_seed0",
-               "--results-root", str(OUT), "--dataset-name", DS,
-               "--seed", str(SPLIT_SEED), "--limit", "200",
-               "--out-dir", str(OUT / "band_ablation")]
-        results["B1"] = sh(cmd, dry)
-
     # ---- B2: V2 seen/unseen (~80 min) ---------------------------------
     if "B2" in stages:
         log("=== B2 V2 seen vs unseen ===")
@@ -234,6 +223,19 @@ def main():
                      "--dataset-name", tag, "--seed", "0", "--split-seed", "0",
                      "--split", "test", "--out-dir", str(OUT / "v2_predictions")],
                     dry)
+
+    # ---- B1: band_ablation smoke test (~5 min) -------------------------
+    # Runs AFTER B2 by necessity: it re-scores a trained model with frequency
+    # bands masked, so it needs a checkpoint. No .pt files are committed, so in a
+    # fresh container the only checkpoint available is the one B2 just produced.
+    if "B1" in stages:
+        log("=== B1 band_ablation smoke (uses B2's checkpoint) ===")
+        cmd = [sys.executable, "-m", "src.band_ablation",
+               "--runs", "ffpp_c40_v2seen_xception_seed0",
+               "--results-root", str(OUT), "--dataset-name", "ffpp_c40_v2seen",
+               "--seed", str(SPLIT_SEED), "--limit", "200",
+               "--out-dir", str(OUT / "band_ablation")]
+        results["B1"] = sh(cmd, dry)
 
     # ---- C1: lr sweep, BOTH arms (~1.2 h) ------------------------------
     if "C1" in stages:

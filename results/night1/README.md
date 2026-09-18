@@ -141,7 +141,31 @@ it. A silent regeneration produced plausible numbers from the wrong data.
 
 ---
 
-## B1 — failed, as anticipated
+## B1 — failed twice; it cannot run first at all
+
+### Second attempt, 2026-09-18
+
+```
+skip ffpp_c40_vid_xception_seed0: no checkpoint
+KeyError: 'delta_auc'
+```
+
+**This is structural, not a flag mistake.** `band_ablation` re-scores a *trained
+model* with frequency bands masked, so it needs `results_root/<run>/best.pt`.
+**Zero `.pt` files are committed** — checkpoints are too large — so in a fresh
+container no checkpoint exists for a run trained in an earlier session. Only that
+run's predictions were kept.
+
+Two fixes applied:
+
+1. **B1 now runs after B2**, against the checkpoint B2 produces
+   (`ffpp_c40_v2seen_xception_seed0`). A different model from the original target,
+   but B1 supports no claim — it exists to demonstrate the script executes.
+2. **`band_ablation` now exits with a clear message** instead of `KeyError:
+   'delta_auc'` when every run is skipped. An empty frame crashing on a pivot told
+   us nothing; the new message names the checkpoint requirement.
+
+### First attempt, 2026-09-18 (earlier)
 
 ```
 FileNotFoundError: .../manifests/ffpp_seed0_sz128.csv
@@ -164,7 +188,7 @@ longer carries a `_test` suffix.
 | | action | cost |
 |---|---|---|
 | **B2** | **re-run in full** — the training used the wrong split and nothing was scored against the unseen manifest | ~85 min |
-| **B1** | re-run, one-line fix, supports no claim | ~5 min |
+| **B1** | re-ordered to run after B2 against its checkpoint. **Not a 5-minute fix** — it needs a trained model in the same session, and no checkpoints are committed | free, rides on B2 |
 | **C1** | ⛔ **PROHIBITED.** `docs/c1-lr-prespecification.md` §6 forbids *"extending the epoch budget for cells that look unfinished"*. Two cells are uninterpretable and must be reported as such | — |
 | **C2** | nothing. Complete and analysed | — |
 

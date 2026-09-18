@@ -133,6 +133,13 @@ def run(runs: list[str], results_root: Path, dataset_name: str, seed: int,
 
     df = pd.DataFrame(rows)
     df.to_csv(out_dir / "band_ablation.csv", index=False)
+    if df.empty or "delta_auc" not in df.columns:
+        raise SystemExit(
+            "no runs produced band deltas -- every run was skipped for a missing\n"
+            "checkpoint. band_ablation re-scores a trained model with frequency\n"
+            "bands masked, so it needs results_root/<run>/best.pt. Checkpoints are\n"
+            "not committed (0 tracked .pt files), so this can only run in a session\n"
+            "where the model was trained, or with a notebook output supplying one.")
     pivot = df.pivot_table(index="run", columns="band", values="delta_auc")
     pivot.to_csv(out_dir / "band_ablation_delta.csv")
     print(f"\nwrote {out_dir/'band_ablation.csv'}\n{pivot.to_string()}")
