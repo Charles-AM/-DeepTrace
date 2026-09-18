@@ -24,12 +24,23 @@ Ordered **cheapest-and-highest-value first**, so a session death loses least.
 If the session dies after B2 you still have the most valuable result. That is the
 reason for this order.
 
-## Inputs to attach
+## Inputs to attach — exactly one
 
-**Required — one:** notebook output **`c40-run`** (under `charlesappiahmanu`),
-which contains `ffpp_c40_crops/`. Add Input → Notebook Output → search `c40-run`.
+**Required:** notebook output **`c40-run`** (under `charlesappiahmanu`), which
+contains `ffpp_c40_crops/`. Add Input → Notebook Output → search `c40-run`.
 
-The driver searches three paths and aborts with a clear message if it finds none.
+**That is the only attachment.** Nothing else is needed — the prediction CSVs,
+reference files and split reference are all in the repo and arrive with the clone.
+
+**Optional:** any notebook output carrying
+`manifests/ffpp_c40_vid_seed0_sz128.csv`. If present the driver copies it; if not,
+it regenerates the split deterministically from the same crops. Either way the
+result is **verified against `results/reference/ffpp_c40_vid_seed0_test_split.json`
+and the run aborts on any divergence.**
+
+⚠️ **Manifests are not tracked in git** — zero files under `results/manifests/`.
+A fresh clone has none, which is why the driver resolves and verifies one before
+B2 rather than assuming a path exists.
 
 ## The cells
 

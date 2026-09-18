@@ -15,7 +15,7 @@ Design, inherited from docs/v8_run.py because it was learned the hard way:
 Governed by docs/c1-lr-prespecification.md and docs/c2-repeat-prespecification.md,
 both committed before this ran.
 """
-import argparse, json, os, subprocess, sys, time
+import argparse, csv, glob, json, os, re, shutil, subprocess, sys, time
 from pathlib import Path
 
 REPO = Path(os.environ.get("DT_REPO", "/kaggle/working/-DeepTrace"))
@@ -89,6 +89,58 @@ def find_crops(dry=False):
         return "<DRY-RUN-CROPS>"
     sys.exit("FATAL: ffpp_c40_crops not found. Attach the c40-run notebook output.")
 
+
+def resolve_manifest(data_root, dry):
+    """Locate or regenerate the seed-0 manifest, then VERIFY it.
+
+    Manifests are not tracked in git (zero under results/manifests/), so a fresh
+    clone has none. make_splits is deterministic given (items, seed, group_by), so
+    it can be regenerated from the same crops. Either way the result is checked
+    against the recorded seed-0 test split -- a partition that quietly differed
+    would make every comparison here incomparable with the runs it is set beside,
+    which is the one failure that invalidates the experiment while raising no
+    error at all.
+    """
+    dest = OUT / "manifests" / f"{DS}_seed{SPLIT_SEED}_sz128.csv"
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    if dry:
+        log("manifest: <DRY-RUN - would resolve and verify>")
+        return dest
+    hits = glob.glob(f"/kaggle/input/**/manifests/{DS}_seed{SPLIT_SEED}_sz128.csv",
+                     recursive=True)
+    local = REPO / f"results/manifests/{DS}_seed{SPLIT_SEED}_sz128.csv"
+    if hits:
+        shutil.copy(hits[0], dest); log("manifest copied from", hits[0])
+    elif local.exists():
+        shutil.copy(local, dest); log("manifest copied from repo", local)
+    else:
+        log("no manifest found - regenerating deterministically from crops")
+        sys.path.insert(0, str(REPO))
+        from src.data import make_splits, scan_images, write_manifest
+        write_manifest(make_splits(scan_images(data_root), seed=SPLIT_SEED,
+                                   group_by="videos-([0-9]+)"), dest)
+        log("manifest regenerated ->", dest)
+
+    rows = list(csv.DictReader(open(dest)))
+    if not rows:
+        sys.exit("FATAL: manifest is empty.")
+    if not os.path.exists(rows[0]["path"]):
+        sys.exit(f"FATAL: manifest points at crops that are not mounted:\n  {rows[0]['path']}")
+    if not SPLIT_REF.exists():
+        sys.exit(f"FATAL: split reference missing: {SPLIT_REF}")
+    ref = json.loads(SPLIT_REF.read_text())
+    got = sorted({m.group(1) for r in rows if r["split"] == "test"
+                  for m in [re.search(r"videos-(\d+)", r["path"])] if m})
+    if got != ref["test_targets"]:
+        sys.exit("FATAL: test split does not match the recorded seed-0 split.\n"
+                 f"  expected {len(ref['test_targets'])} targets, got {len(got)}\n"
+                 f"  missing: {sorted(set(ref['test_targets']) - set(got))[:8]}\n"
+                 f"  extra:   {sorted(set(got) - set(ref['test_targets']))[:8]}")
+    log(f"split VERIFIED against reference: {len(got)} test targets match")
+    counts = {sp: sum(1 for r in rows if r["split"] == sp) for sp in ("train","val","test")}
+    log("splits:", counts)
+    return dest
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--dry-run", action="store_true")
@@ -103,6 +155,7 @@ def main():
         sys.exit("FATAL: reference says amp=true. Every headline run is fp32.")
     data_root = find_crops(dry)
     log("crops:", data_root)
+    manifest = resolve_manifest(data_root, dry)
     results = {}
 
     # ---- B1: band_ablation smoke test (~5 min) -------------------------
@@ -118,9 +171,8 @@ def main():
     # ---- B2: V2 seen/unseen (~80 min) ---------------------------------
     if "B2" in stages:
         log("=== B2 V2 seen vs unseen ===")
-        man = REPO / f"results/manifests/{DS}_seed0_sz128.csv"
         cmd = [sys.executable, "-m", "src.seen_unseen",
-               "--manifest", str(man), "--out-root", str(OUT), "--seed", "0"]
+               "--manifest", str(manifest), "--out-root", str(OUT), "--seed", "0"]
         rc = sh(cmd, dry)
         if rc == 0:
             # train ONE model on the SEEN manifest, then score against both
