@@ -141,6 +141,42 @@ def resolve_manifest(data_root, dry):
     log("splits:", counts)
     return dest
 
+
+def verify_v2_manifests(dry):
+    """Abort before training if train.py would not consume the V2 manifests.
+
+    On 2026-09-18 this exact check was absent: seen_unseen wrote its manifests to
+    OUT/manifests/ while training ran with --out-root OUT/v2, so train.py found
+    nothing, silently regenerated a default split, and trained 80 minutes on the
+    wrong data while reporting entirely plausible numbers.
+
+    The guard reconstructs the path train.py WILL resolve and checks the file
+    there is the one seen_unseen produced, by its split shape. Under Save & Run All
+    nobody is watching the train= line, so the script has to look instead.
+    """
+    if dry:
+        log("v2 manifest guard: <DRY-RUN>")
+        return
+    expect_test = 750          # seen_unseen: 150 videos x 5 crops
+    for tag in ("ffpp_c40_v2seen", "ffpp_c40_v2unseen"):
+        path = OUT / "manifests" / f"{tag}_seed{SPLIT_SEED}_sz128.csv"
+        if not path.exists():
+            sys.exit(f"FATAL: {path} missing. train.py resolves its manifest as "
+                     f"out_root/manifests/<dataset-name>_seed<n>_sz<n>.csv, so it "
+                     f"would regenerate a DEFAULT split and train on the wrong data.")
+        rows = list(csv.DictReader(open(path)))
+        counts = {sp: sum(1 for r in rows if r["split"] == sp)
+                  for sp in ("train", "val", "test")}
+        if counts["test"] != expect_test:
+            sys.exit(f"FATAL: {tag} test split is {counts['test']}, expected "
+                     f"{expect_test}. This is not the V2 manifest.")
+        if tag == "ffpp_c40_v2seen" and counts["train"] >= 24000:
+            sys.exit(f"FATAL: {tag} has {counts['train']} training crops. The seen "
+                     f"manifest holds crops back, so it must be < 24000. A full "
+                     f"24000 means a default split was regenerated -- the exact "
+                     f"failure of 2026-09-18.")
+        log(f"v2 manifest VERIFIED  {tag}: {counts}")
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--dry-run", action="store_true")
@@ -177,6 +213,7 @@ def main():
         rc = sh(cmd, dry)
         results["B2_manifests"] = rc
         if rc == 0:
+            verify_v2_manifests(dry)
             # Train ONE model on the SEEN manifest.
             # out-root MUST be OUT, not OUT/v2: train.py resolves its manifest as
             # out_root/manifests/<dataset-name>_seed<n>_sz<n>.csv, and seen_unseen

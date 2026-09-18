@@ -75,6 +75,22 @@ To run a subset: `--stages B2,C1`.
 !ls -la /kaggle/working/night1_results.tar.gz
 ```
 
+## Re-run — B1 and B2 only (2026-09-18)
+
+B2's first attempt trained on the wrong split; C1 and C2 are done and C1 may not be
+re-run (`docs/c1-lr-prespecification.md` §6). Cells:
+
+```
+!cd /kaggle/working/-DeepTrace && git pull
+!cd /kaggle/working/-DeepTrace && python docs/night1_run.py --dry-run --stages B1,B2
+!cd /kaggle/working/-DeepTrace && python docs/night1_run.py --stages B1,B2
+!cd /kaggle/working && tar czf b2_results.tar.gz night1/
+```
+
+~90 min. Safe under Save & Run All: a manifest guard now aborts in seconds if
+`train.py` would not consume the V2 manifests, so an unattended run cannot repeat
+the 80-minute failure.
+
 ## Guard rails built into the driver
 
 - **Every training command is constructed from `results/reference/train_args_c40_vid.json`.**
@@ -85,6 +101,12 @@ To run a subset: `--stages B2,C1`.
 - **Stage independence.** Each stage records its return code and continues; one
   failure does not stop the rest.
 - **`night1_summary.json`** records every stage's outcome.
+- **V2 manifest guard.** Before B2 trains, the driver reconstructs the path
+  `train.py` will resolve and checks the file there is the one `seen_unseen`
+  produced, by split shape — test must be 750, and the seen manifest's train count
+  must be below 24000. A full 24000 means a default split was regenerated. This is
+  the check whose absence cost 80 minutes on 2026-09-18, and it is what makes an
+  unattended re-run safe.
 
 ## ⚠️ The retrieval trap — read this before starting
 
