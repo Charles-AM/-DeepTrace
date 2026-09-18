@@ -100,7 +100,7 @@ only.
 
 ---
 
-## B2 — V2 seen/unseen: ⚠️ INCOMPLETE
+## B2 — V2 seen/unseen: ⛔ INVALID — trained on the wrong data
 
 Manifests built correctly and matched exactly:
 
@@ -112,15 +112,32 @@ unseen_eval {identical shape}
 train 24000 -> 23250 crops
 ```
 
-The SEEN model trained: `test_auc = 0.8061` (best val epoch 4).
+A model trained and reported `test_auc = 0.8061`. **It is not the V2 model.**
 
-**But the driver never scored that model against the UNSEEN manifest.** V2's whole
-design is *one fixed model, scored against both*. We have the seen condition and no
-unseen comparison, so **no leakage estimate exists**.
+`train.py` resolves its manifest as
+`out_root/manifests/<dataset-name>_seed<n>_sz<n>.csv`. The driver wrote the V2
+manifests to `night1/manifests/` but trained with `--out-root night1/v2`, so
+`train.py` looked in `night1/v2/manifests/`, found nothing, and **silently
+regenerated a default split**.
 
-This is a **driver omission**, not a data problem. The checkpoint and both
-manifests exist. Completing it needs **inference only, no retraining** — a few
-minutes of GPU.
+**The evidence is in the log.** `seen_unseen` reported `train 24000 -> 23250
+crops`; the training run reported `train=24000`. It trained an ordinary L2 model on
+the standard split — effectively a duplicate of an existing run — not the
+seen-manifest model.
+
+**And the driver never scored anything against the UNSEEN manifest**, so even a
+correct model would have produced no leakage estimate.
+
+Two bugs, both mine. **B2 must be re-run in full** (~85 min). Fixed in
+`docs/night1_run.py`: `--out-root` is now `OUT` for both stages, and two
+`src.predict` calls score the one trained checkpoint against **both** manifests —
+`predict.py` takes the checkpoint from `--run` and the manifest from
+`--dataset-name`, so it supports exactly this.
+
+⚠️ **This is the failure mode the split guard exists to prevent, in a place the
+guard did not cover.** The guard verifies the *base* c40 manifest before training;
+it does not verify that each training stage then consumed the manifest intended for
+it. A silent regeneration produced plausible numbers from the wrong data.
 
 ---
 
@@ -133,9 +150,27 @@ FileNotFoundError: .../manifests/ffpp_seed0_sz128.csv
 `band_ablation.py` took its default `--dataset-name ffpp`, so it looked for
 `ffpp_seed0_sz128.csv` instead of `ffpp_c40_vid_seed0_sz128.csv`. The runbook
 flagged this argument as an untested guess and marked its failure ignorable. It
-supports no claim. Fix: pass `--dataset-name ffpp_c40_vid`.
+supports no claim.
+
+Fixed: `--dataset-name ffpp_c40_vid --seed 0` are now passed, and the run name no
+longer carries a `_test` suffix.
+
+**This failure was benign precisely because it was loud.** B2's was not.
 
 ---
+
+## What must be re-run
+
+| | action | cost |
+|---|---|---|
+| **B2** | **re-run in full** — the training used the wrong split and nothing was scored against the unseen manifest | ~85 min |
+| **B1** | re-run, one-line fix, supports no claim | ~5 min |
+| **C1** | ⛔ **PROHIBITED.** `docs/c1-lr-prespecification.md` §6 forbids *"extending the epoch budget for cells that look unfinished"*. Two cells are uninterpretable and must be reported as such | — |
+| **C2** | nothing. Complete and analysed | — |
+
+C1 is the discipline working against us, which is the point of writing it down
+first. The reference learning rate is in any case already covered at 15 epochs by
+the five V8 runs, so the inconclusive cell costs little.
 
 ## Owed on arrival of the tarball
 

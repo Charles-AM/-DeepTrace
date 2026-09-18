@@ -163,8 +163,9 @@ def main():
         log("=== B1 band_ablation smoke ===")
         runs = sorted((REPO / "results/predictions_v8").glob("*xception_seed0*.csv"))
         cmd = [sys.executable, "-m", "src.band_ablation",
-               "--runs", str(runs[0].stem) if runs else "ffpp_c40_vid_xception_seed0",
-               "--results-root", str(OUT), "--limit", "200",
+               "--runs", "ffpp_c40_vid_xception_seed0",
+               "--results-root", str(OUT), "--dataset-name", DS,
+               "--seed", str(SPLIT_SEED), "--limit", "200",
                "--out-dir", str(OUT / "band_ablation")]
         results["B1"] = sh(cmd, dry)
 
@@ -174,12 +175,28 @@ def main():
         cmd = [sys.executable, "-m", "src.seen_unseen",
                "--manifest", str(manifest), "--out-root", str(OUT), "--seed", "0"]
         rc = sh(cmd, dry)
+        results["B2_manifests"] = rc
         if rc == 0:
-            # train ONE model on the SEEN manifest, then score against both
+            # Train ONE model on the SEEN manifest.
+            # out-root MUST be OUT, not OUT/v2: train.py resolves its manifest as
+            # out_root/manifests/<dataset-name>_seed<n>_sz<n>.csv, and seen_unseen
+            # wrote both manifests under OUT/manifests/. Pointing elsewhere makes
+            # train.py regenerate a DEFAULT split and silently train on the wrong
+            # data -- which is exactly what happened on 2026-09-18 (the seen
+            # manifest has 23250 train crops; the run reported 24000).
+            run_name = "ffpp_c40_v2seen_xception_seed0"
             results["B2_train"] = sh(
-                train_cmd(ref, "xception", 0, data_root, out=OUT / "v2",
+                train_cmd(ref, "xception", 0, data_root, out=OUT,
                           tag="ffpp_c40_v2seen"), dry)
-        results["B2"] = rc
+            # Score that ONE fixed model against BOTH manifests. This is the
+            # experiment; training alone produces no leakage estimate.
+            for tag in ("ffpp_c40_v2seen", "ffpp_c40_v2unseen"):
+                results[f"B2_score_{tag}"] = sh(
+                    [sys.executable, "-m", "src.predict",
+                     "--run", run_name, "--results-root", str(OUT),
+                     "--dataset-name", tag, "--seed", "0", "--split-seed", "0",
+                     "--split", "test", "--out-dir", str(OUT / "v2_predictions")],
+                    dry)
 
     # ---- C1: lr sweep, BOTH arms (~1.2 h) ------------------------------
     if "C1" in stages:
