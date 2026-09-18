@@ -85,6 +85,20 @@ def main():
     check("mean-probability point estimate", by["mean_probability"]["point_estimate"], -0.0060, 0.0002)
     check("paired difference mean", paired["paired_diff_mean"], 0.00286, 0.0002)
 
+    # ---- 4. V2 seen-vs-unseen ---------------------------------------------
+    print("\n[4] V2 seen-vs-unseen — src/seen_unseen_boot.py")
+    seen = REPO / "results/predictions_v2/v2seen_xception_seed0_test.csv"
+    unseen = REPO / "results/predictions_v2/v2unseen_xception_seed0_test.csv"
+    if not (seen.exists() and unseen.exists()):
+        print("  SKIP  dumps not yet committed to results/predictions_v2/")
+        print("        (the result exists but is aggregate-only until they are)")
+    else:
+        from src.seen_unseen_boot import run as v2_run
+        r = v2_run(str(seen), str(unseen), n_boot=20000, boot_seed=0, out_dir=None)
+        check("V2 seen AUC", r["auc_seen"], 0.9884, 0.0002)
+        check("V2 unseen AUC", r["auc_unseen"], 0.7886, 0.0002)
+        check("V2 seen-video advantage", r["advantage"], 0.1998, 0.0004)
+
     # ---- summary -----------------------------------------------------------
     print("\n" + "=" * 74)
     failed = [n for n, ok, _ in results if not ok]
@@ -105,6 +119,11 @@ def main():
       either, so regenerating dumps requires retraining. The figure is traceable to
       per-run roc_auc written at training time; it cannot be recomputed from rows.
       Recorded in docs/contribution-1-evidence.md section 0.
+
+  V2 seen/unseen (until the dumps are committed)
+      The result is computed and recorded in results/analysis/v2/, but until the
+      two prediction CSVs are committed it cannot be recomputed here. Check [4]
+      above says SKIP in that state.
 
   C1 learning-rate sweep and C2 repeat audit (2026-09-17 and -18)
       Trained without a prediction dump; train.py writes a per-run JSON and a

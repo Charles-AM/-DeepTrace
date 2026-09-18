@@ -56,7 +56,7 @@ Because the bytes are not in git, record the location so a checkpoint can be fou
 
 | run | campaign | source | notes |
 |---|---|---|---|
-| `ffpp_c40_v2seen_xception_seed0` | night-1 re-run, 2026-09-18 | Kaggle version output | needed to re-score V2 seen/unseen |
+| `ffpp_c40_v2seen_xception_seed0` | night-1 re-run, 2026-09-18 | Kaggle notebook output **`contribution-3`**, at `night1/ffpp_c40_v2seen_xception_seed0/best.pt` | ✅ **already re-scored 2026-09-18**; both dumps produced and validated 13/13. Keep only if V2 must be re-scored again |
 | `c1_lr*_{xception,xception_fad}_seed0` | night-1, 2026-09-18 | Kaggle version output | needed to regenerate C1 dumps |
 | `c2_rep{1,2}_{xception,xception_fad}_seed0` | night-1, 2026-09-18 | Kaggle version output | **needed to regenerate C2 dumps — the sd 0.0226 result** |
 | V8 campaign (10 runs) | 2026-09-06 | not retained | dumps were committed, so this is fine |
@@ -69,6 +69,16 @@ above that is still needed, or accept that the run becomes aggregate-only.
 Attach the night-1 version output to a notebook and run `src.predict` per run. It
 is inference only — a few minutes, no retraining. Cells in `docs/b2-rescore.md`
 show the pattern; only `--run` and `--dataset-name` change.
+
+## ⚠️ Manifests store absolute crop paths
+
+A manifest resolves only when the crops are mounted at the same location it
+records. Re-scoring V2 on 2026-09-18 failed at first because only the night-1
+output was attached and not the `c40-run` crops.
+
+This is why `docs/night1_run.py` **regenerates and re-verifies** the manifest
+rather than trusting a stored one, and why any notebook touching prediction code
+needs **both** inputs attached.
 
 ## Milestones
 
