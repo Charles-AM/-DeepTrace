@@ -1039,3 +1039,63 @@ scikit-learn, pandas and pytest):
 
 ⚠️ Never `pip install -r requirements.txt` on Kaggle — it breaks the pre-installed
 torch build (`docs/REPRODUCIBILITY.md`).
+
+---
+
+## 22. F3-Net's splitting procedure — verified, and it is video-level (2026-09-18)
+
+Asked directly: is there any reference showing a target paper used crop-randomised
+splitting? **No. And the target paper states the opposite.**
+
+**F3-Net, §4.1 Setting, p.10, verbatim:**
+
+> "FaceForensics++ is a face forgery detection video dataset containing 1,000 real
+> videos, in which **720 videos are used for training, 140 videos are reserved for
+> validation and 140 videos for testing**."
+
+That is **video-level splitting**, matching FF++'s official partition exactly
+(§7). F3-Net did not crop-randomise.
+
+### What this settles
+
+| claim | status |
+|---|---|
+| FF++ ships official video-level splits, 720/140/140 | ✅ §7 |
+| **F3-Net uses that video-level split** | ✅ **verified, stated in their own words** |
+| Any paper uses crop-randomised splitting | ❌ **no evidence, and none sought since** |
+| **We** used crop-randomised splitting before 2026-09-05 | ✅ our own logs |
+
+### Consequences — three, all binding
+
+**1. Contribution 1 cannot be framed as correcting F3-Net's protocol.** Their
+protocol is the one we recommend. Any sentence implying otherwise is false, not
+merely unsupported.
+
+**2. F3-Net's +0.014 is not inflated by crop-randomisation.** We should never have
+left that ambiguous. Their reference effect was measured under video-disjoint
+evaluation, as ours is — the two are **protocol-matched**, which strengthens the
+comparison rather than weakening it.
+
+**3. The motivating case for contribution 1 is our own pipeline.** The honest
+framing, already adopted: *we measured what the choice costs, using the alternative
+our own early pipeline used.* No claim about anyone else's practice is made, needed,
+or available.
+
+### Why the demonstration is still worth making
+
+A reasonable challenge follows: if the target paper split correctly and we have no
+evidence anyone splits by crop, why measure the cost?
+
+- It **quantifies the cost of a decision**, which is useful independent of who makes
+  it — and nobody had quantified it in this domain.
+- It **establishes the scale** against which a +0.014 claim must be judged: a single
+  protocol decision moves the score by ~18 points.
+- Kapoor & Narayanan document nonindependence across **294 papers in 17 fields**
+  (§12.1), so the error class is demonstrably live in science generally — just not
+  demonstrated here, by us, about anyone.
+- **Our own pipeline made it**, which is the honest motivating case and requires no
+  speculation about others.
+
+⚠️ **Not checked, and not to be asserted:** whether papers in this area generally
+*state* their splitting procedure. F3-Net does. We have examined one paper's
+methods section on this point and must not generalise from it.

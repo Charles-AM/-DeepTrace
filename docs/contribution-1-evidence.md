@@ -85,6 +85,7 @@ either. Do not imply the L1 side has the same evidential depth as L2.
 | # | claim | evidence | status |
 |---|---|---|---|
 | 3.1 | FF++ ships **official video-level splits**, 720/140/140 | FF++ dataset repository | ✅ |
+| 3.1b | **F3-Net uses video-level splitting** — *"720 videos are used for training, 140 ... for validation and 140 videos for testing"* | F3-Net §4.1 p.10 | ✅ **the target paper split correctly**; contribution 1 cannot be framed as correcting it (ledger §22) |
 | 3.2 | In our documented full-text audit of F3-Net we found **no confidence intervals, standard errors, standard deviations or repeated-run variability** accompanying the reported detector comparisons | ledger §4 | ✅ — scope the claim to the audit |
 | 3.3 | DeepfakeBench's **described evaluation module standardises point metrics and visualisations but does not describe sampling- or training-run uncertainty estimation** | ledger §14, their own enumeration | ✅ — the affirmative form is safer than an absence claim |
 | 3.4 | DeepfakeBench pools **frames** for its metric | *"Our benchmark currently adopts the frame level evaluation..."* | ✅ verbatim |
@@ -120,7 +121,7 @@ either. Do not imply the L1 side has the same evidential depth as L2.
 | "the field has numbers but not error bars" | **Two papers audited.** Say "these two influential examples report point estimates without uncertainty" |
 | "the standard setup falls short" | FF++ supplies fixed video-level splits. There is no deficient "standard setup" to indict |
 | "crop-randomised splitting is invalid" | It is a valid estimator of a **different estimand** — performance on unseen frames of *known* videos. Say it **answers a different question** |
-| "The field commonly splits by crop" | **No evidence.** FF++ ships video-level splits; a paper following the official protocol is not doing this |
+| "The field commonly splits by crop" | **No evidence** — and **F3-Net explicitly states it split by video** (ledger §22). This is not merely unsupported, it is contradicted for the one paper we checked |
 | "Published numbers are inflated by 18 points" | Our L2 absolutes (~0.79–0.82) sit below F3-Net's published range for reasons that are **ours**: scoped subset, 128px inputs, 15 epochs, frame-pooled metric |
 | "Leakage" (unqualified, for the L1→L2 gap) | The two protocols also induce different partitions. **"Protocol gap"** until V2 separates them |
 | "Compression makes the model rely on memorised identity" | **Plausible mechanism, untested.** Label it as interpretation |
