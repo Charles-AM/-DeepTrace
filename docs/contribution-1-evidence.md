@@ -20,6 +20,37 @@ much. See "Claims we deliberately do not make" below.
 
 ---
 
+## 0. Provenance — what can be shown on demand
+
+Both protocols were run by us, 3 configs × 3 seeds each, same crops, same budget.
+
+| | aggregate metrics | per-run provenance JSON | per-prediction dumps |
+|---|---|---|---|
+| **L1** `results/in_domain_c40/` | ✅ `ablation_table.csv`, `summary.csv` | ✅ 9 files, each with `roc_auc`, `best_epoch`, full metrics | ❌ **none committed** |
+| **L2** `results/in_domain_c40_vid/` | ✅ + `paired_summary.csv` | ✅ | ✅ 22 CSVs in `results/predictions/` |
+
+⚠️ **The evidence is asymmetric, and the asymmetry is one-directional.**
+
+L2 can be **independently recomputed from raw prediction rows** — done 2026-09-17
+with a separate AUC and bootstrap implementation, exact match (ledger §17).
+**L1 cannot.** Its per-frame scores were never committed; only the aggregate
+metrics written at training time survive.
+
+**What this supports:** the ~18-point gap. Both sides carry per-run `roc_auc` from
+provenance JSONs generated during training, so the headline is traceable.
+
+**What it does not support:** any re-analysis of the L1 column — no cluster
+bootstrap, no interval, no independent recomputation from scores. If asked to show
+the L1 numbers derive from the data, we can produce provenance JSONs and training
+logs, **not** a recomputation.
+
+**If a reviewer challenges the L1 column**, the honest answer is that the L1 runs
+are documented at aggregate level with per-run provenance, and that regenerating
+per-prediction dumps would require retraining, since no checkpoints are committed
+either. Do not imply the L1 side has the same evidential depth as L2.
+
+---
+
 ## 1. Claims from our own experiments
 
 | # | claim | value | evidence | status |
