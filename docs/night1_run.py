@@ -216,12 +216,17 @@ def main():
                           tag="ffpp_c40_v2seen"), dry)
             # Score that ONE fixed model against BOTH manifests. This is the
             # experiment; training alone produces no leakage estimate.
+            # predict.py names its output <run>_<split>.csv, which is IDENTICAL for
+            # both calls -- same run, same split, only the manifest differs. Writing
+            # both to one directory silently overwrites the first (2026-09-18). Give
+            # each its own directory so the two dumps survive.
             for tag in ("ffpp_c40_v2seen", "ffpp_c40_v2unseen"):
                 results[f"B2_score_{tag}"] = sh(
                     [sys.executable, "-m", "src.predict",
                      "--run", run_name, "--results-root", str(OUT),
                      "--dataset-name", tag, "--seed", "0", "--split-seed", "0",
-                     "--split", "test", "--out-dir", str(OUT / "v2_predictions")],
+                     "--split", "test",
+                     "--out-dir", str(OUT / "v2_predictions" / tag)],
                     dry)
 
     # ---- B1: band_ablation smoke test (~5 min) -------------------------
