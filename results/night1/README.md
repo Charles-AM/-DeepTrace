@@ -355,3 +355,76 @@ distinct artifact. That gap is what made the collision invisible for two runs.
   collision fix. Future runs should clone fresh or `git pull`.
 - **B2 trained twice under the same run name**, so the 18:23 checkpoint replaced the
   14:21 one. The surviving checkpoint corresponds to **seen AUC 0.9884**.
+
+---
+
+## Corrections to this record — 2026-09-18, from review
+
+### 1. C2 is NOT the paper's strongest finding
+
+I called it that. It is not. **The crossed bootstrap is stronger** because it is a
+**planned inferential analysis**; C2 is five opportunistic observations, two of them
+produced by an accidental re-run.
+
+C2's role: **exceptionally persuasive supporting evidence for contribution 3**,
+because it makes training-run sensitivity visible without any statistics. Not the
+primary result.
+
+### 2. Two boundaries on the C2 sign instability
+
+Beyond the standing no-causal-attribution rule:
+
+> These observations **do not identify the source of nondeterminism** and **do not
+> estimate how frequently such reversals occur.**
+
+The second is new and necessary — otherwise "the sign reversed" reads as a rate.
+Five related executions are not a variance estimate.
+
+✅ *"Across five nominally matched executions using the same recorded seed, split,
+code and hyperparameters, the FAD − Xception difference ranged from −0.0311 to
++0.0229 and changed sign across execution sessions. Fixing the documented seed and
+split did not ensure a sign-stable architectural comparison in our setup."*
+
+### 3. C1 may NOT be used to justify the 3e-4 learning rate
+
+I had been treating it as support for the choice. It cannot be: the two sweeps
+disagree in sign, and five of six cells in the second were still improving at the
+final epoch, so the rates were not compared fairly either.
+
+**The fairness argument is unchanged and stands on its own:** both architectures
+received the same prespecified training recipe. C1 belongs in supplementary
+material as a **failed sensitivity audit**.
+
+### 4. B2 is a mechanism experiment, not a protocol estimate
+
+One trained model. **No training-run variation propagated.** It answers a
+conditional question:
+
+> For this trained model, how much better does it perform on withheld crops from
+> represented video groups than on crops from unseen video groups?
+
+It is **not** a population-level protocol estimate and must not be presented as one.
+
+### 5. ⚠️ Independent resampling, NOT paired
+
+Verified in `src/seen_unseen.py`: `seen_eval` is drawn from **training** videos and
+`unseen_eval` from **test** videos. The two sets are matched in *composition* —
+counts, manipulation mix, sampling positions — but contain **entirely disjoint
+video groups**.
+
+So the difference must be estimated with **independent component resampling within
+each set**. "One model, two sets" feels paired and is not.
+
+### 6. Hash-distinctness is necessary, not sufficient
+
+`src/verify_v2.py` implements the full check before any analysis touches the dumps:
+distinct paths and hashes · 750 predictions each · zero exact evaluation crops in
+training · seen groups represented in training · unseen groups **not** represented ·
+manipulation and class composition matching · groups disjoint · seen AUC reproducing
+the training log's 0.9884.
+
+> **A zero return code records that a process finished, not that it produced a
+> distinct artifact.**
+
+That belongs in the repository's validation documentation — and in a reproducibility
+checklist if the manuscript carries one, but not in the prose.
