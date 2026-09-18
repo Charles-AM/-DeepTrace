@@ -1,0 +1,40 @@
+{
+  "primary_estimand": "frame_pooled",
+  "resampling": "independent component resampling within each set (NOT paired)",
+  "n_boot": 50000,
+  "boot_seed": 0,
+  "by_estimand": {
+    "frame_pooled": {
+      "auc_seen": 0.9884,
+      "auc_unseen": 0.7886,
+      "advantage": 0.1998,
+      "ci_lo": 0.1422,
+      "ci_hi": 0.2542,
+      "half_width": 0.056,
+      "excludes_zero": true
+    },
+    "video_mean_logit": {
+      "auc_seen": 0.9992,
+      "auc_unseen": 0.8261,
+      "advantage": 0.1731,
+      "ci_lo": 0.1044,
+      "ci_hi": 0.235,
+      "half_width": 0.0653,
+      "excludes_zero": true
+    },
+    "video_mean_probability": {
+      "auc_seen": 0.9992,
+      "auc_unseen": 0.8214,
+      "advantage": 0.1778,
+      "ci_lo": 0.1106,
+      "ci_hi": 0.2383,
+      "half_width": 0.0639,
+      "excludes_zero": true
+    }
+  },
+  "estimand_spread": 0.0267,
+  "estimand_spread_vs_reference_effect": 1.9,
+  "_scope": "Conditional on ONE trained model. Propagates test-content variation only; NO training-run variation. A mechanism experiment, not a population-level protocol estimate.",
+  "_residual_confound": "The two sets contain DIFFERENT video groups. Composition is matched and assignment was random under the seeded L2 split, but equal composition does not guarantee equal intrinsic difficulty. With 30 groups per side the realised difficulty may differ.",
+  "_pending": "The two prediction CSVs are not yet committed to results/predictions_v2/."
+}

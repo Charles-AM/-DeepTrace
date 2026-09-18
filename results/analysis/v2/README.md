@@ -18,13 +18,45 @@ so no systematic bias is expected — but with 30 groups per side the realised
 difficulty may differ. An earlier version of this file said partition difficulty was
 "removed by construction". **That overstated it.**
 
-## Result
+## Result — computed 2026-09-18, 50,000 replicates, boot seed 0
 
-| | AUC |
-|---|---|
-| seen (crops withheld from videos the model trained on) | **0.9884** |
-| unseen (crops from videos never seen) | **0.7886** |
-| **seen-video advantage** | **+0.1998** |
+| estimand | seen | unseen | advantage | 95% CI | half-width |
+|---|---|---|---|---|---|
+| **frame-pooled** (primary) | 0.9884 | 0.7886 | **+0.1998** | **[+0.1422, +0.2542]** | 0.0560 |
+| video-aggregated, mean-logit | 0.9992 | 0.8261 | +0.1731 | [+0.1044, +0.2350] | 0.0653 |
+| video-aggregated, mean-probability | 0.9992 | 0.8214 | +0.1778 | [+0.1106, +0.2383] | 0.0639 |
+
+**All three exclude zero decisively.** Lower bounds are +0.10 to +0.14 — an order of
+magnitude above the +0.014 reference effect.
+
+### The estimand spread is itself a finding
+
+The advantage ranges **+0.1731 to +0.1998** depending only on how predictions are
+aggregated — a spread of **0.0267**, which is **1.9× the +0.014 architectural effect
+the paper's case study examines.**
+
+Contribution 1 demonstrating itself inside contribution 1's own experiment: even
+when measuring leakage, the estimand choice moves the answer by nearly twice the
+effect under debate. This is why the result is reported under all three rather than
+one.
+
+### Resolution — the same apparatus, two very different outcomes
+
+Same 29-ish components, same bootstrap, same codebase:
+
+| comparison | effect | half-width | effect ÷ half-width | verdict |
+|---|---|---|---|---|
+| **V2 seen-video advantage** | 0.1998 | 0.0560 | **3.6×** | **excludes zero** |
+| FAD crossed comparison | 0.0092 | 0.0269 | **0.34×** | cannot resolve |
+
+**The evaluation is not underpowered in general.** It resolves a 20-point effect
+decisively and cannot resolve a 1.4-point one. That is the resolution argument made
+with measurements rather than assertion, and it retires the objection that the FAD
+null is merely an artefact of a weak method.
+
+⚠️ This is a **post-hoc observation**, not a prespecified power analysis. It is a
+calibration statement about this apparatus on these components — not a general
+claim about detectable effect sizes.
 
 Reported under **three estimands**, because contribution 1 is that estimand choice
 changes reported quantities — reporting one would undercut it:
