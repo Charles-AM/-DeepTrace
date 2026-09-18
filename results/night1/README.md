@@ -307,3 +307,51 @@ pushed after this clone and are untested.
 2. **Regenerate C1/C2 prediction dumps** while the checkpoints exist. All ten runs
    are aggregate-only.
 3. None of the above changes `results/canonical.json`.
+
+---
+
+## ⚠️ Both C1 and C2 conclusions reverse between executions
+
+External review read session C's C2 repeats and sweep 2's C1 in isolation, and
+reached conclusions that the other execution contradicts. Recorded because the
+same reading is easy to arrive at from any single log.
+
+| claim, from one execution | reversed by |
+|---|---|
+| *"Both repeats favoured FAD"* (+0.0229, +0.0158) | session B, four hours earlier: **−0.0114, −0.0311** |
+| *"FAD did not outperform Xception at either viable lr"* (−0.0084, −0.0062) | sweep 1: **+0.0064, +0.0151** |
+
+**Neither sweep nor session supports a directional claim.** The instability *is*
+the result, and it is only visible with both executions side by side.
+
+### Safe wording
+
+✅ *"Two nominally identical in-session repetitions produced FAD − Xception
+differences of +0.0229 and +0.0158; two further repetitions of the same
+configuration in a different session produced −0.0114 and −0.0311. The recorded
+seed and split did not preserve the sign of the architectural difference."*
+
+✅ *"In two one-seed, five-epoch sensitivity sweeps at identical settings, the
+FAD − Xception difference changed sign at both non-divergent learning rates. The
+sweep does not support a directional claim."*
+
+❌ Any sentence of the form *"FAD did/did not outperform Xception at lr X"* citing
+one sweep.
+
+## Engineering defects, from the same review — both fixed
+
+| defect | fix |
+|---|---|
+| Dry-run summary printed **OK** for steps that never executed | now prints **DRY-RUN (not executed)** |
+| Both B2 scorings reported OK while one overwrote the other | `verify_distinct_dumps()` now hashes both files and **aborts if identical or missing** |
+
+A zero return code records that a process finished, **not** that it produced a
+distinct artifact. That gap is what made the collision invisible for two runs.
+
+### Also noted, not yet fixed
+
+- The notebook cloned into a non-empty directory, so the second and third driver
+  invocations silently used the **13:47 clone** — without the B1 reorder or the
+  collision fix. Future runs should clone fresh or `git pull`.
+- **B2 trained twice under the same run name**, so the 18:23 checkpoint replaced the
+  14:21 one. The surviving checkpoint corresponds to **seen AUC 0.9884**.

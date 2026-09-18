@@ -193,6 +193,30 @@ def dump_predictions(run_name, tag, dry, out=None):
                "--split", "test",
                "--out-dir", str(OUT / "predictions" / run_name)], dry)
 
+
+def verify_distinct_dumps(dry):
+    """Confirm the two B2 scorings produced DISTINCT files.
+
+    predict.py names its output from --run, not --dataset-name, so writing both
+    scorings to one directory silently overwrites the first. On 2026-09-18 the
+    driver reported OK for both calls while only one file survived: a zero return
+    code records that a process finished, not that it produced a distinct artifact.
+    """
+    if dry:
+        log("distinct-dump check: <DRY-RUN>")
+        return
+    import hashlib
+    seen = OUT / "v2_predictions" / "ffpp_c40_v2seen" / "ffpp_c40_v2seen_xception_seed0_test.csv"
+    unseen = OUT / "v2_predictions" / "ffpp_c40_v2unseen" / "ffpp_c40_v2seen_xception_seed0_test.csv"
+    for p in (seen, unseen):
+        if not p.exists():
+            sys.exit(f"FATAL: expected dump missing: {p}")
+    h = [hashlib.sha256(p.read_bytes()).hexdigest() for p in (seen, unseen)]
+    if h[0] == h[1]:
+        sys.exit("FATAL: the seen and unseen dumps are byte-identical. One "
+                 "overwrote the other, or both scored the same manifest.")
+    log(f"distinct dumps VERIFIED  seen {h[0][:12]}  unseen {h[1][:12]}")
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--dry-run", action="store_true")
@@ -244,6 +268,7 @@ def main():
                      "--split", "test",
                      "--out-dir", str(OUT / "v2_predictions" / tag)],
                     dry)
+            verify_distinct_dumps(dry)
 
     # ---- B1: band_ablation smoke test (~5 min) -------------------------
     # Runs AFTER B2 by necessity: it re-scores a trained model with frequency
@@ -286,7 +311,11 @@ def main():
 
     log("=== SUMMARY ===")
     for k, v in results.items():
-        log(f"  {k:28s} {'OK' if v == 0 else 'FAILED rc=' + str(v)}")
+        if dry:
+            status = "DRY-RUN (not executed)"
+        else:
+            status = "OK" if v == 0 else "FAILED rc=" + str(v)
+        log(f"  {k:28s} {status}")
     (OUT / "night1_summary.json").write_text(json.dumps(results, indent=2))
     log("wrote", OUT / "night1_summary.json")
 
