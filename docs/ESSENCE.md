@@ -14,9 +14,17 @@ of external review have converged; the last two corrected wording, not substance
 Further rounds trade execution time for polish. Re-open only if an experimental
 result contradicts something below.
 
-### Title
-> **Evaluation Units Matter: A Cluster-Aware Assessment of Frequency-Domain
+### Title — settled 2026-09-21
+> **Evaluation Choices Matter: Aggregation, Dependence, and Training Variation in
 > Deepfake Detection**
+
+The three subtitle nouns map one-to-one onto the contributions: aggregation → 1,
+dependence → 2, training variation → 3.
+
+⚠️ Supersedes *"Evaluation Units Matter: A Cluster-Aware Assessment of
+Frequency-Domain Deepfake Detection"*, which predates the restructure. That title
+led with clustering, which names contribution 2 only, and omitted the estimand half
+— the one documented in published practice.
 
 ### Thesis
 > Evaluation design changes both what deepfake detectors appear to achieve and how

@@ -1,3 +1,14 @@
+# ⛔ SUPERSEDED — do not use
+
+Replaced by **`extended-summary.md`**, which reflects the 2026-09-18 restructure
+(`thesis-and-contributions.md`) and carries five corrections this version lacks.
+
+Retained only as a record of the earlier wording. Its numbers are correct; its
+**structure** is not — it presents the crop-randomised experiment as a contribution
+rather than as motivation, and omits the scope qualifiers on the final paragraph.
+
+---
+
 # Two-contribution summary — agreed text
 
 Settled 2026-09-18. Every figure verified against `results/canonical.json` and
