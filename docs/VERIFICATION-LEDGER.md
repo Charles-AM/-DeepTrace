@@ -1221,3 +1221,62 @@ those results are. This entry is the answer.
 ❌ Never write "we used one dataset" without the second sentence. Conceding the
 limit and explaining why it is not a gap is far stronger than hoping it is not
 asked about.
+
+---
+
+## 25. Decision — L1 will NOT be re-run (2026-09-21)
+
+**Decided before drafting, and recorded so it is not revisited under pressure.**
+
+### The limitation
+
+The crop-randomised (L1) campaign predates the artifact-retention policy. Per-run
+metrics were saved; **prediction-level outputs and checkpoints were not**. The
+~18-point protocol gap is traceable to `roc_auc` written at training time but
+**cannot be recomputed crop-by-crop** without retraining.
+
+### Why re-running is not warranted — the arithmetic
+
+| | |
+|---|---|
+| Original Xception protocol gap | **+0.1764** |
+| V2 controlled seen-video advantage | **+0.1998**, 95% CI [+0.1422, +0.2542] |
+| Effect under study (FAD) | **+0.014** |
+| **V2 lower bound ÷ reference effect** | **10.2×** |
+| Largest observed run-to-run movement (C2, 5 observations) | 0.0540 |
+| Advantage **minus** that movement | 0.1458 — still **10×** the reference |
+
+**Even worst-case run-to-run variation leaves the effect an order of magnitude
+above the quantity under study.** A rerun could move the exact AUC values; it
+cannot plausibly overturn the finding that seen-video exposure produces a very
+large apparent advantage.
+
+### What a rerun would cost
+
+- Values would differ from the published table, creating **two L1 campaigns to
+  reconcile**
+- Pairing new L1 against existing L2 introduces a **cross-session confound**
+- Avoiding that confound requires retraining L2 as well — **18 runs, ~11 h**
+
+For a section whose role is **motivation and scale-setting**, not novelty.
+
+### The settled position
+
+1. Keep the original three-architecture L1–L2 comparison as **descriptive evidence**
+2. Use **V2** as the prediction-level, interval-supported mechanism experiment
+3. **Disclose** that L1 prediction dumps were not retained
+4. Re-run **only** if a supervisor or reviewer specifically requires row-level
+   reproduction of the original protocol gap
+
+### ✅ Required disclosure — use verbatim
+
+> The crop-randomised campaign predates our artifact-retention policy: per-run
+> metrics were saved, but prediction-level outputs were not. We therefore report
+> this comparison descriptively, without cluster-aware uncertainty. The mechanism
+> it motivates is independently established in §[V2] with prediction-level data and
+> component-aware intervals.
+
+❌ Never present the ~18-point figure with an interval, or imply it is
+recomputable from committed data.
+✅ `src/reproduce.py` already prints this limitation under "UNREPRODUCIBLE FROM
+COMMITTED DATA" — the disclosure matches what the tooling reports.
