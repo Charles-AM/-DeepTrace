@@ -1166,3 +1166,58 @@ citation, which has not been done. Same error as the field-practice and
 frequency-methods claims: asserting an absence from a partial check. It also makes the no-hyperparameter-search
 disclosure concrete: we can now say exactly where our settings sit relative to the
 source's own recommendations.
+
+---
+
+## 24. Datasets — FaceForensics++ only, and why the others are excluded (2026-09-21)
+
+**Every training run and every result in this study uses FaceForensics++.** All 34
+committed prediction dumps are `ffpp_c23_*`, `ffpp_c40_*` or `v2seen_*`; no
+cross-dataset results directory exists.
+
+### Two other datasets appear in the reproducibility registry
+
+`docs/REPRODUCIBILITY.md` lists **Celeb-DF v2** (8,951 crops) and **DFDC**
+(400 videos, 914 real / 3,756 fake crops). A reader will see them and ask where
+those results are. This entry is the answer.
+
+| | status |
+|---|---|
+| **Trained on either** | ❌ **never.** Training was FaceForensics++ throughout |
+| **Celeb-DF evaluation** | one preliminary cross-dataset run — train on FF++, test on Celeb-DF. 2 configurations × **1 seed**. `results/README.md`: *"Celeb-DF spatial ~0.82 vs freq-hybrid ~0.74"* |
+| **DFDC** | extracted; **no results found** |
+| **Both** | **superseded**, excluded from this study |
+
+### Three reasons for exclusion, each sufficient
+
+1. **The Celeb-DF sample is not the official test set.** A random balanced sample
+   was used instead of `List_of_testing_videos.txt`. Flagged for correction on
+   re-extraction; never redone. No figure from it is comparable to published
+   Celeb-DF results.
+2. **n = 1.** One seed, two configurations. We have since measured that repeating a
+   single nominally identical configuration moves the paired difference by up to
+   0.054 — so a single-seed cross-dataset number carries no evidential weight.
+3. **It answers a different question.** Cross-dataset transfer concerns whether a
+   *detector generalises*, which is a claim about the architecture. This study
+   concerns evaluation design, and every claim is an internal comparison under
+   matched conditions.
+
+### ✅ Accurate statement for the paper
+
+> Training used FaceForensics++ exclusively. Celeb-DF v2 and DFDC were acquired and
+> used in preliminary cross-dataset evaluation during an earlier phase of the
+> project; those results are superseded — the Celeb-DF sample was not the official
+> test list — and are excluded from this study.
+
+### The limitation that follows, and why it is not a gap
+
+> The claims concern evaluation design and are established through internal
+> comparisons under matched conditions, for which a single dataset is sufficient. We
+> do not establish that the observed magnitudes transfer to other datasets; the
+> cluster structure driving the uncertainty analysis — 3,000 crops, 150 video files,
+> 30 target groups, 29 source-target components — is a property of FaceForensics++
+> and of our subset.
+
+❌ Never write "we used one dataset" without the second sentence. Conceding the
+limit and explaining why it is not a gap is far stronger than hoping it is not
+asked about.
