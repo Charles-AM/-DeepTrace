@@ -1100,3 +1100,44 @@ evidence anyone splits by crop, why measure the cost?
 ⚠️ **Not checked, and not to be asserted:** whether papers in this area generally
 *state* their splitting procedure. F3-Net does. We have examined one paper's
 methods section on this point and must not generalise from it.
+
+---
+
+## 23. Focal loss — where our settings match the source and where they do not (2026-09-21)
+
+Verified against Lin, Goyal, Girshick, He, Dollár, *Focal Loss for Dense Object
+Detection*, ICCV 2017, pp. 2999–3007 (arXiv:1708.02002).
+
+| | paper | ours | |
+|---|---|---|---|
+| formula | FL(p_t) = −α_t(1 − p_t)^γ log(p_t) | identical, `src/losses.py` | ✅ **matches** |
+| **γ** | *"we found γ = 2 to work best"*; *"γ = 2 (our default setting)"* | **2.0** | ✅ **matches** |
+| **α** | *"best α's ranged in just [.25, .75] (we tested α ∈ [.01, .999]). **We use γ = 2.0 with α = .25** for all experiments"* | **0.200** | ⚠️ **below their best range** |
+
+### The α difference, stated precisely
+
+Our α = 0.200 is **derived from the training class balance** (4,800 real : 19,200
+fake), not tuned. It falls **just below** the [0.25, 0.75] interval Lin et al.
+report as best.
+
+Their optimum was found under RetinaNet's foreground/background imbalance of
+roughly 1:1000; ours is 1:4, so their range is not obviously binding here. **But
+that is an argument for why our value is reasonable, not for why it matches** —
+different claims, and only the first is available to us.
+
+### ✅ Required methods wording
+
+> We train with focal loss (Lin et al., 2017) using γ = 2.0, the value that work
+> reports as best. The class-weighting term α = 0.200 is set from the training
+> class balance rather than tuned; it falls just below the [0.25, 0.75] range
+> reported as best in that paper, whose class imbalance differs substantially from
+> ours. No focal-loss hyperparameter was searched.
+
+❌ Never write *"following Lin et al."* unqualified — true of γ, false of α.
+
+### Why this matters beyond one citation
+
+It is the **only place our training recipe departs from a cited source**, and it is
+now stated rather than discovered. It also makes the no-hyperparameter-search
+disclosure concrete: we can now say exactly where our settings sit relative to the
+source's own recommendations.

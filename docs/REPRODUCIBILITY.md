@@ -79,6 +79,11 @@ tarballs.
 
 Defaults (`src/train.py`), used for every in-domain/ablation run unless noted.
 
+⚠️ **α = 0.200 falls just below the [0.25, 0.75] range Lin et al. report as best**
+(they use α = 0.25 for all experiments). Ours is set from the training class
+balance, not tuned. γ = 2.0 does match their stated default. See ledger §23 for
+the required wording — *"following Lin et al."* is true of γ and false of α.
+
 ⚠️ **No hyperparameter search was performed.** These are the library/script defaults,
 fixed once and applied identically to every configuration. This is deliberate, not an
 omission — see "Why no tuning" below — but it means **no model here is claimed to be
