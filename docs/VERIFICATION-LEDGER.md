@@ -129,10 +129,11 @@ open reading questions were extracted in full with `pdftotext` and quoted verbat
 | Seed variance (RL) | Henderson et al. AAAI 2018, **pp. 3207–3214** |
 | Seed variance (LM) | Melis, Dyer, Blunsom. ICLR 2018 |
 | Repro standards | Pineau et al. JMLR **22, 1–20**, 2021 |
+| **Focal loss** | **Lin, Goyal, Girshick, He, Dollár. ICCV 2017, pp. 2999–3007** — ✅ verified 2026-09-21; our training objective (γ=2.0, α from train class balance) |
 
-### Still unverified — 7
+### Still unverified — 6
 
-Focal Loss (Lin et al., ICCV 2017) · Efron & Tibshirani (1993) ·
+Efron & Tibshirani (1993) ·
 Davison & Hinkley (1997) · Gundersen & Kjensmo (AAAI 2018) ·
 Reimers & Gurevych (EMNLP 2017) · Dodge et al. (EMNLP 2019) ·
 Bengio & Grandvalet (JMLR 5, 2004)
