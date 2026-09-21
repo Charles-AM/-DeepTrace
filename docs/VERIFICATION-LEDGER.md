@@ -1114,30 +1114,55 @@ Detection*, ICCV 2017, pp. 2999–3007 (arXiv:1708.02002).
 | **γ** | *"we found γ = 2 to work best"*; *"γ = 2 (our default setting)"* | **2.0** | ✅ **matches** |
 | **α** | *"best α's ranged in just [.25, .75] (we tested α ∈ [.01, .999]). **We use γ = 2.0 with α = .25** for all experiments"* | **0.200** | ⚠️ **below their best range** |
 
-### The α difference, stated precisely
+### The α difference, stated precisely — corrected 2026-09-21
 
-Our α = 0.200 is **derived from the training class balance** (4,800 real : 19,200
-fake), not tuned. It falls **just below** the [0.25, 0.75] interval Lin et al.
-report as best.
+⚠️ **My earlier framing was wrong.** I wrote that α = 0.200 *"falls just below the
+[0.25, 0.75] range they report as best."* Lin et al. do **not** report that as a
+generally optimal interval — it is the range of best α values **across different γ
+settings**. At **γ = 2 specifically their answer is α = 0.25**, with α = 0.50
+nearly as good (0.4 AP lower).
 
-Their optimum was found under RetinaNet's foreground/background imbalance of
-roughly 1:1000; ours is 1:4, so their range is not obviously binding here. **But
-that is an argument for why our value is reasonable, not for why it matches** —
-different claims, and only the first is available to us.
+So the correct comparison is against **α = 0.25 at γ = 2**, not against a range.
+
+### ✅ Our α, verified in code
+
+`src/train.py:93` — `alpha = n_real / (n_real + n_fake)` = 4800 / 24000 = **0.20**.
+
+`src/losses.py` — a float α is *"the weight for the positive class (index 1); the
+negative class gets 1 − alpha."*
+
+Committed dumps confirm the encoding: all four manipulations carry **label 1**,
+real carries **label 0**. So **fake is the positive class**.
+
+| | count | weight | aggregate |
+|---|---|---|---|
+| fake | 19,200 | **α = 0.20** | **3,840** |
+| real | 4,800 | **1 − α = 0.80** | **3,840** |
+
+**Equal aggregate class weight** under the 1:4 imbalance. That is the justification
+— not "reflects class balance", which says much less.
 
 ### ✅ Required methods wording
 
-> We train with focal loss (Lin et al., 2017) using γ = 2.0, the value that work
-> reports as best. The class-weighting term α = 0.200 is set from the training
-> class balance rather than tuned; it falls just below the [0.25, 0.75] range
-> reported as best in that paper, whose class imbalance differs substantially from
-> ours. No focal-loss hyperparameter was searched.
+> We use binary focal loss with **γ = 2**, matching the best RetinaNet setting
+> reported by Lin et al. With fake samples encoded as the positive class, we set
+> **α_fake = 0.20** from inverse class frequency and **α_real = 0.80**, giving equal
+> aggregate class weight under the 1:4 real-to-fake imbalance. This differs from
+> Lin et al.'s RetinaNet setting of α = 0.25 at γ = 2; no focal-loss
+> hyperparameter was tuned for our study.
 
 ❌ Never write *"following Lin et al."* unqualified — true of γ, false of α.
+❌ Never write that α *"falls below their reported-best range"* — misdescribes what
+they report.
 
 ### Why this matters beyond one citation
 
-It is the **only place our training recipe departs from a cited source**, and it is
-now stated rather than discovered. It also makes the no-hyperparameter-search
+It is **one explicitly documented departure from the cited reference
+configuration**.
+
+⚠️ I previously called it *"the only place our training recipe departs from a
+cited source."* **Unverified** — that would require checking every training-recipe
+citation, which has not been done. Same error as the field-practice and
+frequency-methods claims: asserting an absence from a partial check. It also makes the no-hyperparameter-search
 disclosure concrete: we can now say exactly where our settings sit relative to the
 source's own recommendations.
