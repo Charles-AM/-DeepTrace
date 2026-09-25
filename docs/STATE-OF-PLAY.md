@@ -1,6 +1,39 @@
 # State of play — resume here
 
-Last updated **2026-09-17**. Read this first; everything else is detail.
+Last updated **2026-09-25**. Read this first; everything else is detail.
+
+## ✅ EXPERIMENTAL PROGRAMME COMPLETE — writing phase
+
+All three contributions are supported by completed, validated, reproducible
+experiments. **No experiment is required for the manuscript.**
+
+| | |
+|---|---|
+| Title | **Evaluation Choices Matter: Aggregation, Dependence, and Training Variation in Deepfake Detection** |
+| `python -m src.reproduce` | **16/16** |
+| Tests | ~261 on Kaggle (0 failed) · 113 locally |
+| Dataset | **FaceForensics++ only** — Celeb-DF and DFDC excluded (ledger §24) |
+
+### Write from these, in this order
+
+1. `docs/manuscript/thesis-and-contributions.md` — structure and contribution list
+2. `docs/manuscript/extended-summary.md` — the agreed narrative
+3. `docs/manuscript/methods-notes.md` — cost, hyperparameters, validation, ablation, prespecification
+4. `docs/contribution-1-evidence.md` / `-2-evidence.md` — claim-by-claim, with do-not-write tables
+5. `docs/VERIFICATION-LEDGER.md` — 25 sections, every external claim traced
+
+### Still outstanding — none of it experimental
+
+- **Contribution 3 evidence map** — the last structural piece
+- **Three figures** — none exist; the conditional-vs-crossed one carries the argument
+- **6 citations** unverified (supporting literature only, not method components)
+- **UCF** audit entry unconfirmed by a second reader
+- **Estimand sentence** in `canonical.json` — awaiting approval
+- **C1/C2 prediction dumps** — recoverable by inference while Kaggle outputs survive
+- **Efficiency latency discrepancy** — README +44% vs CSV +46.1%
+
+⚠️ **L1 is aggregate-only by decision** (ledger §25). Disclose; do not re-run.
+
 
 **Next session starts at `docs/EXPERIMENT-PLAN.md`.**
 
