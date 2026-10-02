@@ -68,6 +68,19 @@ setup. These belong in the comparability audit:
 | Batch size | 128 | 64 |
 | Budget | ~150k iterations | 15 epochs |
 | Backbone init | Xception, ImageNet-pretrained | same |
+| **Training loss** | **cross-entropy** | **focal loss, γ=2.0, α from train class balance** |
+
+**The loss row was added 2026-10-02** after an external critique flagged it; it was
+missing from this table. F3-Net states its loss twice, verbatim (arXiv:2007.09355v2):
+*"The whole face forgery detection model is learned by the cross-entropy loss in an
+end-to-end manner"* (abstract) and *"We train the F3-Net by the wellknown cross
+entropy loss"* (§3.4). The string "focal" does not occur in the paper.
+
+Why this does **not** invalidate the comparison: focal loss is applied identically
+to both of our arms, so it cannot produce a difference between them. What it affects
+is comparability of our *difference* to their +0.014, which is already qualified by
+the six rows above. ✅ Disclose as a seventh protocol difference.
+❌ Do not describe our training as replicating F3-Net's.
 
 **Metric aggregation is also not identical.** p.10 states: *"for single-frame
 methods, we average the accuracy scores of each frame in a video"* and *"we also
