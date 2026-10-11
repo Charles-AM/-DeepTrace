@@ -55,49 +55,59 @@ not reported, and is answerable"* — never *"their ranking is noise."*
 
 ---
 
-## B · Publish the FaceForensics++ component map (nearly free)
+## B · Component map — ⛔ WITHDRAWN 2026-10-11, the premise was wrong
 
-### What ships
+**Do not do this.** Proposed on the assumption that source-target components are
+non-trivial clusters worth publishing. They are not. Checked the same day against
+the official FF++ split files (`dataset/splits/{train,val,test}.json`, from
+ondyari/FaceForensics):
 
-- One CSV: each FF++ source-target sequence mapped to its component id
-- `src/clusters.py`, which already exists — union-find over the FF++ pair graph
-- A short README: what a component is, why it is the right resampling unit, how to use it for grouped splitting
+| | |
+|---|---|
+| pairs | **500** |
+| unique sequences | **1,000** |
+| sequences appearing in more than one pair | **0** |
+| components | **500, every one of size exactly 2** |
+| components shared across the official train/val/test splits | **0** |
 
-### Why it is worth publishing
+Union-find has nothing to merge. **The component map is the pair list**, and the
+official 360/70/70 pair split is already component-disjoint. Publishing a CSV that
+restates the dataset's own pairing adds nothing.
 
-A target-video group is **not** the strongest grouping. A video can appear as the
-target of one manipulation and the source of another, so grouping by target still
-lets related footage cross a split. Components merge every sequence linked by a
-shared source or target, which is the unit that actually breaks the dependence.
+### What the check produced instead — keep this
 
-We concede the matching limitation openly: our **split** is by target-video group
-while our **resampling** is by component, and component-disjoint splitting (L3) was
-never run. Publishing the map is what lets others do what we did not.
+> The official FaceForensics++ split is already component-disjoint. The dependence
+> risk does not come from the dataset's design; it comes from subsampling or
+> re-splitting it.
 
-### What the audit says about the need
+Sharper than the "grouping is inconsistently documented" line this file originally
+carried, and it reframes the split audit: **UCF (ICCV 2023) not stating its
+partition matters precisely because departing from the official split is where the
+risk enters.** Fold this into A3 as a one-line sharpening.
 
-`docs/split-policy-audit.md`: of six recent top-tier FF++ papers, four state their
-partition explicitly, **one defers to a benchmark (FreqDebias, CVPR 2025) and one
-states nothing at all (UCF, ICCV 2023)**. Grouping is inconsistently documented, so
-a ready-made, checkable grouping is useful.
+Two side findings:
 
-### Accomplishes
+- **Independent confirmation of ledger §7.** 360 pairs × 2 = **720** training
+  videos, 70 × 2 = **140** each for val and test — the 720/140/140 already recorded.
+- **Our own 30 target groups → 29 components is explained**: exactly one of our 30
+  test targets is paired with another of them. One merged pair, not a systematic gap.
 
-A reusable artifact rather than a claim — the one piece of this project another
-researcher can pick up and use in an afternoon.
+### The residual mechanism, unquantified
 
----
+A sequence can be a *target* in train while being the *source* of a test video.
+Target-grouping does not prevent that; component-grouping does. How often it occurs
+in our split is **unknown** — it needs the V2/L2 manifests, which are gap 1 in
+`docs/recovery-runbook.md`. State it as a mechanism, never as a measured rate.
 
 ## Effort and order
 
 | step | work | depends on |
 |---|---|---|
-| B — export the component CSV and README | ~1 hour; the code exists | nothing |
 | A — draft the four-ask paragraph | ~1 hour | nothing |
-| Cite B from A4 | minutes | both |
 
-Do **B first**: it is mechanical, and having the artifact in hand makes A's
-recommendations concrete rather than aspirational.
+B is withdrawn, so A is the whole of this plan. **Neither is in scope now** — the
+programme proceeds on the three original contributions; this file is a parked
+think-piece, kept because the component finding above is worth reusing.
 
 ## What must not be claimed
 
@@ -105,3 +115,4 @@ recommendations concrete rather than aspirational.
 - ❌ "No deepfake paper propagates seed variance." ✅ "Among eight papers from ECCV 2020 to CVPR 2025, none do."
 - ❌ "Frame-level AUC is the field norm." ✅ Quote SBI and FreqDebias and let them disagree.
 - ❌ Presenting component-disjoint splitting as something we did. We did not run L3.
+- ❌ "Grouping is inconsistently documented, so a component map is useful." Withdrawn — see B.
