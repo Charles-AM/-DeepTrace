@@ -586,6 +586,27 @@ coincide. State it that way, and it stops looking like a convenient result.
 
 Agreed text. Every clause traces to §3, §14 or the verified quote on p.5.
 
+### The source sentence, and how to find it in 10 seconds (added 2026-10-12)
+
+Both halves of our claim sit in **one sentence**. Open arXiv:2307.01426 and
+**Ctrl+F `leading to unfair comparisons`**:
+
+> "...uation metrics in the community, **some are at the frame level, while others
+> are at the video level, leading to unfair comparisons. Our benchmark currently
+> adopts the frame level evaluation to build a fair basis for comparison among
+> detectors.**"
+
+The first clause supports *"identifies inconsistent frame- and video-level
+evaluation as an obstacle to fair comparison"*. The second supports *"adopts
+frame-level metrics as a common basis"*. Quote them together or not at all —
+dropping the second clause is what produces the §3 inversion, where a reader comes
+away thinking DeepfakeBench is **against** frame-level evaluation when frame-level
+is the fix they chose.
+
+⚠️ Grepping for `frame-level` alone does **not** find this. The paper uses that
+string many times in its own results tables ("The metric is the frame-level AUC"),
+and those hits are incidental. Search the unfair-comparisons phrase instead.
+
 ### The one-line formulation
 
 > **DeepfakeBench standardises which performance estimate is computed; our study
