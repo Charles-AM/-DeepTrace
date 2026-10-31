@@ -55,11 +55,23 @@ x = self.conv1(NPR * 2.0/3.0)
 dataloader normalisation and immediately before `conv1`. Applying it before
 normalisation gives a per-channel scaled version, not the same operation.
 
-## Scope
+## Scope — TEN runs, both arms retrained
 
-Five seeds of **Xception + NPR** on the **fixed c40 video-disjoint split**
-(`split_seed 0`), dumps saved, paired against the five Xception seeds already
-committed there.
+🚨 **Revised 2026-10-31.** The original plan paired five new NPR runs against the
+committed V8 Xception runs. That is unsound.
+
+`results/in_domain_c40_fixedsplit/README.md` records a nominally identical seed-0
+configuration repeated across sessions: the FAD−Xception difference moved from
+−0.0196 to **+0.0140**, a movement of **0.0336 — 2.4× the reference effect — and
+it flipped sign.** The two arms moved in *opposite* directions, so this is not a
+constant offset that cancels in a paired difference.
+
+The primary FAD comparison does not have this problem: V8 trained both arms in one
+campaign. Reusing half of it for NPR would give the supplementary study a weaker
+property than the primary has.
+
+**Therefore: five new plain Xception runs and five new Xception+NPR runs, both
+arms in the same campaign.**
 
 | experiment | covered |
 |---|---|
@@ -67,6 +79,67 @@ committed there.
 | 4 — units, conditional vs crossed | ✅ |
 | 1 — splitting | ❌ second campaign |
 | 2 — prior exposure | ❌ manifests uncommitted |
+
+### 🚨 Counterbalanced run order — committed before training
+
+Always training Xception first would let an **order effect** load onto one arm.
+
+| seed | first | second |
+|---|---|---|
+| 0 | Xception | NPR |
+| 1 | NPR | Xception |
+| 2 | Xception | NPR |
+| 3 | NPR | Xception |
+| 4 | Xception | NPR |
+
+❌ Do **not** attribute any observed movement to heat, caching or memory
+fragmentation. Those mechanisms have not been tested. Counterbalancing controls a
+*possible order effect*; the mechanism is unknown.
+
+### Session rule
+
+**Each Xception/NPR seed pair must complete within one session.** If a session ends
+between the two arms, the completed run stays recorded but is **excluded from the
+primary paired analysis**, and both arms for that seed are rerun together.
+
+Ideally all ten runs share one session. At minimum each matched pair does.
+
+Record per run: session identifier, start time, model order, seed, device,
+software versions, checkpoint path.
+
+### 🚨 Analysis gate — assert, do not assume
+
+The analysis is glob-driven. A pattern catching `results/predictions_v8/` alongside
+`results/predictions_npr/` would **silently** mix sessions — the same failure mode
+as the night-1 output collision.
+
+Before any analysis, assert: exactly the five new same-session Xception and five
+NPR dumps, one per seed, identical component membership across all ten.
+
+❌ **The committed V8 Xception runs are never mixed into the NPR effect estimate.**
+
+### Bonus: the repeatability audit upgrades from n=1 to five paired seeds
+
+Comparing the five new Xception runs against the five committed V8 Xception runs
+gives a five-seed paired cross-session contrast, where the current audit is one
+observation.
+
+**Fixed wording:**
+
+> We repeated five seed configurations in a second campaign using the same fixed
+> split, recipe and protected training code. This expands the audit from one
+> repeated seed configuration to five. Because all comparisons involve the same two
+> campaign sessions, it does not estimate the distribution of session-level
+> variation.
+
+Report: the five paired AUC changes, their signs, mean and range, the largest
+absolute movement, and whether any architectural or threshold interpretation would
+change.
+
+❌ **No formal session-level confidence interval.** Five observations sharing one
+session pair cannot estimate session variance.
+⚠️ Five paired *seed configurations*, **one** contrast between two campaign
+sessions. Never call the session sample size five.
 
 ## 🚨 Directional prediction — written before running
 
@@ -79,8 +152,16 @@ NPR targets artifacts from **learned upsampling**. The four FF++ methods differ:
 | FaceSwap | classical graphics: landmarks, 3D template, blending | least |
 | Face2Face | 3D reconstruction + image-based rendering | least |
 
-**Prediction: the largest NPR effect appears on Deepfakes, plausibly on
-NeuralTextures, and least on FaceSwap and Face2Face.**
+**Prediction, with the effect defined explicitly:**
+
+> Using **video-aggregated mean-logit AUC**, we predict that the **NPR minus
+> Xception difference** will be largest for Deepfakes, may also be positive for
+> NeuralTextures, and will be smaller for the graphics-based FaceSwap and
+> Face2Face methods. Per-manipulation results will be treated as **directional and
+> descriptive**, because each manipulation has only 30 sequences in the test set.
+
+Naming the aggregation rule now matters: without it, "largest effect" could later
+mean frame AUC, video AUC, absolute NPR performance, or the difference.
 
 ⚠️ This counts **only because it is recorded now**. Finding the pattern afterwards
 and reporting it as anticipated would be the exact behaviour this paper criticises.
@@ -122,8 +203,9 @@ batches", unless the sampled row order is hashed per seed.
 - **Transform parity.** Our implementation must match theirs numerically on random
   tensors, to float tolerance.
 - **Shape and channel count** unchanged through the transform.
-- **Path-level identity.** The run must select exactly the same 3,000 test items as
-  the committed Xception dump — compare path strings.
+- **Test membership.** The run must select exactly the same 3,000 test items as the
+  committed Xception dump, matched on **full paths, labels, manipulation names,
+  video groups and source-target components** — not path strings alone.
 - **Range check, not equality.** A retrained plain Xception through the new path
   should land inside the observed seed range **0.77203 – 0.85272**. Requiring
   0.81347 exactly contradicts our own C2 run-to-run finding, and the V8 checkpoints
@@ -141,7 +223,8 @@ expectation is the behaviour this paper argues against.
 
 ## Isolation
 
-Branch. New directories (`results/predictions_npr/`). `config.py` additive only.
+Branch. New directories (`results/predictions_npr/` for **both** arms of this
+campaign, so the same-session pairs stay together and apart from V8). `config.py` additive only.
 Analysis code unchanged. Before merging:
 
 ```bash
@@ -159,5 +242,6 @@ split against the committed reference JSON · no `--amp`.
 
 ## Cost
 
-Estimated 2–3 GPU-hours for five runs, from the observed cost of five Xception
-runs. ⚠️ **Remains an estimate until one NPR epoch is timed.**
+Estimated **4–6 GPU-hours for ten runs**, from the observed cost of five Xception
+runs. ⚠️ **Remains an estimate until one NPR epoch is timed**, with training time,
+memory use and the projected five-seed cost recorded.
