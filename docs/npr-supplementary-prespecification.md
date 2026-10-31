@@ -198,7 +198,7 @@ batches", unless the sampled row order is hashed per seed.
 
 ❌ No outcome changes `canonical.json` or the primary FAD conclusion.
 
-## Fidelity checks before the five runs
+## Fidelity checks before the ten runs
 
 - **Transform parity.** Our implementation must match theirs numerically on random
   tensors, to float tolerance.
