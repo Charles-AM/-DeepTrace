@@ -70,3 +70,41 @@ def test_flat_input_gives_zero_residual():
 
 def test_scale_constant():
     assert abs(SCALE - 2.0 / 3.0) < 1e-12
+
+
+# --- training-loop interface -------------------------------------------------
+# The transform tests above all exercise npr_residual directly. They passed while
+# XceptionNPR was missing get_alpha, which src/train.py calls every epoch, so the
+# campaign would have crashed after the first epoch of the first NPR run. These
+# build through build_model and assert the contract the training loop relies on.
+
+def test_builds_through_build_model_and_satisfies_training_interface():
+    from src.config import build_model
+
+    model = build_model("xception_npr", image_size=128, pretrained=False)
+    out = model(torch.randn(2, 3, 128, 128))
+    assert out.shape == (2, 2)
+    assert model.get_alpha() is None
+    assert model.get_frequency_mask() is None
+    out.sum().backward()
+
+
+def test_exposes_the_same_interface_as_the_baseline_arm():
+    """Both campaign arms go through one training loop, so any attribute the loop
+    touches on the baseline must exist on the NPR arm too."""
+    from src.config import build_model
+
+    base = build_model("xception", image_size=128, pretrained=False)
+    npr = build_model("xception_npr", image_size=128, pretrained=False)
+    missing = [a for a in ("get_alpha", "get_frequency_mask", "forward",
+                           "forward_features")
+               if hasattr(base, a) and not hasattr(npr, a)]
+    assert not missing, f"NPR arm is missing {missing}"
+
+
+def test_forward_features_pools_to_a_vector():
+    from src.config import build_model
+
+    model = build_model("xception_npr", image_size=128, pretrained=False)
+    f = model.forward_features(torch.randn(2, 3, 128, 128))
+    assert f.dim() == 2 and f.shape[0] == 2

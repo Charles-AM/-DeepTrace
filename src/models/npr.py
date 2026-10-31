@@ -94,3 +94,15 @@ class XceptionNPR(nn.Module):
     def forward_features(self, x: torch.Tensor) -> torch.Tensor:
         f = self.backbone.forward_features(self.npr(x))
         return f.mean(dim=(-2, -1)) if f.dim() == 4 else f
+
+    # -- shims so the shared training loop treats it like the hybrid model ----
+    # src/train.py calls get_alpha() unconditionally every epoch. Omitting these
+    # let the model build, pass every transform test, train a full epoch, and
+    # only then crash at the first logging step.
+    @torch.no_grad()
+    def get_alpha(self):
+        return None
+
+    @torch.no_grad()
+    def get_frequency_mask(self):
+        return None

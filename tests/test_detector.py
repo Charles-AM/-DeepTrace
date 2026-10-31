@@ -131,7 +131,7 @@ def test_focal_gradient_flows():
 
 # --- timm baselines (verification framework) ------------------------------- -
 
-@pytest.mark.parametrize("name", ["efficientnet_b0", "xception"])
+@pytest.mark.parametrize("name", ["efficientnet_b0", "xception", "xception_npr"])
 def test_timm_baseline_builds_and_matches_interface(name):
     model = build_model(name, image_size=128, pretrained=False)
     out = model(torch.randn(2, 3, 128, 128))
