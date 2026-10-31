@@ -77,7 +77,19 @@ def build_model(name: str, image_size: int = 128, pretrained: bool = True, **ove
 
         return F3NetFAD(image_size=image_size, pretrained=pretrained, **overrides)
 
+    if name == "xception_npr":
+        # NPR-inspired local pixel residual (Tan et al., CVPR 2024) in front of an
+        # unmodified Xception. Zero learned parameters, 3 channels in and out, so
+        # the backbone is identical to the `xception` baseline -- not even
+        # `in_chans` changes. An ADAPTATION, never a reproduction: the original
+        # trains a ~1.44M-parameter custom CNN on ForenSynths, and reports no
+        # matched FF++ Xception-vs-Xception+NPR comparison, so there is no
+        # published reference effect here. See docs/npr-supplementary-prespecification.md
+        from .models.npr import XceptionNPR
+
+        return XceptionNPR(image_size=image_size, pretrained=pretrained, **overrides)
+
     raise KeyError(
         f"unknown config {name!r}; choices: "
-        f"{sorted(MODEL_CONFIGS) + sorted(TIMM_BASELINES) + ['f3net']}"
+        f"{sorted(MODEL_CONFIGS) + sorted(TIMM_BASELINES) + ['f3net', 'xception_npr']}"
     )
