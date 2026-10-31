@@ -96,3 +96,38 @@ reference list for any of these claims.**
 Its two PMC citations were correct: PMC10499856 is Kapoor & Narayanan
 (PMID 37720327 ✓), PMC10728486 is a genuine correlated-AUC bootstrap paper
 (*Frontiers in Veterinary Science*, 2023).
+
+---
+
+# 3. Within-video correlation (added 2026-10-31)
+
+⚠️ **DESCRIPTIVE. NOT PRESPECIFIED.** Reproduce with `python -m src.within_video`.
+
+**Why it matters.** Everywhere else, the case for clustering rests on construction
+("twenty crops, same face, same room, same compression") plus the indirect fact
+that grouping by video tripled the standard error, 0.0063 to 0.0199. This measures
+the dependence directly.
+
+**Intraclass correlation** = var(video means) / (var(video means) + mean within-video
+variance). The share of score variation attributable to which video a crop came from.
+
+| | ICC |
+|---|---|
+| min across 10 fixed-split c40 dumps | 0.705 |
+| **median** | **0.770** |
+| max | 0.832 |
+
+Stable across all five seeds and both architectures, so it is a property of the
+data rather than of one run.
+
+**Roughly 77% of the variation between crop scores is between videos rather than
+within them.** A video's twenty crops carry far less than twenty crops' worth of
+information.
+
+✅ *Safe to write:* the dependence that motivates cluster-aware resampling is
+measured, not assumed.
+
+❌ **Do not read ICC as an effective sample size.** The design effect for a cluster
+bootstrap depends on cluster sizes and on the statistic being resampled, not on ICC
+alone. ICC says dependence is present and substantial; it does not convert 3,000
+crops into a specific smaller number.

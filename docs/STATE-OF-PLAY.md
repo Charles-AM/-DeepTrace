@@ -1,6 +1,6 @@
 # State of play — resume here
 
-Last updated **2026-09-25**. Read this first; everything else is detail.
+Last updated **2026-10-31**. Read this first; everything else is detail.
 
 ## ✅ EXPERIMENTAL PROGRAMME COMPLETE — writing phase
 
@@ -22,14 +22,47 @@ experiments. **No experiment is required for the manuscript.**
 4. `docs/contribution-1-evidence.md` / `-2-evidence.md` — claim-by-claim, with do-not-write tables
 5. `docs/VERIFICATION-LEDGER.md` — 25 sections, every external claim traced
 
+### Since 2026-09-25 — proposal phase, 17 commits
+
+**Analyses added, all CPU on committed dumps, no new training**
+
+| | |
+|---|---|
+| `src/descriptive_checks.py` | frames per sequence exactly 20 everywhere; per-manipulation FAD difference negative in all four, spread 0.0047 |
+| `src/protocol_gap.py` | protocol gap per architecture and seed: +0.1921 / +0.1764 / +0.1817, every observation in [0.1405, 0.2077] |
+| `src/within_video.py` | **ICC median 0.770** over 10 dumps — the dependence is measured, not assumed |
+
+**Literature work**
+
+- `docs/seed-variance-audit.md` — 0 of 8 papers propagate training-run variation; DF40's verbatim **[No]**
+- `docs/manuscript/literature-claims.md` — claims as direction, awaiting independent re-check
+- `docs/review-comments-1.md` — round 1 review, 5 comments, responses recorded
+- Ledger §16 now carries the exact search string for DeepfakeBench's frame/video sentence
+
+**Prespecified and NOT run**
+
+| plan | status |
+|---|---|
+| `docs/l1-recovery-prespecification.md` | parked — buys an interval on a confounded quantity |
+| `docs/ucf-supplementary-prespecification.md` | **parked** — UCF's reconstruction loss needs balanced ordered batches |
+| `docs/xception-d-supplementary-plan.md` | **parked** — same blocker; D is two backbones plus a decoder |
+| `docs/npr-supplementary-prespecification.md` | **ready to run** — code written and tested |
+
+**NPR supplementary — implemented, not trained**
+
+`src/models/npr.py` + `tests/test_npr.py`, 8 tests passing. Parameter count
+identical to plain Xception, +0. Zero learned parameters, 3 channels in and out,
+backbone unmodified. Needs 5 training runs on Kaggle.
+
 ### Still outstanding — none of it experimental
 
 - **Contribution 3 evidence map** — the last structural piece
-- **Three figures** — none exist; the conditional-vs-crossed one carries the argument
+- **Figures** — 12 now exist in `~/Downloads/deeptrace-figures/`, off-repo
 - **6 citations** unverified (supporting literature only, not method components)
 - **UCF** audit entry unconfirmed by a second reader
 - **Estimand sentence** in `canonical.json` — awaiting approval
 - **C1/C2 prediction dumps** — recoverable by inference while Kaggle outputs survive
+- **V2 manifests** — uncommitted, so 4 membership checks SKIP locally (`docs/recovery-runbook.md`)
 - **Efficiency latency discrepancy** — README +44% vs CSV +46.1%
 
 ⚠️ **L1 is aggregate-only by decision** (ledger §25). Disclose; do not re-run.
