@@ -10,7 +10,26 @@ Rehearsal findings: `docs/npr-campaign-rehearsal.md`
 | Internet | **On** (clone) |
 | Persistence | **No persistence** — see the warning below |
 | Runs | 10 = 2 configs × 5 training seeds, c40, `--split-seed 0`, 15 epochs |
-| Estimated | 4–6 h, ⚠️ unverified — V8's ten runs took ~6 h on the same backbone |
+| Estimated | 4–6 h, ⚠️ **unverified** — see the cost note below |
+
+## Cost — what is measured and what is not
+
+⚠️ **No observed duration for V8 is recorded anywhere in this repository.** The
+"~6 h" in `docs/v8-runbook.md` is that runbook's *Estimated* row, not a
+measurement, and the per-run JSONs store `best_epoch` but no wall time.
+
+The nearest **observed** figure is in `docs/EXPERIMENTS.md`: the c40 video-level
+campaign of **nine runs took ~3.9 h**, i.e. roughly **26 min per run** at 15
+epochs, or ~1.7 min per epoch. Runs within a session are sequential
+(`docs/v8_run.py` loops `subprocess.run`); the "2 parallel" in that table refers
+to two *concurrent Kaggle sessions* (`docs/overnight-plan.md`), not two GPUs
+inside one session.
+
+Extrapolated to ten sequential runs: **~4.3 h**, plus whatever NPR's two
+interpolations per forward pass add. That is what `--time-one-epoch` measures.
+
+❌ Do not quote 4.3 h as this campaign's cost. It is an extrapolation from a
+different config, and the NPR overhead is exactly the unmeasured quantity.
 
 ## 🚨 Use a NEW notebook, and turn persistence OFF
 
