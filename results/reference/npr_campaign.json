@@ -1,0 +1,21 @@
+{
+  "_purpose": "Campaign constants for the NPR supplementary study. Hyperparameters are NOT duplicated here: they come from results/reference/train_args_c40_vid.json, the same file V8 used, so the two campaigns cannot drift apart. This file records only what is specific to the NPR campaign.",
+  "_prespecification": "docs/npr-supplementary-prespecification.md",
+  "split_seed": 0,
+  "seeds": [0, 1, 2, 3, 4],
+  "configs": {"a": "xception", "b": "xception_npr"},
+  "order": {
+    "_note": "Committed BEFORE training, per the prespecification. Always training arm A first would let an order effect load onto one arm. 'a_first' trains xception then NPR; 'b_first' is the reverse. This controls a POSSIBLE ORDER EFFECT ONLY -- no mechanism (heat, caching, memory fragmentation) has been tested and none may be claimed.",
+    "0": "a_first",
+    "1": "b_first",
+    "2": "a_first",
+    "3": "b_first",
+    "4": "a_first"
+  },
+  "session_rule": "Each seed's two arms must complete within one session. A pair split across sessions stays recorded but is excluded from the primary paired analysis, and both arms are rerun together in a new session.",
+  "_cost_estimate": {
+    "gpu_hours": "4-6",
+    "_status": "ESTIMATE ONLY, extrapolated from the five V8 xception runs. The prespecification requires timing one NPR epoch before the full campaign (docs/npr_run.py --time-one-epoch)."
+  },
+  "_analysis_gate": "src.campaign_gate must pass before any bootstrap. The analysis entry points glob for dumps, so a pattern reaching results/predictions_v8/ would mix sessions silently."
+}
