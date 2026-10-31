@@ -242,6 +242,46 @@ split against the committed reference JSON · no `--amp`.
 
 ## Cost
 
-Estimated **4–6 GPU-hours for ten runs**, from the observed cost of five Xception
-runs. ⚠️ **Remains an estimate until one NPR epoch is timed**, with training time,
-memory use and the projected five-seed cost recorded.
+🚨 **MEASURED 2026-10-31, superseding the 4–6 GPU-hour estimate.**
+
+Step-level probe on the real c40 set, Tesla T4, 24,000 train items, batch 64,
+375 steps/epoch (`src.throughput_probe`, median of 20 steps after 5 warmup):
+
+| config | ms/step | epoch | 15-epoch run |
+|---|---|---|---|
+| `xception` | 401.3 | 2.5 min | 0.63 h |
+| `xception_npr` | 464.3 | 2.9 min | 0.73 h |
+
+**NPR overhead: +15.7% per step.** Campaign of five runs per arm: **~6.8 GPU-h.**
+
+⚠️ **6.8 h is a FLOOR, not an estimate of the total.** The probe times optimiser
+steps only. A real run also performs a validation pass every epoch and one test
+pass, which the probe never executes. Expect somewhat more.
+
+✅ Still inside the runner's 10.5 h guard and the 12 h session limit.
+❌ The prespecified 4–6 h range was wrong. It is superseded by measurement, and
+the measured figure is what may be reported.
+
+**Zero parameters is not zero cost.** NPR adds no trainable parameters — both
+arms report 20,811,050 — yet costs 15.7% more per step, because the two nearest
+interpolations run on every forward pass. This belongs in the efficiency
+discussion rather than being glossed as a free transform.
+
+⚠️ **An unexplained discrepancy, recorded rather than resolved.**
+`docs/EXPERIMENTS.md` gives ~3.9 h for the nine c40 video-level runs, i.e. ~26
+min/run, against the 38 min/run the probe measures for the same config at the
+same scale. `src/run_ablation.py` contains no `Popen`, `CUDA_VISIBLE_DEVICES` or
+threading, so that campaign was sequential too and parallelism does not explain
+it. Possible causes — fewer epochs in some of those runs, a different allocation,
+or the "~" in that table — were **not** tested. The measurement supersedes the
+extrapolation because it is the conservative direction and was taken on the
+hardware that will run the campaign.
+
+### Deviation from the gate as written
+
+The prespecification asked for **one timed NPR epoch**. The figure above comes
+from a **step-level probe** instead, because the full-epoch timer prints nothing
+until the epoch and validation both finish, leaving slow indistinguishable from
+hung. The probe excludes dataloader warmup and the validation pass, so it reads
+optimistic against a real epoch. Recorded as a deviation, not presented as the
+epoch timing that was specified.
