@@ -252,20 +252,38 @@ Step-level probe on the real c40 set, Tesla T4, 24,000 train items, batch 64,
 | `xception` | 401.3 | 2.5 min | 0.63 h |
 | `xception_npr` | 464.3 | 2.9 min | 0.73 h |
 
-**NPR overhead: +15.7% per step.** Campaign of five runs per arm: **~6.8 GPU-h.**
+**NPR overhead: +15.7% per step** on this probe run. Campaign floor: ~6.8 GPU-h.
 
-⚠️ **6.8 h is a FLOOR, not an estimate of the total.** The probe times optimiser
-steps only. A real run also performs a validation pass every epoch and one test
-pass, which the probe never executes. Expect somewhat more.
+🚨 **SUPERSEDED BY THE CAMPAIGN ITSELF, 2026-10-31.** The ten runs executed and
+their own wall clock is a better measurement than any probe:
 
-✅ Still inside the runner's 10.5 h guard and the 12 h session limit.
-❌ The prespecified 4–6 h range was wrong. It is superseded by measurement, and
-the measured figure is what may be reported.
+| quantity | observed |
+|---|---|
+| whole campaign, 10 runs + prediction dumps | **356.7 min = 5.94 h** |
+| `xception`, each of 5 runs | 35.7–35.9 min |
+| `xception_npr`, 4 healthy runs | 35.9 min |
+| `xception_npr`, the seed-0 collapse | 31.8 min |
+| epoch time, `xception` | 142–145 s |
+| epoch time, healthy `xception_npr` | 142–145 s |
 
-**Zero parameters is not zero cost.** NPR adds no trainable parameters — both
-arms report 20,811,050 — yet costs 15.7% more per step, because the two nearest
-interpolations run on every forward pass. This belongs in the efficiency
-discussion rather than being glossed as a free transform.
+❌ **The +15.7% overhead figure does not replicate and must not be reported.** A
+second probe in the same session gave **+4.1%**, and at the level that matters —
+whole runs under the real training loop — the two arms are at **parity** (35.9
+min each, 142 s per epoch each). Two probe runs disagreeing by a factor of four
+means the probe was measuring session contention, not the transform.
+
+❌ **Do not claim NPR is cheaper, either.** The one NPR run that finished early
+(31.8 min, 126 s/epoch) is the collapsed seed-0 run. Why a constant-predicting
+network ran ~11% faster per epoch at identical op count is **unexplained**; it
+tracks collapse, not the arm.
+
+✅ The prespecified 4–6 h range was closer to the truth than the 6.8 h probe
+floor. The reportable figure is the observed 5.94 h.
+
+**Zero parameters, and — measured at run level — no detectable cost.** NPR adds
+no trainable parameters (both arms report 20,811,050) and the campaign shows no
+wall-clock penalty. The efficiency discussion should rest on these observed run
+times, not on the probe.
 
 ⚠️ **An unexplained discrepancy, recorded rather than resolved.**
 `docs/EXPERIMENTS.md` gives ~3.9 h for the nine c40 video-level runs, i.e. ~26

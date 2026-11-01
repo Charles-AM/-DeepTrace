@@ -10,7 +10,7 @@ Rehearsal findings: `docs/npr-campaign-rehearsal.md`
 | Internet | **On** (clone) |
 | Persistence | **No persistence** — see the warning below |
 | Runs | 10 = 2 configs × 5 training seeds, c40, `--split-seed 0`, 15 epochs |
-| **Measured** | **~6.8 GPU-h floor** (+15.7% NPR overhead) — see the cost note |
+| **Observed** | **5.94 h for all 10 runs** (2026-10-31); arms at parity, 35.9 min each |
 
 ## Cost — what is measured and what is not
 
