@@ -303,3 +303,74 @@ until the epoch and validation both finish, leaving slow indistinguishable from
 hung. The probe excludes dataloader warmup and the validation pass, so it reads
 optimistic against a real epoch. Recorded as a deviation, not presented as the
 epoch timing that was specified.
+
+---
+
+# Addendum — campaign 2 (execution replication)
+
+**Committed 2026-11-01, before campaign 2 was launched.**
+
+The loss-geometry diagnostic's control collapsed, so the seed-0 constant-prediction
+outcome reproduces on a fresh Kaggle instance under the identical recipe. Campaign 2
+is run with that knowledge.
+
+## 🚨 This is a replication, not a replacement
+
+- **Campaign 1 remains the primary analysis.** It is the prespecified one.
+- **Both campaigns are reported, whatever either produces.** Campaign 2 may not be
+  substituted for campaign 1, and campaign 1 may not be withdrawn or re-labelled in
+  light of campaign 2's outcome. Choosing between them on the basis of which
+  contains a collapse is outcome-dependent selection — the practice this paper
+  argues against.
+- **The two campaigns are NOT pooled into one ten-run-per-arm estimate.** The
+  crossed bootstrap resamples training runs, so pooling would charge
+  execution-level variance to the run level. This repository already documents a
+  0.0336 execution-level shift at the difference level, so that assumption is known
+  to be unsafe here.
+
+## Held constant
+
+Same frozen recipe (`results/reference/train_args_c40_vid.json`), same committed
+order table (`results/reference/npr_campaign.json`), same split seed, and the **same
+runner file** — `docs/npr_run.py` is not modified, so the executable path is
+identical to campaign 1's. Order is deliberately *not* re-randomised: re-flipping it
+would confound execution with order and destroy the comparison.
+
+Only the output directories differ, via the runner's existing environment overrides:
+
+```
+DEEPTRACE_OUT=/kaggle/working/results2
+DEEPTRACE_PRED=/kaggle/working/preds_npr2
+```
+
+The gate's containment check then applies to campaign 2 on its own, and no analysis
+glob can mix the two campaigns.
+
+## What this can and cannot establish
+
+✅ Five **paired** seeds across two executions of a complete counterbalanced
+campaign — execution-to-execution repeatability at the level results are actually
+published at. This is the strongest reproducibility artifact the programme will
+have.
+
+✅ Whether the seed-0 collapse is deterministic across instances, or whether a
+collapse appears at a different seed — the latter would be the stronger finding,
+since it would show the failure is not seed-0-specific.
+
+❌ **Not** a between-execution variance. Two executions give a difference, not a
+variance, and nothing here licenses an interval on execution-level spread.
+
+❌ **Not** a collapse rate. Ten NPR runs with one collapse leaves a 95%
+Clopper–Pearson interval of about [0.003, 0.445]. The rate is not estimable at any
+run budget available to this programme, and must not be reported as though it were.
+
+❌ **Not** a clean architectural comparison. If seed 0 collapses again, campaign 2
+inherits the same problem, and that is the expected outcome given the control.
+
+## Prior expectation, recorded before the runs
+
+Seed 0 is expected to collapse again, on the evidence of 4/4 collapses to date (two
+timing runs, the campaign run, the diagnostic control) across two physical instances.
+Campaign 2 is therefore expected to confirm determinism rather than to yield a clean
+five-seed comparison. It is being run for the paired repeatability measurement, and
+that purpose is fixed in advance of the result.
