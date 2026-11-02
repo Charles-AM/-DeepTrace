@@ -27,6 +27,12 @@ complete outcome of running the frozen recipe five times.
 | point (mean-logit) | −0.0667 | −0.0676 |
 | non-additivity ratio | 1.045 | 1.048 |
 
+`crossed_boot.py` reads **only** `logit_margin` (lines 90 and 98), so its point
+estimate and all three intervals are mean-logit throughout. The mean-probability
+figure (−0.0675 for campaign 1) belongs to the `agg_space` sensitivity analysis
+alone and must not be placed beside these intervals. Their four-decimal agreement
+is numerical coincidence between two estimands, not interchangeability.
+
 ✅ **The conditioning claim replicates across two independent executions.** Holding
 the five trained model pairs fixed and resampling only test content supports a
 negative conclusion — the interval excludes zero in *both* campaigns. Propagating
@@ -77,17 +83,53 @@ equally** — aggregation unit does, aggregation space does not.
 
 Run-level resampling draws 5 runs from 5 with replacement:
 
-| copies of seed 0 | share of replicates |
+| copies of seed 0 | exact weight |
 |---|---|
-| 0 | **0.3277** |
-| 1 | 0.4096 |
-| 2 | 0.2048 |
-| 3+ | 0.0512 |
+| 0 | **0.32768** |
+| 1 | 0.40960 |
+| 2 | 0.20480 |
+| 3 | 0.05120 |
+| 4 | 0.00640 |
+| 5 | 0.00032 |
+| 3 or more | 0.05792 |
 
-A third of replicates never contain the collapsed run. The distribution is therefore
-a mixture, and a single percentile interval hides that its lower tail is one failed
-optimisation resampled. Any report of the five-run result must carry the
-stratification or a histogram alongside it.
+`src.npr_mixture` enumerates this exactly — `5**5 = 3125` ordered resamples, 126
+distinct compositions — and the result is not a tail but a **four-spike ladder**,
+each stratum narrow and separated by roughly one fifth of the collapsed run's
+deficit:
+
+| copies | exact seed-only mean | 95% range | campaign 2 mean |
+|---|---|---|---|
+| 0 | **+0.0047** | [−0.0001, +0.0102] | **−0.0037** |
+| 1 | −0.0667 | [−0.0709, −0.0616] | −0.0676 |
+| 2 | −0.1381 | [−0.1416, −0.1342] | −0.1314 |
+| 3+ | −0.2181 | [−0.2823, −0.2057] | −0.2031 |
+
+Two things this makes visible that the pooled interval cannot:
+
+- **The 0-copies stratum *is* the seeds 1–4 sensitivity analysis.** Its exact range
+  [−0.0001, +0.0102] reproduces the seeds 1–4 `seed_only` interval
+  [−0.0006, +0.0110] to within Monte Carlo error. The "post hoc sensitivity" is
+  simply the 33% of the prespecified distribution that omits the collapsed run.
+- **The 1-copy stratum carries the modal weight (0.41)** and its crossed range
+  [−0.1080, −0.0273] closely tracks the five-run `component_only` interval
+  [−0.1028, −0.0278]. The "significant negative" conditional result is largely a
+  statement about resamples containing exactly one copy of a constant predictor.
+
+❌ Reporting the five-run interval alone is therefore not conservative — it hides
+that the estimate is a weighted average over how many times one failed
+optimisation happened to be drawn.
+
+⚠️ **Monte Carlo error is not the limitation.** The tail mass is exactly
+computable. The limitation is inferential: the whole distribution rests on five
+observed run values, so `P(>0)` from it is descriptive of those five runs and is
+not evidence about the population of possible training executions. Run-level
+bootstrap probabilities should be reported descriptively, and the 35 (n=4) or 126
+(n=5) distinct compositions stated alongside them.
+
+Artifacts: `mixture_c1/` and `mixture_c2/` — `crossed_replicates.csv` (each
+replicate with its collapsed-run copy count), `seed_compositions.csv` (all 126
+compositions with exact weights), `mixture.png`.
 
 ## Constant-prediction audit
 
