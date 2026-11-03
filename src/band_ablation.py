@@ -22,6 +22,23 @@ Radial convention: the DCT has DC at ``[0, 0]`` (corner origin, unlike the
 centre-origin FFT in `src/spectra.py`), so radius is distance from that corner,
 normalised so the highest-frequency corner is 1.0.
 
+.. warning::
+
+   **Band 0 is not interpretable as a spectral result.** Band 0 contains the DC
+   coefficient, which carries the image mean. Zeroing it centres the image on
+   zero, so roughly half of every image's pixels go negative and are clamped by
+   the ``np.clip(a, 0, 255)`` below. Measured 2026-11-03: ~50% of pixels clipped
+   for band 0 against ~4% for the others, on white noise, a smooth gradient and a
+   blurred-noise "face-like" plane alike -- it is structural, not content
+   dependent. On a smooth gradient band 2 clips nothing while band 0 still clips
+   half, which isolates DC as the cause.
+
+   So band 0's ``delta_auc`` measures the model's response to a half-clamped
+   image, not its reliance on the lowest frequency band. Either preserve the DC
+   coefficient (exclude ``[0, 0]`` from the band-0 mask) or report band 0 as
+   contaminated. Pinned by ``tests/test_band_ablation.py::
+   test_zeroing_the_lowest_band_clips_half_the_pixels``.
+
     python -m src.band_ablation --runs ffpp_baseline_spatial_seed0 ffpp_full_seed0 \
         --results-root results --dataset-name ffpp --seed 0 --image-size 128 \
         --n-bands 8 --limit 3000 --out-dir results/analysis/band_ablation
