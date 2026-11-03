@@ -16,8 +16,8 @@ Produced by `src/crossed_boot.py` from the V8 fixed-split prediction dumps
 
 | variation propagated | 95% CI | contains +0.014? | half-width | SE |
 |---|---|---|---|---|
-| test components only; five runs fixed | [−0.0224, +0.0042] | **no** | 0.0133 | 0.006824 |
-| training runs only; test content fixed | [−0.0257, +0.0041] | **no** | 0.0149 | 0.007781 |
+| test components only; five runs fixed | [−0.0226, +0.0040] | **no** | 0.01327 | 0.006764 |
+| training runs only; test content fixed | [−0.0257, +0.0041] | **no** | 0.01486 | 0.007600 |
 | **training runs and test components** | **[−0.0358, +0.0180]** | **yes** | 0.0269 | 0.013255 |
 
 Point estimate **−0.0092**. 29 components, 150 videos, seeds 0–4, one verified
@@ -37,10 +37,22 @@ neither detect FAD's published gain nor rule it out.
 
 `excludes_0.014 = False`, `equivalent_0.014 = False`.
 
+⚠️ **Conditional rows reconciled to canonical 2026-11-03.** The two conditional rows
+previously read SE 0.006824 / 0.007781 and CI [−0.0224, +0.0042], which match no
+column of `crossed_video_b50000_s0.csv` — the source `results/canonical.json`
+declares. The crossed row and the point estimate were correct throughout, and **no
+conclusion changes**: both conditionals still exclude +0.014, both still contain
+zero, and the crossed interval still contains both. The drift was detectable because
+the stored `nonadditivity_ratio` of 1.6973 reconciles exactly from the canonical SEs
+(0.013255² / (0.006764² + 0.0076²) = 1.6974) but gives 1.640 from the figures
+previously printed here. `tests/test_canonical.py` guarded canonical.json against its
+CSV and against the manuscript sentence, but not this table; `test_crossed_readme_matches_canonical`
+now covers it.
+
 ## 2. Why the crossed interval is the right one
 
-Its half-width is **1.8–2.0× the conditional half-widths** (0.0269 against 0.0149
-and 0.0133). Each conditional analysis excludes +0.014 **for its restricted
+Its half-width is **1.8–2.0× the conditional half-widths** (0.02687 against 0.01486
+and 0.01327). Each conditional analysis excludes +0.014 **for its restricted
 estimand**, and each is valid for that target. But neither alone supports an
 **architecture-level** conclusion, which must generalise over both test content and
 training runs — and the crossed interval, which does, does not exclude +0.014.

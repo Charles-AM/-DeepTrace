@@ -369,8 +369,14 @@ inherits the same problem, and that is the expected outcome given the control.
 
 ## Prior expectation, recorded before the runs
 
-Seed 0 is expected to collapse again, on the evidence of 4/4 collapses to date (two
-timing runs, the campaign run, the diagnostic control) across two physical instances.
+Seed 0 is expected to collapse again, on the evidence of **3/3** collapses completed
+at the time of writing (two timing runs and the campaign run).
+
+⚠️ **Count corrected 2026-11-03.** This paragraph originally read "4/4 collapses to
+date (two timing runs, the campaign run, the diagnostic control)". The diagnostic
+control had not run when this was committed (`4339b87`, 2026-11-01 10:46); it ran on
+2026-11-03. Three collapses were complete at the time of writing. The run was
+counted prospectively and described as "to date", which it was not.
 Campaign 2 is therefore expected to confirm determinism rather than to yield a clean
 five-seed comparison. It is being run for the paired repeatability measurement, and
 that purpose is fixed in advance of the result.

@@ -20,10 +20,16 @@ a constant predictor through `src/metrics.py` returns `roc_auc 0.5, accuracy 0.8
 f1 0.88889, eer 0.5` — an exact match on all four. The run converged to a constant
 prediction.
 
-The same configuration collapsed 3/3 times at seed 0 (two timing runs and the
-campaign run). Seeds 1–4 trained normally. `xception_seed3` entered the same region
-(`train_loss=0.0555`, `val_auc=0.5170`) for two epochs and escaped at epoch 2, so
-**the region is reached by both arms** and the collapse is not NPR-specific.
+As of this document's commit the same configuration had collapsed **3/3** times at
+seed 0 (two timing runs and the campaign run). Seeds 1–4 trained normally.
+`xception_seed3` entered the same region (`train_loss=0.0555`, `val_auc=0.5170`) for
+two epochs and escaped at epoch 2.
+
+⚠️ **Entry and persistent collapse must be distinguished.** The region is *entered*
+by both arms — `xception_seed3` in both campaign executions, and `xception_npr_seed1`
+in campaign 2. Persistent collapse has been observed only at NPR seed 0. So NPR's
+role is **unidentified**, not excluded: one collapsed cell cannot separate the input
+representation from the initialisation or the loss.
 
 ## The arithmetic this diagnostic tests
 
@@ -123,3 +129,75 @@ git diff main -- src/train.py src/crossed_boot.py src/agg_space.py \
                  src/cluster_boot.py src/clusters.py     # must print nothing
 python -m src.reproduce                                   # must return 16/16
 ```
+
+---
+
+# Result — recorded after the runs (2026-11-03)
+
+Session `S-827a87f7`, one Tesla T4, clean container, clone asserted at `a2d3498`.
+Split VERIFIED: 30 test targets match the reference. One manifest generated and
+copied per condition. 109.9 min total.
+
+| run | α | γ | p\* | test AUC | sd(prob_fake) | mean(prob_fake) | verdict |
+|---|---|---|---|---|---|---|---|
+| `ctrl` | 0.2 (derived) | 2.0 | 0.500 | **0.5000** | **0.00000** | 0.5010 | **collapsed** |
+| `alpha` | 0.5 | 2.0 | 0.627 | 0.7832 | 0.17086 | 0.7902 | escaped |
+| `gamma` | 0.2 (derived) | 0.0 | 0.500 | 0.7948 | 0.30005 | 0.8147 | escaped |
+
+## Outcome 4 fired — neither factor is isolated
+
+Row 4 of the enumerated table: *collapse / escape / escape*. The prespecified
+reading stands as written — "the collapse is fragile to any loss perturbation,
+closer to a knife-edge initialisation effect than loss geometry."
+
+🚨 **The prespecified prediction for `gamma` was wrong.** The arithmetic predicted
+collapse: dropping γ to 0 leaves the best constant prediction at p=0.500, exactly on
+the decision threshold. `gamma` escaped, reaching `test_auc=0.7948`. Therefore **the
+location of the constant optimum is not sufficient for collapse**, and the causal
+version of the loss-geometry account is refuted by its own prespecified test.
+
+## What survives, and what does not
+
+❌ **Refuted:** that the coincidence of the constant optimum with the decision
+threshold explains entry into, or persistence in, the constant-prediction solution.
+`gamma` preserved that coincidence exactly and trained normally.
+
+✅ **Unaffected:** the arithmetic's description of the collapsed *state*. `ctrl` held
+`train_loss=0.0555` for all 15 epochs, which is the computed constant-prediction
+floor to four decimals, with `sd(prob_fake)` exactly 0.
+
+✅ **Coherence check on the floors.** Recomputed over the campaign's class counts,
+the constant-prediction minima are 0.0555 / 0.0647 / 0.2218 at p\* = 0.500 / 0.627 /
+0.500. Both escaping runs were already *below* their own floor at epoch 0 — `alpha`
+0.0584 < 0.0647, `gamma` 0.2006 < 0.2218 — so neither was ever a constant predictor.
+Epoch-mean training loss is not the full-distribution optimum, so this corroborates
+the arithmetic; it is not an identity.
+
+## Limits — binding on any write-up
+
+- **n = 1 per condition.** The ceiling is "associated with escape," as fixed in
+  advance. Two of two perturbations escaping is *consistent* with fragility to any
+  loss change; it does not establish that over "these two perturbations in particular."
+- **No interaction is estimable.** Three cells, two factors moved one at a time.
+- **Initialisation and input representation were held constant** across all three
+  runs — same seed 0, same NPR arm. Nothing here speaks to either factor, and
+  neither may be named as contributing.
+- **The three AUCs are not comparable as effect estimates.** Each run uses a
+  different loss configuration. They may not enter any arm comparison.
+- **No mechanism is identified.** The collapse remains reproducible and unexplained.
+
+## Scope of the prespecification — stated exactly
+
+The collapse had already been observed before this diagnostic was designed. The
+intervention settings, the directional predictions and the collapse rule were
+committed (`db858f2`, 2026-10-31 22:30) before the three diagnostic runs. The
+diagnostic is therefore **prespecified with respect to those interventions, not
+preregistered with respect to the original collapse.** The commit timestamps are the
+record.
+
+## Decision
+
+Closed. No α ladder and no further diagnostic training. Identifying the mechanism
+would need repeated runs across several seeds and loss settings, which is outside
+the scope of the paper and would be spent refining a secondary characterisation of a
+null result.

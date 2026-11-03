@@ -28,8 +28,15 @@ one 29-component partition.
 `xception_npr` seed 0 produced `train_loss=0.0555` unchanged for all 15 epochs and
 `test_auc=0.5000 test_acc=0.8000 test_f1=0.8889 test_eer=0.5000` — identical to
 campaign 1, and identical to what a constant predictor returns through
-`src/metrics.py`. Counting the two timing runs, campaign 1, the diagnostic control
-and campaign 2, that is **5/5 across at least three physical instances**.
+`src/metrics.py`. Counting the two timing runs, campaign 1 and campaign 2, that was
+**4/4** when this was written, across at least three physical instances. The
+diagnostic control later became the **fifth** (`S-827a87f7`, 2026-11-03), so the
+current total is **5/5**.
+
+⚠️ **Count corrected 2026-11-03.** This sentence originally read "5/5" and included
+the diagnostic control, which had not yet run when this document was committed
+(`a2d3498`) — the diagnostic cloned the repository *at* that commit. Four collapses
+were complete at the time of writing.
 
 ## 2. Basin entry is partly, not wholly, seed-determined
 

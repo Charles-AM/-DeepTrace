@@ -144,8 +144,75 @@ arithmetic predicts (`src/losses.FocalLoss`, α=0.2 exactly balancing the 1:4 ra
 
 ❌ It does **not** establish why this configuration entered that solution, nor that
 NPR caused it — `xception_seed3` entered the same region in both campaigns and
-escaped both times. The `alpha`/`gamma` diagnostic
-(`docs/npr-loss-geometry-prespecification.md`) remains unrun.
+escaped both times.
+
+### The loss-geometry diagnostic ran, and refuted its own prediction
+
+Three runs at seed 0 on the NPR arm (`S-827a87f7`, 2026-11-03; full record in
+`docs/npr-loss-geometry-prespecification.md`):
+
+| run | α | γ | p\* | test AUC | sd(prob_fake) | verdict |
+|---|---|---|---|---|---|---|
+| `ctrl` | 0.2 (derived) | 2.0 | 0.500 | 0.5000 | 0.00000 | collapsed |
+| `alpha` | 0.5 | 2.0 | 0.627 | 0.7832 | 0.17086 | escaped |
+| `gamma` | 0.2 (derived) | 0.0 | 0.500 | 0.7948 | 0.30005 | escaped |
+
+🚨 **`gamma` was predicted to collapse and did not.** It leaves the best constant
+prediction at p=0.500, exactly on the decision threshold, and still trained to
+`test_auc=0.7948`. So the coincidence of the optimum with the threshold is **not
+sufficient** for collapse. The arithmetic describes the collapsed *state* — `ctrl`
+held its computed floor of 0.0555 for all 15 epochs — but does not explain entry
+into it. **Outcome 4** of the prespecified table: neither factor isolated.
+
+❌ **No mechanism is identified**, and nothing in the diagnostic bears on NPR:
+initialisation and input representation were held constant across all three runs.
+The three AUCs use different loss configurations and may never enter an arm
+comparison. n=1 per condition.
+
+## FAD and NPR reach fragile inference through different uncertainty structures
+
+Both cases support Contribution 3; neither is a replication of the other. FAD
+figures are from `results/analysis/crossed/` (canonical: `results/canonical.json`).
+
+| | FAD | NPR (c1 / c2) |
+|---|---|---|
+| representation | explicit DCT frequency decomposition | pixel-domain neighbouring-pixel operator |
+| reference point | published **+0.014** | zero |
+| component only | [−0.0226, +0.0040] — excludes +0.014, contains 0 | [−0.1028, −0.0278] — **excludes 0** |
+| runs only | [−0.0257, +0.0041] — **also excludes +0.014** | [−0.2099, +0.0088] — contains 0 |
+| crossed | [−0.0358, +0.0180] — excludes neither | [−0.2203, +0.0379] — contains 0 |
+| variance non-additivity | **1.58 – 1.74** | **1.045 / 1.048** |
+
+Three structural differences, all of which should be reported rather than smoothed
+over:
+
+1. **In FAD both conditionals excluded the reference effect; in NPR only one did.**
+   FAD's run-only interval also excludes +0.014, so propagating training-run
+   variation *alone* would not have corrected it — only crossing the two sources
+   widened the interval enough. In NPR the run-only interval already contains zero,
+   because the pathology lives in the run dimension. **The general recommendation is
+   therefore to cross both sources, not to add the run dimension.**
+2. **The over-generalisation points in opposite directions.** FAD's conditionals
+   supported "the published gain is not here"; NPR's supported "this is worse than
+   the baseline". Narrow conditioning produced confidence on either side of the null,
+   so this is not a directional bias.
+3. **Variance non-additivity does not replicate.** FAD's combined variance is
+   substantially greater than the sum of the two conditional variances; NPR's is
+   approximately additive, twice.
+
+✅ **Each conditional analysis is valid for its own estimand.** The error is
+substituting a conditional result for an architecture-level conclusion, which
+requires both sources. See `results/analysis/crossed/README.md` §2.
+
+⚠️ **The non-additivity ratio is exploratory** — `src/crossed_boot.py` prints it with
+that label. It is `var(crossed) / (var(component_only) + var(seed_only))`, a
+description of how the bootstrap variance behaved in these five-run studies. It is
+**not** evidence of a causal interaction in FAD or of independence in NPR, and AUC is
+nonlinear. Report the observed **range**, not a point value: Monte Carlo variation
+alone moves FAD's ratio across 1.5771 – 1.7439 (video, b=4000, bootstrap seeds 0–4),
+with 1.6973 at b=50,000 and 1.7311 at the target unit. The FAD–NPR *contrast* is
+robust because ≈1.6–1.74 and ≈1.05 are far outside that band; the third digit of
+either value is not.
 
 ## Outstanding
 
