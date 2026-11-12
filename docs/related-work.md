@@ -365,7 +365,7 @@ absent entirely.
 
 ✅ **Verified 2026-09-15** against dblp / CVF / publisher pages — 15 of 22 entries
 below now carry confirmed authors, venue, volume and pages, marked ✅ inline.
-The 7 still marked ⚠️ remain written from memory. See `VERIFICATION-LEDGER.md` §6
+The **6** still marked ⚠️ remain written from memory (Lin et al. was verified 2026-09-21; its marker was stale until 2026-11-12). See `VERIFICATION-LEDGER.md` §6
 for the full record, and **§ Two questions — answered** below, which settles both
 open reading questions.
 
@@ -375,7 +375,7 @@ open reading questions.
 |---|---|
 | **✅ Rössler, Cozzolino, Verdoliva, Riess, Thies, Nießner. "FaceForensics++: Learning to Detect Manipulated Facial Images." ICCV 2019.** | the dataset. Also the source of the `target_source` naming our component clustering exploits. ✅ **Official splits verified 2026-09-17: video-level, 720/140/140** — so FF++ itself is not crop-randomised, and we must not imply otherwise (ledger §7) |
 | **✅ Chollet. "Xception: Deep Learning with Depthwise Separable Convolutions." CVPR 2017, pp. 1800–1807.** | the backbone for both arms, and for F3-Net. Why the comparison is matched |
-| **⚠️ Lin, Goyal, Girshick, He, Dollár. "Focal Loss for Dense Object Detection." ICCV 2017.** | our training objective, γ=2.0, α from train class balance |
+| **✅ Lin, Goyal, Girshick, He, Dollár. "Focal Loss for Dense Object Detection." ICCV 2017, pp. 2999–3007.** | our training objective, γ=2.0, α from train class balance. **Verified 2026-09-21** (ledger §6) |
 | **✅ Loshchilov, Hutter. "Decoupled Weight Decay Regularization." ICLR 2019.** | AdamW. Also the citation that makes our `no_decay_param_groups` fix legible — decoupled decay was being applied to a scalar gate |
 | **✅ Loshchilov, Hutter. "SGDR: Stochastic Gradient Descent with Warm Restarts." ICLR 2017.** | cosine schedule |
 

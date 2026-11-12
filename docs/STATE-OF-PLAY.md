@@ -169,7 +169,7 @@ established by full-text search, see `docs/VERIFICATION-LEDGER.md` §4.
 **`docs/REMAINING-WORK.md`** has the underlying reasoning.
 
 **Free (no quota), all runnable locally — numpy and scipy are present:**
-A2 verify the **remaining 7** citations (~1 h, **blocks submission**; was ~20
+A2 verify the **remaining 6** citations (~1 h, **blocks submission**; was ~20
 before the 2026-09-15 pass) · A1 coverage simulation (~1.5 h, **narrows** limitation 4 — it cannot retire it,
 and Cameron et al. put 29 clusters inside the documented over-rejection regime) ·
 A3 three figures (~1 h, needs a matplotlib venv) · A4 per-manipulation intervals ·

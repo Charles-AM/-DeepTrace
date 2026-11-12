@@ -98,7 +98,7 @@ reports"*, never *"neither measured"*.
 
 | item | why it matters | cost |
 |---|---|---|
-| **7 citations in Groups A, G, H of `related-work.md`** | ~~20~~ → 7 after the 2026-09-15 pass (§6). Dataset paper and backbone now cleared; the rest still block submission | ~1 h |
+| **6 citations in Groups A, G, H of `related-work.md`** | ~~20~~ → ~~7~~ → **6** (the 2026-09-15 pass, then Lin et al. verified 2026-09-21; the count was not updated until 2026-11-12). Dataset paper and backbone now cleared; the rest still block submission | ~1 h |
 | **Replacement intro positioning paragraph** | the existing one is quarantined as old-framing (§6) | short |
 | DeepfakeBench F3Net numbers | read off a table image, then confirmed in extracted text — but worth one direct look at the PDF | minutes |
 | Re-verify Groups B–F | last checked 2026-09-03/04 | an hour |
