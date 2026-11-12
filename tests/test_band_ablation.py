@@ -13,7 +13,8 @@ import pytest
 from PIL import Image
 from scipy.fft import dctn, idctn
 
-from src.band_ablation import ZeroDCTBand, _transform, radial_band_mask
+from src.band_ablation import (ZeroDCTBand, _transform, band_mask_for_ablation,
+                               parse_args, radial_band_mask)
 
 SIZE, N_BANDS = 32, 8
 
@@ -133,3 +134,45 @@ def test_ablation_is_applied_after_the_resize_and_crop():
     assert names.index("ZeroDCTBand") > names.index("CenterCrop")
     assert names.index("ZeroDCTBand") < names.index("ToTensor")
     assert names.index("Normalize") == len(names) - 1
+
+
+# --- the DC fix (2026-11-12) -------------------------------------------------
+
+def test_preserving_dc_excludes_exactly_one_coefficient_from_band_zero():
+    plain = radial_band_mask(SIZE, 0, N_BANDS)
+    kept = band_mask_for_ablation(SIZE, 0, N_BANDS, preserve_dc=True)
+    assert plain[0, 0] and not kept[0, 0]
+    assert int(plain.sum()) - int(kept.sum()) == 1
+
+
+@pytest.mark.parametrize("band", range(1, N_BANDS))
+def test_preserving_dc_leaves_every_other_band_untouched(band):
+    assert (band_mask_for_ablation(SIZE, band, N_BANDS, preserve_dc=True)
+            == radial_band_mask(SIZE, band, N_BANDS)).all()
+
+
+@pytest.mark.parametrize("band", range(N_BANDS))
+def test_include_dc_reproduces_the_original_masks(band):
+    assert (band_mask_for_ablation(SIZE, band, N_BANDS, preserve_dc=False)
+            == radial_band_mask(SIZE, band, N_BANDS)).all()
+
+
+def test_preserving_dc_removes_the_band_zero_clipping():
+    """The point of the fix: band 0 should clip like the other bands, not like DC.
+
+    Measured without it: 48% (noise) and 50% (gradient). With it: 3% and 0%.
+    """
+    rng = np.random.default_rng(0)
+    _, x = np.indices((SIZE, SIZE))
+    for plane in (rng.integers(0, 256, (SIZE, SIZE)).astype(np.float64),
+                  120.0 + 60.0 * np.sin(2 * np.pi * x / SIZE)):
+        a = plane.copy()
+        d = dctn(a, type=2, norm="ortho")
+        d[band_mask_for_ablation(SIZE, 0, N_BANDS, preserve_dc=True)] = 0.0
+        a = idctn(d, type=2, norm="ortho")
+        assert float(((a < 0) | (a > 255)).mean()) < 0.1
+
+
+def test_the_cli_preserves_dc_unless_asked_not_to():
+    assert parse_args(["--runs", "r"]).include_dc is False
+    assert parse_args(["--runs", "r", "--include-dc"]).include_dc is True

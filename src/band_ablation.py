@@ -33,11 +33,14 @@ normalised so the highest-frequency corner is 1.0.
    dependent. On a smooth gradient band 2 clips nothing while band 0 still clips
    half, which isolates DC as the cause.
 
-   So band 0's ``delta_auc`` measures the model's response to a half-clamped
-   image, not its reliance on the lowest frequency band. Either preserve the DC
-   coefficient (exclude ``[0, 0]`` from the band-0 mask) or report band 0 as
-   contaminated. Pinned by ``tests/test_band_ablation.py::
-   test_zeroing_the_lowest_band_clips_half_the_pixels``.
+   So band 0's ``delta_auc`` would measure the model's response to a half-clamped
+   image, not its reliance on the lowest frequency band.
+
+   **Fixed 2026-11-12:** ``band_mask_for_ablation`` holds the DC coefficient back
+   by default, which drops band 0's clipping from ~50% to the ~4% the other bands
+   show. ``--include-dc`` restores the original behaviour. The ``dc_preserved``
+   column records which was used. The defect itself stays pinned by
+   ``tests/test_band_ablation.py::test_zeroing_the_lowest_band_clips_half_the_pixels``.
 
     python -m src.band_ablation --runs ffpp_baseline_spatial_seed0 ffpp_full_seed0 \
         --results-root results --dataset-name ffpp --seed 0 --image-size 128 \
@@ -68,6 +71,23 @@ def radial_band_mask(size: int, band: int, n_bands: int) -> np.ndarray:
     r /= np.sqrt(2.0) * (size - 1)
     lo, hi = band / n_bands, (band + 1) / n_bands
     return (r >= lo) & (r <= hi if band == n_bands - 1 else r < hi)
+
+
+def band_mask_for_ablation(size: int, band: int, n_bands: int,
+                           preserve_dc: bool = True) -> np.ndarray:
+    """``radial_band_mask`` with the DC coefficient optionally held back.
+
+    ``radial_band_mask`` is a pure geometric partition and stays one. This is the
+    mask actually used for ablation: with ``preserve_dc`` (the default) the DC
+    coefficient at ``[0, 0]`` is never zeroed, so band 0 measures reliance on the
+    lowest frequency band instead of the response to a half-clamped image. See the
+    module warning.
+    """
+    mask = radial_band_mask(size, band, n_bands)
+    if preserve_dc and mask[0, 0]:
+        mask = mask.copy()
+        mask[0, 0] = False
+    return mask
 
 
 class ZeroDCTBand:
@@ -108,7 +128,7 @@ def _transform(image_size: int, mask: np.ndarray | None):
 def run(runs: list[str], results_root: Path, dataset_name: str, seed: int,
         image_size: int, n_bands: int = 8, limit: int | None = None,
         batch_size: int = 128, num_workers: int = 2,
-        out_dir: Path | None = None) -> pd.DataFrame:
+        out_dir: Path | None = None, preserve_dc: bool = True) -> pd.DataFrame:
     device = get_device()
     out_dir = Path(out_dir) if out_dir is not None else Path.cwd()
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -138,9 +158,10 @@ def run(runs: list[str], results_root: Path, dataset_name: str, seed: int,
         clean = _auc(None)
         print(f"{run_name}  ({ckpt['config']})  clean auc={clean:.4f}")
         for b in range(n_bands):
-            auc = _auc(radial_band_mask(sz, b, n_bands))
+            auc = _auc(band_mask_for_ablation(sz, b, n_bands, preserve_dc))
             rows.append({
                 "run": run_name, "config": ckpt["config"], "band": b,
+                "dc_preserved": preserve_dc,
                 "band_lo": round(b / n_bands, 3), "band_hi": round((b + 1) / n_bands, 3),
                 "auc_clean": round(clean, 4), "auc_ablated": round(auc, 4),
                 "delta_auc": round(auc - clean, 4),
@@ -198,6 +219,10 @@ def parse_args(argv=None):
     p.add_argument("--n-bands", type=int, default=8)
     p.add_argument("--limit", type=int, default=None)
     p.add_argument("--out-dir", default=None)
+    p.add_argument("--include-dc", action="store_true",
+                   help="zero the DC coefficient along with band 0 -- the original "
+                        "behaviour, which clamps ~half of every image's pixels and "
+                        "makes band 0 uninterpretable. Off by default.")
     return p.parse_args(argv)
 
 
@@ -205,7 +230,8 @@ def main(argv=None):
     a = parse_args(argv)
     run(a.runs, Path(a.results_root), a.dataset_name, a.seed, a.image_size,
         n_bands=a.n_bands, limit=a.limit,
-        out_dir=Path(a.out_dir) if a.out_dir else None)
+        out_dir=Path(a.out_dir) if a.out_dir else None,
+        preserve_dc=not a.include_dc)
 
 
 if __name__ == "__main__":
